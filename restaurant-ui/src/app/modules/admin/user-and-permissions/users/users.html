@@ -1,0 +1,140 @@
+<p-toast></p-toast>
+<p-toolbar class="mb-6">
+  <ng-template #start>
+    <p-button [showIfCanCreate]="menuItemId" [label]="translate.instant('label_add_user')" icon="pi pi-plus" severity="secondary" class="m-inline-end-1" (onClick)="openNew()" />
+    <p-button [showIfCanDelete]="menuItemId" [label]="translate.instant('label_delete_user')" icon="pi pi-trash" severity="secondary" outlined (onClick)="deleteSelectedUsers()"
+      [disabled]="!selectedUsers || !selectedUsers.length" />
+  </ng-template>
+
+  <ng-template #end>
+    <p-button [label]="translate.instant('label_export')" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt [value]="usersService.users()" [loading]="usersService.loading()" [rows]="10" [columns]="cols" [paginator]="true"
+  [globalFilterFields]="['fullName', 'email']"
+  [tableStyle]="{ 'min-width': '60rem' }" [(selection)]="selectedUsers" [rowHover]="true" dataKey="id"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users" [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[10, 20, 30]">
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <h5 class="m-0">{{ translate.instant('label_manage_users') }}</h5>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" [placeholder]="translate.instant('label_search')" />
+      </p-iconfield>
+    </div>
+  </ng-template>
+
+  <ng-template #header>
+    <tr>
+      <th style="width: 2rem">
+        <p-tableHeaderCheckbox />
+      </th>
+      <th pSortableColumn="id" style="width: 4rem">
+        {{ translate.instant('label_id') }}
+        <p-sortIcon field="id" />
+      </th>
+      <th pSortableColumn="fullName" style="width:6rem">
+        {{ translate.instant('label_name') }}
+        <p-sortIcon field="fullName" />
+      </th>
+
+      <th pSortableColumn="email" style="width:6rem">
+        {{ translate.instant('label_email') }}
+        <p-sortIcon field="email" />
+      </th>
+
+      <th pSortableColumn="status" style="width:4rem">
+        {{ translate.instant('label_status') }}
+        <p-sortIcon field="status" />
+      </th>
+
+      <th style="width: 6rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-user>
+    <tr>
+      <td>
+        <p-tableCheckbox [value]="user" />
+      </td>
+      <td>{{ user.id }}</td>
+      <td>
+        <div class="d-flex align-items-center gap-2">
+          <p-avatar [image]="imagesUrl + user.image" shape="circle" size="xlarge"></p-avatar>
+          <span>  {{ user.firstname + ' ' + user.lastname }}</span>
+        </div>
+      </td>
+      <td>{{ user.email }}</td>
+      <td>
+        <p-tag [value]="user.status ? translate.instant('label_active') : translate.instant('label_inactive')"
+          [severity]="user.status ? 'success' : 'danger'"></p-tag>
+      </td>
+      <td>
+        <p-button icon="pi pi-pencil" class="m-inline-end-1" [rounded]="true" [outlined]="true" [showIfCanEdit]="menuItemId" (click)="editUser(user)" />
+        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" [showIfCanDelete]="menuItemId" (click)="deleteUser(user)" />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [visible]="usersService.userDialog()" [style]="{ width: '950px' }" [header]="translate.instant('label_user_details')" [modal]="true" (onHide)="hideDialog()">
+
+  <ng-template #content>
+    <form [formGroup]="userForm" enctype="multipart/form-data" class="pb-3">
+       <app-form-input [control]="$any(userForm.get('roleIds'))" label="label_roles" [options]="roleOptions()" type="multiselect"> </app-form-input>
+      <div class="row ">
+        <div class="col-md-6">
+          <div class="row d-flex flex-colum">
+            <app-form-input [control]="$any(userForm.get('firstname'))" label="label_first_name"> </app-form-input>
+            <app-form-input [control]="$any(userForm.get('lastname'))" label="label_last_name"> </app-form-input>
+            <app-form-input [control]="$any(userForm.get('email'))" label="label_email" type="email"> </app-form-input>
+            <app-form-input [control]="$any(userForm.get('password'))" label="label_password" type="password"> </app-form-input>
+          </div>
+
+        </div>
+        <div class="col-md-6">
+          <div class="row d-flex flex-colum">
+
+            <div class="mb-5 pb-4">
+              <div class="row">
+                <div class="col-6">
+                <img [src]="defaultPreview" class="image-preview">
+
+                <label for="inputTag">
+                  <div class="upload-image-btn">
+                    <i class="pi pi-upload"></i>
+                    <span>{{ translate.instant('label_select_image') }}</span>
+                  </div>
+                  <input id="inputTag" type="file" hidden (change)="onImageSelected($event)" />
+                </label>
+              </div>
+                <div class="col-6">
+                  <app-form-input [control]="$any(userForm.get('status'))" label="label_status" type="checkbox"> </app-form-input>
+                  <app-form-input [control]="$any(userForm.get('isMonitor'))" label="label_is_monitor" type="checkbox"> </app-form-input>
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+            <app-form-input [control]="$any(userForm.get('about'))" label="label_about" type="textarea"> </app-form-input>
+         </div>
+        </div>
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template #footer>
+    <p-button [label]="translate.instant('label_cancel')" icon="pi pi-times" text (click)="hideDialog()" />
+    <p-button [label]="translate.instant('label_save')" icon="pi pi-check" (click)="saveUser()" [loading]="usersService.loadingSave()" />
+  </ng-template>
+
+
+</p-dialog>
+
+
+<p-confirmdialog [style]="{ width: '450px' }" />

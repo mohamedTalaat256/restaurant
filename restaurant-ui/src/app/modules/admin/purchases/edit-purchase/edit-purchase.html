@@ -1,0 +1,168 @@
+<p-toast></p-toast>
+
+@if(purchaseService.loading()) {
+<div class="loading-container">
+  <div class="loading-spinner">
+    <i class="pi pi-spin pi-spinner"></i>
+    <span>{{ translate.instant('label_loading') || 'Loading...' }}</span>
+  </div>
+</div>
+} @else {
+<form [formGroup]="purchaseService.purchaseForm" class="purchase-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <i class="pi pi-file-edit"></i>
+      </div>
+      <div>
+        <h4 class="header-title">{{ translate.instant(isEditMode ? 'label_edit_purchase' : 'label_add_purchase') }}</h4>
+        <p class="header-subtitle">{{ translate.instant(isEditMode ? 'label_edit_purchase' : 'label_add_purchase') }}
+        </p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <p-button [label]="translate.instant('label_cancel')" icon="pi pi-arrow-left" severity="secondary"
+        [outlined]="true" (onClick)="goBack()" class="m-inline-end-1" />
+      <p-button [label]="translate.instant('label_save')" icon="pi pi-check" (onClick)="savePurchase()"
+        [loading]="purchaseService.loadingSave()" />
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="d-flex align-items-center gap-2 mb-3 pb-3 border-bottom">
+      <i class="pi pi-receipt section-icon"></i>
+      <h6 class="section-title">{{ translate.instant('label_invoice_number') }}</h6>
+    </div>
+    <div class="row">
+    <app-form-input class="col-3" [control]="$any(purchaseService.purchaseForm.get('invoiceNumber'))"
+      label="label_invoice_number"></app-form-input>
+    <app-form-input class="col-3" [control]="$any(purchaseService.purchaseForm.get('supplierId'))"
+      label="label_supplier" [options]="supplierOptions()" type="select" [filter]="true"></app-form-input>
+    <app-form-input class="col-3" [control]="$any(purchaseService.purchaseForm.get('purchaseDate'))"
+      label="label_purchase_date" type="date"></app-form-input>
+    <app-form-input class="col-3" [control]="$any(purchaseService.purchaseForm.get('expiryDate'))"
+      label="label_expiry_date" type="date"></app-form-input>
+  </div>
+
+  </div>
+
+  <div class="row">
+    <div class="col-9">
+      <div class="card">
+        <div class="d-flex align-items-center gap-2 mb-3 pb-3 border-bottom">
+          <div class="flex items-center gap-2">
+            <i class="pi pi-box section-icon"></i>
+            <h6 class="section-title">{{ translate.instant('label_purchase_items') }}</h6>
+            <span class="item-count-badge">{{ purchaseItems.length }}</span>
+          </div>
+          <p-button icon="pi pi-plus" [label]="translate.instant('label_add_item')" severity="success" size="small"
+            [rounded]="true" (onClick)="addPurchaseItem()" />
+        </div>
+
+        <div class="items-table-wrapper">
+          <table class="purchase-table">
+            <thead>
+              <tr>
+                <th>
+                  <i class="pi pi-tag"></i>
+                  {{translate.instant('label_item')}}
+                </th>
+                <th>
+                  <i class="pi pi-sort-numeric-up"></i>
+                  {{translate.instant('label_qti')}}
+                </th>
+                <th>
+                  <i class="pi pi-dollar"></i>
+                  {{translate.instant('label_price')}}
+                </th>
+                <th class="action-col"></th>
+              </tr>
+            </thead>
+            <tbody formArrayName="purchaseItems">
+              @for (item of purchaseItems.controls; track $index; let i = $index) {
+              <tr [formGroupName]="i" class="item-row">
+                <td>
+                  <app-form-input [hideLabel]="true" [control]="$any(item.get('ingredientId'))" label="label_ingredient"
+                    [options]="ingredientOptions()" type="select" [filter]="true"></app-form-input>
+                </td>
+                <td>
+                  <app-form-input [hideLabel]="true" [control]="$any(item.get('quantity'))" label="label_quantity"
+                    type="number"></app-form-input>
+                </td>
+                <td>
+                  <app-form-input [hideLabel]="true" [control]="$any(item.get('price'))" label="label_price"
+                    type="number"></app-form-input>
+                </td>
+                <td class="action-col">
+                  <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [text]="true"
+                    (click)="removePurchaseItem(i)" />
+                </td>
+              </tr>
+              }
+              @empty {
+              <tr class="empty-row">
+                <td colspan="4">
+                  <div class="empty-state">
+                    <i class="pi pi-inbox"></i>
+                    <p>{{ translate.instant('label_add_item') }}</p>
+                  </div>
+                </td>
+              </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="2" class="total-label">{{ translate.instant('label_total') || 'Total' }}</td>
+                <td class="total-value">{{ totalAmount() | number:'1.2-2' }}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-3">
+      <div class="card">
+        <div class="d-flex align-items-center gap-2 mb-3 pb-3">
+          <i class="pi pi-wallet section-icon"></i>
+          <h6 class="section-title">{{ translate.instant('label_payment_method') }}</h6>
+        </div>
+        <div class="payment-fields">
+          <app-form-input [control]="$any(purchaseService.purchaseForm.get('paymentMethod'))"
+            label="label_payment_method" [options]="paymentMethodOptions()" type="select"></app-form-input>
+          <app-form-input [control]="$any(purchaseService.purchaseForm.get('paidAmount'))" label="label_paid_amount"
+            type="number"></app-form-input>
+
+          <div class="balance-indicator">
+            <div class="balance-row">
+              <span class="balance-label">{{ translate.instant('label_total') || 'Total' }}</span>
+              <span class="balance-value">{{ totalAmount() | number:'1.2-2' }}</span>
+            </div>
+            <div class="balance-row">
+              <span class="balance-label">{{ translate.instant('label_paid_amount') }}</span>
+              <span class="balance-value paid">{{ purchaseService.purchaseForm.get('paidAmount')?.value | number:'1.2-2'
+                }}</span>
+            </div>
+            <div class="balance-divider"></div>
+            <div class="balance-row">
+              <span class="balance-label remaining-label">{{ translate.instant('label_remaining') || 'Remaining'
+                }}</span>
+              <span class="balance-value remaining">{{ (totalAmount() -
+                (purchaseService.purchaseForm.get('paidAmount')?.value || 0)) | number:'1.2-2' }}</span>
+            </div>
+          </div>
+
+          <app-form-input [control]="$any(purchaseService.purchaseForm.get('note'))" label="label_note"
+            type="textarea"></app-form-input>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+
+</form>
+}

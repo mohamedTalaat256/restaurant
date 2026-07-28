@@ -1,0 +1,94 @@
+.kitchen-kanban {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  align-items: start;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kanban-col {
+  background: var(--surface-ground, #f8f9fa);
+  border-radius: 8px;
+  padding: 0.75rem;
+  min-height: 200px;
+}
+
+.kanban-col-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.badge-count {
+  background: var(--primary-color, #6366f1);
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.kitchen-card {
+  background: var(--surface-card, white);
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid var(--primary-color, #6366f1);
+}
+
+.kitchen-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.kitchen-card-items {
+  margin-bottom: 0.5rem;
+}
+
+.kitchen-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid var(--surface-border, #e0e0e0);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.kitchen-item-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.kitchen-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.kitchen-card-footer {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--surface-border, #e0e0e0);
+}

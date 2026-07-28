@@ -1,0 +1,157 @@
+
+
+<ng-template #fieldLabel>
+  <label [for]="label" class="custom-form-label" [class.label-on]="labelVarient === 'on'">
+    @if (isRequired() && requiredAstric) {
+      <span class="required-astric">*</span>
+    }
+    <span>{{ translate.instant(label) }}</span>
+  </label>
+</ng-template>
+
+<div class="">
+  <div class="d-flex flex-column">
+
+    @if (type === 'select') {
+
+      @if (labelVarient === 'over') {
+        @if (!hideLabel) {
+          <ng-container *ngTemplateOutlet="fieldLabel" />
+        }
+        <p-select class="mb-2 mt-2 w-100" [formControl]="control" [inputId]="label" [options]="options" [filter]="filter"
+          optionLabel="label" optionValue="value" [placeholder]="translate.instant(placeholder)"
+          fluid [loading]="loading" optionDisabled="disabled" appendTo="body" />
+      } @else {
+        <p-floatlabel class="w-full md:w-56" [variant]="labelVarient">
+          <p-select class="mb-2 mt-2 w-100" [formControl]="control" [inputId]="label" [options]="options" [filter]="filter"
+            optionLabel="label" optionValue="value" [placeholder]="translate.instant(placeholder)"
+            fluid [loading]="loading" optionDisabled="disabled" appendTo="body" />
+          @if (!hideLabel) {
+            <ng-container *ngTemplateOutlet="fieldLabel" />
+          }
+        </p-floatlabel>
+      }
+
+    } @else if (type === 'radio') {
+
+      @if (!hideLabel) {
+        <ng-container *ngTemplateOutlet="fieldLabel" />
+      }
+      <div class="flex flex-wrap align-items-center justify-content-between gap-4 mb-2 mt-2">
+        @for (option of options; track option.value) {
+          <div class="flex align-items-center">
+            <p-radioButton [formControl]="control" [name]="label" [value]="option.value" [inputId]="option.label" />
+            <label [for]="option.label" class="mx-2 cursor-pointer">
+              {{ translate.instant(option.label) }}
+            </label>
+          </div>
+        }
+      </div>
+
+    } @else if (type === 'textarea') {
+
+      @if (!hideLabel) {
+        <ng-container *ngTemplateOutlet="fieldLabel" />
+      }
+      <textarea class="mb-2 mt-2 w-100" pInputText [id]="label" [formControl]="control"
+        [placeholder]="translate.instant(placeholder)" rows="4" (input)="onInput($event)"
+        [class.ng-invalid-input]="control.invalid && control.touched"></textarea>
+
+    } @else if (type === 'multiselect') {
+
+      @if (labelVarient === 'over') {
+        @if (!hideLabel) {
+          <ng-container *ngTemplateOutlet="fieldLabel" />
+        }
+        <p-multiSelect class="mb-2 w-100" [formControl]="control" [inputId]="label" [options]="options"
+          optionLabel="label" optionValue="value" placeholder="Select values" fluid />
+      } @else {
+        <p-floatlabel class="w-full md:w-56" [variant]="labelVarient">
+          <p-multiSelect class="mb-2 w-100" [formControl]="control" [inputId]="label" [options]="options"
+            optionLabel="label" optionValue="value" placeholder="Select values" fluid />
+          @if (!hideLabel) {
+            <ng-container *ngTemplateOutlet="fieldLabel" />
+          }
+        </p-floatlabel>
+      }
+
+    } @else if (type === 'checkbox') {
+
+      <div class="flex align-items-center mb-2 gap-2">
+        <p-checkbox [formControl]="control" [binary]="true" inputId="checkbox" />
+        <label for="checkbox" class="cursor-pointer">
+          @if (isRequired() && requiredAstric) {
+            <span class="required-astric">*</span>
+          }
+          {{ translate.instant(label) }}
+        </label>
+      </div>
+
+    } @else if(type === 'date'){
+      @if (!hideLabel) {
+        <ng-container *ngTemplateOutlet="fieldLabel" />
+      }
+      <p-datepicker class="mb-2 mt-2 w-100" [formControl]="control"
+      [id]="label"
+      dateFormat="yy-mm-dd">
+      </p-datepicker>
+    } @else {
+
+      @if (icon) {
+        <p-iconfield>
+          <p-inputicon [class]="icon" />
+          <p-floatlabel [variant]="labelVarient">
+            <input class="mb-2 w-100 input-icon" pInputText [id]="label" [formControl]="control"
+              [placeholder]="translate.instant(placeholder)" [type]="type" (input)="onInput($event)"
+              [class.ng-invalid-input]="control.invalid && control.touched" />
+            @if (!hideLabel) {
+              <ng-container *ngTemplateOutlet="fieldLabel" />
+            }
+          </p-floatlabel>
+        </p-iconfield>
+      } @else if (labelVarient === 'over') {
+        @if (!hideLabel) {
+          <ng-container *ngTemplateOutlet="fieldLabel" />
+        }
+        <input class="mt-2 mb-2 w-100" pInputText [id]="label" [formControl]="control"
+          [placeholder]="translate.instant(placeholder)" [type]="type" (input)="onInput($event)"
+          [class.ng-invalid-input]="control.invalid && control.touched" />
+      } @else {
+        <p-floatlabel [variant]="labelVarient">
+          <input class="mb-2 w-100" pInputText [id]="label" [formControl]="control"
+            [placeholder]="translate.instant(placeholder)" [type]="type" (input)="onInput($event)"
+            [class.ng-invalid-input]="control.invalid && control.touched" />
+          @if (!hideLabel) {
+            <ng-container *ngTemplateOutlet="fieldLabel" />
+          }
+        </p-floatlabel>
+      }
+
+    }
+
+  </div>
+
+  <div style="height: 20px;">
+     @if (control.invalid && control.touched) {
+    <p-message severity="error" size="small" variant="simple">{{ getErrorMessage() }}</p-message>
+  }
+  </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

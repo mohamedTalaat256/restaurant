@@ -1,0 +1,151 @@
+
+    /*
+     * بيع كاش
+     */
+    public void postCashSale(BigDecimal amount, String description) {
+        JournalEntry entry = createEntry(description);
+        addDebit(entry, accounts.get(SystemAccount.MAIN_CASH),amount);
+        addCredit(entry, accounts.get(SystemAccount.RESTAURANT_SALES), amount);
+        journal.post(entry);
+    }
+
+    /*
+     * بيع توصيل كاش
+     */
+    public void postDeliverySale(BigDecimal amount,  String description) {
+        JournalEntry entry = createEntry(description);
+        addDebit(entry, accounts.get(SystemAccount.MAIN_CASH), amount);
+        addCredit(entry, accounts.get(SystemAccount.DELIVERY_SALES), amount);
+        journal.post(entry);
+    }
+
+    /*
+     * بيع سفري كاش
+     */
+    public void postTakeawaySale(BigDecimal amount, String description) {
+        JournalEntry entry = createEntry(description);
+        addDebit(entry, accounts.get(SystemAccount.MAIN_CASH), amount);
+        addCredit(entry, accounts.get(SystemAccount.TAKEAWAY_SALES), amount);
+        journal.post(entry);
+    }
+
+    /*
+     * تحصيل مديونية عميل
+     */
+    public void receiveCustomerPayment(BigDecimal amount, String description) {
+        JournalEntry entry = createEntry(description);
+        addDebit(entry, accounts.get(SystemAccount.MAIN_CASH), amount);
+        addCredit(entry, accounts.get(SystemAccount.CUSTOMER_RECEIVABLES), amount);
+        journal.post(entry);
+    }
+
+    /*
+     * شراء مخزون كاش
+     */
+    public void purchaseInventoryCash(BigDecimal amount, String description) {
+        JournalEntry entry = createEntry(description);
+        addDebit(entry, accounts.get(SystemAccount.INVENTORY), amount);
+        addCredit(entry, accounts.get(SystemAccount.MAIN_CASH), amount);
+        journal.post(entry);
+    }
+
+    /*
+     * شراء مخزون آجل
+     */
+    public void purchaseInventoryCredit(BigDecimal amount, String description) {
+        JournalEntry entry = createEntry(description);
+        addDebit(entry, accounts.get(SystemAccount.INVENTORY), amount);
+        addCredit(entry, accounts.get(SystemAccount.SUPPLIER_PAYABLES), amount);
+        journal.post(entry);
+    }
+
+    /*
+     * سداد مورد
+     */
+    public void paySupplier(BigDecimal amount, String description) {
+        JournalEntry entry = createEntry(description);
+        addDebit(entry, accounts.get(SystemAccount.SUPPLIER_PAYABLES),amount);
+        addCredit(entry, accounts.get(SystemAccount.MAIN_CASH), amount);
+        journal.post(entry);
+    }
+
+    /*
+     * دفع إيجار
+     */
+    public void payRent(BigDecimal amount, String description) {
+        JournalEntry entry = createEntry(description);
+        addDebit(entry, accounts.get(SystemAccount.RENT_EXPENSE),amount);
+        addCredit(entry, accounts.get(SystemAccount.MAIN_CASH), amount);
+        journal.post(entry);
+    }
+
+    /*
+     * دفع صيانة
+     */
+    public void payMaintenance(BigDecimal amount, String description) {
+        JournalEntry entry = createEntry(description);
+        addDebit(entry, accounts.get(SystemAccount.MAINTENANCE_EXPENSE), amount);
+        addCredit(entry, accounts.get(SystemAccount.MAIN_CASH), amount);
+        journal.post(entry);
+    }
+
+    /*
+     * دفع مرتبات
+     */
+    public void paySalary(BigDecimal amount, String description) {
+        JournalEntry entry = createEntry(description);
+        addDebit(entry, accounts.get(SystemAccount.SALARIES_EXPENSE), amount);
+        addCredit(entry, accounts.get(SystemAccount.MAIN_CASH),  amount);
+        journal.post(entry);
+    }
+
+    /*
+     * دفع أي مصروف عام
+     */
+    public void payExpense(SystemAccount expenseAccount, BigDecimal amount, String description) {
+        JournalEntry entry = createEntry(description);
+        addDebit(entry, accounts.get(expenseAccount), amount);
+        addCredit(entry, accounts.get(SystemAccount.MAIN_CASH), amount);
+        journal.post(entry);
+    }
+
+    /*
+     * إنشاء رأس القيد
+     */
+    private JournalEntry createEntry(String description) {
+
+        return JournalEntry.builder()
+                .entryDate(LocalDateTime.now())
+                .description(description)
+                .build();
+    }
+
+    /*
+     * إضافة مدين
+     */
+    private void addDebit(JournalEntry entry, Account account, BigDecimal amount) {
+
+        JournalEntryLine line = JournalEntryLine.builder()
+                .journalEntry(entry)
+                .account(account)
+                .debit(amount)
+                .credit(BigDecimal.ZERO)
+                .build();
+
+        entry.getLines().add(line);
+    }
+
+    /*
+     * إضافة دائن
+     */
+    private void addCredit(JournalEntry entry, Account account, BigDecimal amount) {
+
+        JournalEntryLine line = JournalEntryLine.builder()
+                .journalEntry(entry)
+                .account(account)
+                .debit(BigDecimal.ZERO)
+                .credit(amount)
+                .build();
+
+        entry.getLines().add(line);
+    }

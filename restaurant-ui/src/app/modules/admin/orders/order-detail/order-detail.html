@@ -1,0 +1,179 @@
+<p-toast></p-toast>
+
+@if (orderService.loading()) {
+  <div class="d-flex justify-content-center p-5">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+  </div>
+} @else if (order) {
+  <!-- Header Toolbar -->
+  <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+    <p-button icon="pi pi-arrow-left" [text]="true" (click)="goBack()" />
+    <h4 class="m-0"># {{ order.orderNumber }}</h4>
+    <p-tag [value]="order.status" [severity]="getStatusSeverity(order.status)" />
+    <p-tag [value]="order.orderType" [severity]="order.orderType === 'QUICK_ORDER' ? 'warn' : 'info'" />
+    <div class="ms-auto d-flex gap-2 flex-wrap">
+      <p-button [label]="translate.instant('label_tracking')" icon="pi pi-map" severity="secondary" (click)="openTracking()" />
+      <p-button [label]="translate.instant('label_split')" icon="pi pi-share-alt" severity="warn"
+        [disabled]="!canSplit()" (click)="showSplitDialog.set(true)" />
+      <p-button [label]="translate.instant('label_complete')" icon="pi pi-check" severity="success"
+        [disabled]="!canComplete()" [loading]="orderService.loadingSave()" (click)="completeOrder()" />
+      <p-button [label]="translate.instant('label_checkout')" icon="pi pi-credit-card" severity="info"
+        [disabled]="!canCheckout()" (click)="showCheckoutDialog.set(true)" />
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Order Info -->
+    <div class="col-md-4 mb-4">
+      <p-card [header]="translate.instant('label_order_info')">
+        <div class="d-flex flex-column gap-2">
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">{{ translate.instant('label_table') }}</span>
+            <span>{{ order.tableName ?? '-' }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">{{ translate.instant('label_waiter') }}</span>
+            <span>{{ order.waiterName ?? '-' }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">{{ translate.instant('label_customer') }}</span>
+            <span>{{ order.customerName ?? '-' }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">{{ translate.instant('label_created_at') }}</span>
+            <span>{{ order.createdAt | date: 'short' }}</span>
+          </div>
+          <p-divider />
+          <div class="d-flex justify-content-between">
+            <span class="f-w-bold">{{ translate.instant('label_total') }}</span>
+            <span class="f-w-bold" style="font-size: 1.1rem">{{ order.totalAmount }}</span>
+          </div>
+        </div>
+      </p-card>
+    </div>
+
+    <!-- Kitchen Progress -->
+    <div class="col-md-8 mb-4">
+      <p-card [header]="translate.instant('label_kitchen_progress')">
+        @if (orderService.tracking()) {
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span>{{ translate.instant('label_items_ready') }}: {{ orderService.tracking()?.readyItems }} / {{ orderService.tracking()?.totalItems }}</span>
+              <span>{{ trackingProgress }}%</span>
+            </div>
+            <p-progressbar [value]="trackingProgress" [showValue]="false" />
+          </div>
+          @for (kp of orderService.tracking()?.kitchenProgress; track kp.kitchenOrderId) {
+            <div class="mb-3">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <strong>{{ kp.kitchenName }}</strong>
+                <p-tag [value]="kp.kitchenOrderStatus" />
+              </div>
+              <div class="d-flex flex-wrap gap-2">
+                @for (item of kp.items; track item.kitchenOrderItemId) {
+                  <p-tag
+                    [value]="item.itemFoodName + (item.quantity > 1 ? ' x' + item.quantity : '')"
+                    [severity]="item.itemStatus === 'READY' || item.itemStatus === 'SERVED' ? 'success' : item.itemStatus === 'PREPARING' ? 'warn' : 'secondary'"
+                  />
+                }
+              </div>
+            </div>
+          }
+        } @else {
+          <span class="text-muted">{{ translate.instant('label_no_kitchen_data') }}</span>
+        }
+      </p-card>
+    </div>
+  </div>
+
+  <!-- Order Items -->
+  <p-card [header]="translate.instant('label_order_items')">
+    <p-table [value]="order.orderItems" [tableStyle]="{ 'min-width': '40rem' }">
+      <ng-template #header>
+        <tr>
+          <th>{{ translate.instant('label_item_food') }}</th>
+          <th>{{ translate.instant('label_variant') }}</th>
+          <th>{{ translate.instant('label_add_ons') }}</th>
+          <th>{{ translate.instant('label_price') }}</th>
+          <th>{{ translate.instant('label_quantity') }}</th>
+          <th>{{ translate.instant('label_total') }}</th>
+          <th></th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-item>
+        <tr>
+          <td>{{ item.itemFoodName }}</td>
+          <td>{{ item.variantName ?? '-' }}</td>
+          <td>
+            @for (addon of item.orderItemAddOns; track addon.id) {
+              <span class="badge bg-secondary me-1">{{ addon.addOnName }}</span>
+            }
+            @if (!item.orderItemAddOns?.length) { - }
+          </td>
+          <td>{{ item.price }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-1">
+              <p-button icon="pi pi-minus" [rounded]="true" [text]="true" severity="danger" size="small"
+                [disabled]="!canEditItems() || item.quantity <= 1" (click)="decrementItemQty(item)" />
+              <span class="px-2">{{ item.quantity }}</span>
+              <p-button icon="pi pi-plus" [rounded]="true" [text]="true" severity="success" size="small"
+                [disabled]="!canEditItems()" (click)="incrementItemQty(item)" />
+            </div>
+          </td>
+          <td>{{ item.totalPrice }}</td>
+          <td>
+            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" size="small"
+              [disabled]="!canEditItems()" (click)="removeItem(item)" />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <!-- Kitchen Orders -->
+  @if (order.kitchenOrders.length) {
+    <p-card [header]="translate.instant('label_kitchen_orders')" class="mt-4">
+      @for (ko of order.kitchenOrders; track ko.id) {
+        <div class="mb-3">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <strong>{{ ko.kitchenName }}</strong>
+            <p-tag [value]="ko.status" />
+            @if (ko.notes) {
+              <small class="text-muted">{{ ko.notes }}</small>
+            }
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            @for (ki of ko.kitchenOrderItems; track ki.id) {
+              <div class="border rounded p-2 d-flex flex-column gap-1" style="min-width:120px">
+                <span>{{ ki.itemFoodName }}</span>
+                @if (ki.variantName) { <small class="text-muted">{{ ki.variantName }}</small> }
+                <small>x{{ ki.quantity }}</small>
+                <p-tag [value]="ki.status" [severity]="ki.status === 'READY' || ki.status === 'SERVED' ? 'success' : ki.status === 'PREPARING' ? 'warn' : ki.status === 'REJECTED' ? 'danger' : 'secondary'" />
+              </div>
+            }
+          </div>
+        </div>
+        <p-divider />
+      }
+    </p-card>
+  }
+}
+
+<p-confirmdialog [style]="{ width: '450px' }" />
+
+@if (order) {
+  <app-checkout-dialog
+    [visible]="showCheckoutDialog()"
+    [orderId]="order.id"
+    [totalAmount]="order.totalAmount"
+    (visibleChange)="showCheckoutDialog.set($any($event))"
+    (checkoutDone)="orderService.loadOrderById(order.id)"
+  />
+
+  <app-split-order-dialog
+    [visible]="showSplitDialog()"
+    [order]="order"
+    (visibleChange)="showSplitDialog.set($any($event))"
+    (splitDone)="goBack()"
+  />
+}

@@ -1,0 +1,109 @@
+<p-toast></p-toast>
+<p-toolbar class="mb-6">
+  <ng-template #start>
+    <p-button [showIfCanCreate]="menuItemId" [label]="translate.instant('label_add_customer')" icon="pi pi-plus" severity="secondary" class="m-inline-end-1" (onClick)="openNew()" />
+  </ng-template>
+
+  <ng-template #end>
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt [value]="customerService.customers()" [loading]="customerService.loading()" [rows]="10" [columns]="cols" [paginator]="true"
+  [globalFilterFields]="['name', 'email', 'phone']"
+  [tableStyle]="{ 'min-width': '60rem' }" [rowHover]="true" dataKey="id"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} customers" [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[10, 20, 30]">
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <h5 class="m-0">{{ translate.instant('label_manage_customers') }}</h5>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" [placeholder]="translate.instant('label_search')" />
+      </p-iconfield>
+    </div>
+  </ng-template>
+
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="id" style="width: 4rem">
+        {{ translate.instant('label_id') }}
+        <p-sortIcon field="id" />
+      </th>
+      <th pSortableColumn="name" style="width:6rem">
+        {{ translate.instant('label_name') }}
+        <p-sortIcon field="name" />
+      </th>
+      <th pSortableColumn="email" style="width:6rem">
+        {{ translate.instant('label_email') }}
+        <p-sortIcon field="email" />
+      </th>
+      <th pSortableColumn="phone" style="width:5rem">
+        {{ translate.instant('label_phone') }}
+        <p-sortIcon field="phone" />
+      </th>
+      <th pSortableColumn="customerType.type" style="width:5rem">
+        {{ translate.instant('label_customer_type') }}
+        <p-sortIcon field="customerType.type" />
+      </th>
+      <th pSortableColumn="accountCode" style="width:5rem">
+        {{ translate.instant('label_account_code') }}
+        <p-sortIcon field="accountCode" />
+      </th>
+      <th pSortableColumn="status" style="width:4rem">
+        {{ translate.instant('label_status') }}
+        <p-sortIcon field="status" />
+      </th>
+      <th style="width: 6rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-customer>
+    <tr>
+      <td>{{ customer.id }}</td>
+      <td>{{ customer.name }}</td>
+      <td>{{ customer.email }}</td>
+      <td>{{ customer.phone }}</td>
+      <td>{{ customer.customerTypeDescription }}</td>
+      <td>{{ customer.accountCode }}</td>
+      <td>
+        <p-tag [value]="customer.status ? translate.instant('label_active') : translate.instant('label_inactive')" [severity]="customer.status ? 'success' : 'danger'" />
+      </td>
+      <td>
+        <p-button icon="pi pi-pencil" class="m-inline-end-1" [rounded]="true" [outlined]="true" [showIfCanEdit]="menuItemId" (click)="editCustomer(customer)" />
+        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" [showIfCanDelete]="menuItemId" (click)="deleteCustomer(customer)" />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [visible]="customerService.customerDialog()" [style]="{ width: '850px' }" [header]="translate.instant('label_customer_details')" [modal]="true" (onHide)="hideDialog()">
+
+  <ng-template #content>
+    <form [formGroup]="customerForm" style="padding-top: 20px;">
+      <div class="row">
+        <div class="col-6">
+          <app-form-input [control]="$any(customerForm.get('name'))" label="label_name"> </app-form-input>
+          <app-form-input [control]="$any(customerForm.get('email'))" label="label_email"> </app-form-input>
+          <app-form-input [control]="$any(customerForm.get('phone'))" label="label_phone"> </app-form-input>
+          <app-form-input [control]="$any(customerForm.get('address'))" label="label_address"> </app-form-input>
+          <app-form-input [control]="$any(customerForm.get('favoriteDeliveryAddress'))" label="label_favorite_delivery_address"> </app-form-input>
+          <app-form-input [control]="$any(customerForm.get('password'))" label="label_password"> </app-form-input>
+        </div>
+        <div class="col-6">
+          <app-form-input [control]="$any(customerForm.get('customerType'))" label="label_customer_type" placeholder="label_select_customer" type="select" [options]="customerTypesOptions()"> </app-form-input>
+          <app-form-input [control]="$any(customerForm.get('allowCredit'))" label="label_allow_credit" type="checkbox"> </app-form-input>
+          <app-form-input [control]="$any(customerForm.get('status'))" label="label_active" type="checkbox"> </app-form-input>
+        </div>
+      </div>
+
+
+    </form>
+  </ng-template>
+
+  <ng-template #footer>
+    <p-button [label]="translate.instant('label_cancel')" icon="pi pi-times" text (click)="hideDialog()" />
+    <p-button [label]="translate.instant('label_save')" icon="pi pi-check" (click)="saveCustomer()" [loading]="customerService.loadingSave()" />
+  </ng-template>
+
+</p-dialog>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

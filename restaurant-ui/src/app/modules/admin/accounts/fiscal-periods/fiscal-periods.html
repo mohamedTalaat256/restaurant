@@ -1,0 +1,85 @@
+<p-toast></p-toast>
+<p-toolbar class="mb-6">
+  <ng-template #start>
+    <form [formGroup]="filterForm" class="d-flex align-items-center gap-2">
+      <p-select formControlName="year" [options]="yearOptions" optionLabel="label" optionValue="value"
+        [placeholder]="translate.instant('label_select_year')" [showClear]="true"
+        (onChange)="filterByYear()" [style]="{ 'min-width': '150px' }"></p-select>
+    </form>
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt [value]="fiscalPeriodService.fiscalPeriods()" [loading]="fiscalPeriodService.loading()" [rows]="12" [paginator]="true"
+  [globalFilterFields]="['year', 'month']"
+  [tableStyle]="{ 'min-width': '60rem' }" [rowHover]="true" dataKey="id"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} periods" [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[12, 24, 36]">
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <h5 class="m-0">{{ translate.instant('label_manage_fiscal_periods') }}</h5>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" [placeholder]="translate.instant('label_search')" />
+      </p-iconfield>
+    </div>
+  </ng-template>
+
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="year" style="width: 4rem">
+        {{ translate.instant('label_year') }}
+        <p-sortIcon field="year" />
+      </th>
+      <th pSortableColumn="month" style="width: 4rem">
+        {{ translate.instant('label_month') }}
+        <p-sortIcon field="month" />
+      </th>
+      <th pSortableColumn="startDate" style="width: 5rem">
+        {{ translate.instant('label_start_date') }}
+        <p-sortIcon field="startDate" />
+      </th>
+      <th pSortableColumn="endDate" style="width: 5rem">
+        {{ translate.instant('label_end_date') }}
+        <p-sortIcon field="endDate" />
+      </th>
+      <th pSortableColumn="locked" style="width: 4rem">
+        {{ translate.instant('label_status') }}
+        <p-sortIcon field="locked" />
+      </th>
+      <th style="width: 5rem">
+        {{ translate.instant('label_locked_by') }}
+      </th>
+      <th style="width: 5rem">
+        {{ translate.instant('label_locked_at') }}
+      </th>
+      <th style="width: 5rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-period>
+    <tr>
+      <td>{{ period.year }}</td>
+      <td>{{ period.month }}</td>
+      <td>{{ period.startDate }}</td>
+      <td>{{ period.endDate }}</td>
+      <td>
+        <p-tag [value]="period.locked ? translate.instant('label_locked') : translate.instant('label_open')"
+          [severity]="period.locked ? 'danger' : 'success'"></p-tag>
+      </td>
+      <td>{{ period.lockedByUsername }}</td>
+      <td>{{ period.lockedAt }}</td>
+      <td>
+        @if (!period.locked) {
+          <p-button icon="pi pi-lock" severity="warn" [rounded]="true" [outlined]="true"
+            [pTooltip]="translate.instant('label_lock_period')" (click)="lockPeriod(period)"
+            [loading]="fiscalPeriodService.loadingSave()" />
+        } @else {
+          <p-button icon="pi pi-lock-open" severity="success" [rounded]="true" [outlined]="true"
+            [pTooltip]="translate.instant('label_unlock_period')" (click)="unlockPeriod(period)"
+            [loading]="fiscalPeriodService.loadingSave()" />
+        }
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

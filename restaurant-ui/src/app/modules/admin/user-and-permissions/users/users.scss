@@ -1,0 +1,31 @@
+ .p-datatable-frozen-tbody {
+   font-weight: bold;
+ }
+
+ .p-datatable-scrollable .p-frozen-column {
+   font-weight: bold;
+ }
+.image-preview{
+  height: 150px;
+  width: 150px;
+  border-radius: 12px;
+  object-fit: cover;
+  object-position: center;
+}
+
+.upload-image-btn {
+  display: flex;
+  gap: 6px;
+  width: 150px;
+  padding: 12px 6px;
+  justify-content: center;
+  align-items: center;
+  margin: 6px;
+  cursor: pointer;
+  background-color: rgb(5, 51, 92);
+  border-radius: 11px;
+  color: white;
+
+
+}
+

@@ -1,0 +1,56 @@
+<p-toast></p-toast>
+
+<p-card [header]="translate.instant('label_trial_balance')">
+  <form [formGroup]="filterForm" class="mb-4">
+    <div class="grid">
+      <div class="col-12 md:col-4">
+        <app-form-input [control]="$any(filterForm.get('startDate'))" label="label_start_date" type="date"> </app-form-input>
+      </div>
+      <div class="col-12 md:col-4">
+        <app-form-input [control]="$any(filterForm.get('endDate'))" label="label_end_date" type="date"> </app-form-input>
+      </div>
+      <div class="col-12 md:col-4 flex items-end">
+        <p-button [label]="translate.instant('label_generate')" icon="pi pi-search" (onClick)="generateReport()"
+          [loading]="reportService.loading()" />
+      </div>
+    </div>
+  </form>
+
+  @if (reportService.trialBalance(); as report) {
+    <p-table [value]="report.lines" [rows]="20" [paginator]="true" [rowHover]="true"
+      [tableStyle]="{ 'min-width': '70rem' }" [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} accounts">
+      <ng-template #header>
+        <tr>
+          <th>{{ translate.instant('label_account_code') }}</th>
+          <th>{{ translate.instant('label_account_name') }}</th>
+          <th>{{ translate.instant('label_account_type') }}</th>
+          <th>{{ translate.instant('label_opening_balance') }}</th>
+          <th>{{ translate.instant('label_debit') }}</th>
+          <th>{{ translate.instant('label_credit') }}</th>
+          <th>{{ translate.instant('label_closing_balance') }}</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-line>
+        <tr>
+          <td>{{ line.accountCode }}</td>
+          <td>{{ line.accountName }}</td>
+          <td>{{ line.accountType }}</td>
+          <td>{{ line.openingBalance | number:'1.2-2' }}</td>
+          <td>{{ line.totalDebit | number:'1.2-2' }}</td>
+          <td>{{ line.totalCredit | number:'1.2-2' }}</td>
+          <td>{{ line.closingBalance | number:'1.2-2' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template #footer>
+        <tr class="font-bold">
+          <td colspan="3" class="text-right">{{ translate.instant('label_total') }}</td>
+          <td>{{ report.totalOpeningDebit | number:'1.2-2' }} / {{ report.totalOpeningCredit | number:'1.2-2' }}</td>
+          <td>{{ report.totalPeriodDebit | number:'1.2-2' }}</td>
+          <td>{{ report.totalPeriodCredit | number:'1.2-2' }}</td>
+          <td>{{ report.totalClosingDebit | number:'1.2-2' }} / {{ report.totalClosingCredit | number:'1.2-2' }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+</p-card>

@@ -1,0 +1,154 @@
+<p-toast></p-toast>
+<p-toolbar class="mb-6">
+  <ng-template #start>
+    <p-button [showIfCanCreate]="menuItemFoodId" [label]="translate.instant('label_add_item_food')" icon="pi pi-plus" severity="secondary" class="m-inline-end-1" (onClick)="openNew()" />
+  </ng-template>
+
+  <ng-template #end>
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt [value]="itemFoodService.itemFoods()" [loading]="itemFoodService.loading()" [rows]="10" [paginator]="true"
+  [globalFilterFields]="['name', 'descrip']"
+  [tableStyle]="{ 'min-width': '80rem' }" [rowHover]="true" dataKey="id"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items" [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[10, 20, 30]">
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <h5 class="m-0">{{ translate.instant('label_manage_item_foods') }}</h5>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" [placeholder]="translate.instant('label_search')" />
+      </p-iconfield>
+    </div>
+  </ng-template>
+
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="id" style="width: 2rem">
+        {{ translate.instant('label_id') }}
+        <p-sortIcon field="id" />
+      </th>
+      <th pSortableColumn="name" style="width:8rem">
+        {{ translate.instant('label_name') }}
+        <p-sortIcon field="name" />
+      </th>
+      <th pSortableColumn="category.name" style="width:6rem">
+        {{ translate.instant('label_category') }}
+        <p-sortIcon field="category.name" />
+      </th>
+      <th pSortableColumn="kitchen.name" style="width:6rem">
+        {{ translate.instant('label_kitchen') }}
+        <p-sortIcon field="kitchen.name" />
+      </th>
+      <th pSortableColumn="menuType.name" style="width:6rem">
+        {{ translate.instant('label_menu_type') }}
+        <p-sortIcon field="menuType.name" />
+      </th>
+      <th pSortableColumn="status" style="width:4rem">
+        {{ translate.instant('label_status') }}
+        <p-sortIcon field="status" />
+      </th>
+      <th style="width: 6rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-itemFood>
+    <tr>
+      <td>{{ itemFood.id }}</td>
+      <td>
+        <div class="d-flex align-items-center gap-2">
+          <img [src]="imagesUrl+itemFood.image" alt="{{ itemFood.name }}" class="image" />
+          <span>{{ itemFood.name }}</span>
+
+        </div>
+      </td>
+      <td>{{ itemFood.categoryName }}</td>
+      <td>{{ itemFood.kitchenName }}</td>
+      <td>{{ itemFood.menuTypeName }}</td>
+      <td>
+        <p-tag [value]="itemFood.status ? translate.instant('label_active') : translate.instant('label_inactive')"
+          [severity]="itemFood.status ? 'success' : 'danger'"></p-tag>
+      </td>
+      <td>
+        <p-button [showIfCanRead]="menuVariantId" icon="pi pi-bars" class="m-inline-end-1" [rounded]="true" [outlined]="true" (click)="openVariantDialog(itemFood)" />
+        <p-button [showIfCanRead]="menuItemAssociationId" icon="pi pi-plus" class="m-inline-end-1" [rounded]="true" [outlined]="true" (click)="openAddOnsDialog(itemFood)" />
+        <p-button [showIfCanEdit]="menuItemFoodId" icon="pi pi-pencil" class="m-inline-end-1" [rounded]="true" [outlined]="true" (click)="editItemFood(itemFood)" />
+        <p-button [showIfCanDelete]="menuItemFoodId" icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteItemFood(itemFood)" />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<!-- food item dialog -->
+<p-dialog [visible]="itemFoodService.itemFoodDialog()" [style]="{ width: '950px' }"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [maximizable]="true"
+ [header]="translate.instant('label_item_food_details')"
+[modal]="true"
+(onHide)="hideDialog()">
+
+  <ng-template #content>
+    <form [formGroup]="itemFoodForm" class="pb-3 mt-4 pt-3">
+      <div class="row">
+        <div class="col-md-6">
+            <div class="row">
+              <app-form-input class="col-12" [control]="$any(itemFoodForm.get('name'))" label="label_name"> </app-form-input>
+              <app-form-input class="col-12" [control]="$any(itemFoodForm.get('descrip'))" label="label_description"> </app-form-input>
+              <app-form-input class="col-12" [control]="$any(itemFoodForm.get('component'))" label="label_component"> </app-form-input>
+              <app-form-input class="col-12" [control]="$any(itemFoodForm.get('note'))" label="label_note"> </app-form-input>
+              <app-form-input class="col-12" [control]="$any(itemFoodForm.get('position'))" label="label_position" type="number"> </app-form-input>
+              <app-form-input class="col-12" [control]="$any(itemFoodForm.get('cookedTime'))" label="label_cooked_time" type="number"> </app-form-input>
+              <app-form-input class="col-6" [control]="$any(itemFoodForm.get('offerIsAvailable'))" label="label_offer_is_available" type="checkbox"> </app-form-input>
+              <app-form-input class="col-6" [control]="$any(itemFoodForm.get('offerRate'))" label="label_offer_rate" type="number"> </app-form-input>
+              <app-form-input class="col-6" [control]="$any(itemFoodForm.get('offerStartDate'))" label="label_offer_start_date" type="date"> </app-form-input>
+              <app-form-input class="col-6" [control]="$any(itemFoodForm.get('offerEndDate'))" label="label_offer_end_date" type="date"> </app-form-input>
+            </div>
+        </div>
+        <div class="col-md-6">
+          <div class="row">
+              <app-form-input class="col-12" [control]="$any(itemFoodForm.get('categoryId'))" label="label_category" [options]="categoryOptions()" type="select" [filter]="true"> </app-form-input>
+              <app-form-input class="col-12" [control]="$any(itemFoodForm.get('kitchenId'))" label="label_kitchen" [options]="kitchenOptions()" type="select" [filter]="true"> </app-form-input>
+              <app-form-input class="col-12" [control]="$any(itemFoodForm.get('menuTypeId'))" label="label_menu_type" [options]="menuTypeOptions()" type="select" [filter]="true"> </app-form-input>
+              <app-form-input class="col-4" [control]="$any(itemFoodForm.get('productVat'))" label="label_product_vat" type="number"> </app-form-input>
+              <app-form-input class="col-4" [control]="$any(itemFoodForm.get('tax0'))" label="label_tax0" type="number"> </app-form-input>
+              <app-form-input class="col-4" [control]="$any(itemFoodForm.get('tax1'))" label="label_tax1" type="number"> </app-form-input>
+              <app-form-input class="col-6" [control]="$any(itemFoodForm.get('isGroup'))" label="label_is_group" type="checkbox"> </app-form-input>
+              <app-form-input class="col-6" [control]="$any(itemFoodForm.get('isCustomQty'))" label="label_is_custom_qty" type="checkbox"> </app-form-input>
+              <app-form-input class="col-6" [control]="$any(itemFoodForm.get('isSpecial'))" label="label_is_special" type="checkbox"> </app-form-input>
+              <app-form-input class="col-6" [control]="$any(itemFoodForm.get('status'))" label="label_status" type="checkbox"> </app-form-input>
+          </div>
+        </div>
+      </div>
+      <div >
+        <label class="form-label">{{ translate.instant('label_image') }}</label>
+        <input type="file" class="form-control" accept="image/*" (change)="onImageSelected($event)" />
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template #footer>
+    <p-button [label]="translate.instant('label_cancel')" icon="pi pi-times" text (click)="hideDialog()" />
+    <p-button [label]="translate.instant('label_save')" icon="pi pi-check" (click)="saveItemFood()" [loading]="itemFoodService.loadingSave()" />
+  </ng-template>
+
+</p-dialog>
+
+<!-- variant dialog -->
+<p-dialog [visible]="itemFoodService.itemFoodVariantDialog()" [style]="{ width: '650px', height: '600px' }"
+  [header]="selectedItemFood()?.name + ' ' + translate.instant('label_item_food_variants')"
+  [modal]="true" [baseZIndex]="10000"
+    [autoZIndex]="true"
+    appendTo="body"
+    (onHide)="itemFoodService.itemFoodVariantDialog.set(false)">
+  <app-item-food-variants [selectedItemFood]="selectedItemFood()" ></app-item-food-variants>
+</p-dialog>
+
+<!-- add-ons dialog -->
+<p-dialog [visible]="itemFoodService.itemFoodAddonsDialog()" [style]="{ width: '650px', height: '600px' }"
+  [header]="selectedItemFood()?.name + ' ' + translate.instant('label_item_food_add_ons')" [modal]="true" [baseZIndex]="10000"
+    [autoZIndex]="true"
+    appendTo="body"
+    (onHide)="itemFoodService.itemFoodAddonsDialog.set(false)">
+  <app-item-food-add-ons-association [selectedItemFood]="selectedItemFood()" ></app-item-food-add-ons-association>
+</p-dialog>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

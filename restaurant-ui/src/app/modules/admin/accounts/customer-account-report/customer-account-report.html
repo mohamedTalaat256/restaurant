@@ -1,0 +1,72 @@
+<p-toast></p-toast>
+<p-toolbar class="mb-6">
+  <ng-template #start>
+
+  <div class="flex items-center justify-between gap-4">
+      <h5 class="m-0">{{ translate.instant('label_customer_account_report') }}</h5>
+      <p-iconfield>
+         <p-select [options]="customerOptions()" optionLabel="label" placeholder="{{ translate.instant('label_select_customer') }}"
+         (onChange)="onSelectCustomer($event)">
+
+        </p-select>
+      </p-iconfield>
+    </div>
+  </ng-template>
+
+  <ng-template #end>
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt [value]="accountService.customerJournals()" [loading]="accountService.loading()" [rows]="10" [paginator]="true"
+  [globalFilterFields]="['name']"
+  [tableStyle]="{ 'min-width': '60rem' }" [rowHover]="true" dataKey="id"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} accounts" [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[10, 20, 30]">
+  <ng-template #caption>
+
+  </ng-template>
+
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="id" style="width: 2rem">
+        {{ translate.instant('label_id') }}
+        <p-sortIcon field="id" />
+      </th>
+      <th pSortableColumn="description" style="width:8rem">
+        {{ translate.instant('label_description') }}
+        <p-sortIcon field="description" />
+      </th>
+      <th pSortableColumn="account" style="width:4rem">
+        {{ translate.instant('label_account') }}
+        <p-sortIcon field="account" />
+      </th>
+      <th pSortableColumn="amount" style="width:4rem">
+        {{ translate.instant('label_amount') }}
+        <p-sortIcon field="amount" />
+      </th>
+      <th pSortableColumn="entryDate" style="width:4rem">
+        {{ translate.instant('label_date') }}
+        <p-sortIcon field="entryDate" />
+      </th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-journalEntryLine>
+    <tr>
+      <td>{{ journalEntryLine.id }}</td>
+      <td>{{ journalEntryLine.description }}</td>
+      <td>{{ journalEntryLine.accountName }}</td>
+      <td>
+        @if(journalEntryLine.debit > 0){
+          <p-tag [value]="translate.instant('label_debit') + ': ' + journalEntryLine.debit" severity="danger"></p-tag>
+          {{currencyName}}
+        }@else {
+          <p-tag [value]="translate.instant('label_credit') + ': ' + journalEntryLine.credit" severity="success"></p-tag>
+          {{currencyName}}
+        }
+       </td>
+      <td>{{ journalEntryLine.entryDate | date }}</td>
+
+    </tr>
+  </ng-template>
+</p-table>
+

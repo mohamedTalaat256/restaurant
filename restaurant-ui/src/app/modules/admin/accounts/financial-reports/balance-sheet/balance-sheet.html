@@ -1,0 +1,111 @@
+<p-toast></p-toast>
+
+<p-card [header]="translate.instant('label_balance_sheet')">
+  <form [formGroup]="filterForm" class="mb-4">
+    <div class="grid">
+      <div class="col-12 md:col-6">
+        <app-form-input [control]="$any(filterForm.get('asOfDate'))" label="label_as_of_date" type="date"> </app-form-input>
+      </div>
+      <div class="col-12 md:col-6 flex items-end">
+        <p-button [label]="translate.instant('label_generate')" icon="pi pi-search" (onClick)="generateReport()"
+          [loading]="reportService.loading()" />
+      </div>
+    </div>
+  </form>
+
+  @if (reportService.balanceSheet(); as report) {
+    <div class="mb-3">
+      @if (report.isBalanced) {
+        <p-tag [value]="translate.instant('label_balanced')" severity="success"></p-tag>
+      } @else {
+        <p-tag [value]="translate.instant('label_not_balanced')" severity="danger"></p-tag>
+      }
+    </div>
+
+    <!-- Assets Section -->
+    <h4>{{ translate.instant('label_assets') }}</h4>
+    <p-table [value]="report.assets.accounts" [tableStyle]="{ 'min-width': '40rem' }">
+      <ng-template #header>
+        <tr>
+          <th>{{ translate.instant('label_account_code') }}</th>
+          <th>{{ translate.instant('label_account_name') }}</th>
+          <th>{{ translate.instant('label_balance') }}</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-line>
+        <tr>
+          <td>{{ line.accountCode }}</td>
+          <td>{{ line.accountName }}</td>
+          <td>{{ line.balance | number:'1.2-2' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template #footer>
+        <tr class="font-bold">
+          <td colspan="2" class="text-right">{{ translate.instant('label_total_assets') }}</td>
+          <td>{{ report.assets.sectionTotal | number:'1.2-2' }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <p-divider></p-divider>
+
+    <!-- Liabilities Section -->
+    <h4>{{ translate.instant('label_liabilities') }}</h4>
+    <p-table [value]="report.liabilities.accounts" [tableStyle]="{ 'min-width': '40rem' }">
+      <ng-template #header>
+        <tr>
+          <th>{{ translate.instant('label_account_code') }}</th>
+          <th>{{ translate.instant('label_account_name') }}</th>
+          <th>{{ translate.instant('label_balance') }}</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-line>
+        <tr>
+          <td>{{ line.accountCode }}</td>
+          <td>{{ line.accountName }}</td>
+          <td>{{ line.balance | number:'1.2-2' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template #footer>
+        <tr class="font-bold">
+          <td colspan="2" class="text-right">{{ translate.instant('label_total_liabilities') }}</td>
+          <td>{{ report.liabilities.sectionTotal | number:'1.2-2' }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <p-divider></p-divider>
+
+    <!-- Equity Section -->
+    <h4>{{ translate.instant('label_equity') }}</h4>
+    <p-table [value]="report.equity.accounts" [tableStyle]="{ 'min-width': '40rem' }">
+      <ng-template #header>
+        <tr>
+          <th>{{ translate.instant('label_account_code') }}</th>
+          <th>{{ translate.instant('label_account_name') }}</th>
+          <th>{{ translate.instant('label_balance') }}</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-line>
+        <tr>
+          <td>{{ line.accountCode }}</td>
+          <td>{{ line.accountName }}</td>
+          <td>{{ line.balance | number:'1.2-2' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template #footer>
+        <tr class="font-bold">
+          <td colspan="2" class="text-right">{{ translate.instant('label_total_equity') }}</td>
+          <td>{{ report.equity.sectionTotal | number:'1.2-2' }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <div class="my-3 p-4 surface-200 border-round">
+      <div class="flex justify-between font-bold text-xl">
+        <span>{{ translate.instant('label_total_liabilities_and_equity') }}</span>
+        <span>{{ report.totalLiabilitiesAndEquity | number:'1.2-2' }}</span>
+      </div>
+    </div>
+  }
+</p-card>

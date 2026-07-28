@@ -1,0 +1,107 @@
+<p-toast></p-toast>
+
+<p-toolbar class="mb-6">
+  <ng-template #start>
+    <p-button
+      [label]="translate.instant('label_merge_orders')"
+      icon="pi pi-code-branch"
+      severity="info"
+      [disabled]="selectedOrders.length < 2"
+      (onClick)="mergeSelected()"
+      class="m-inline-end-1"
+    />
+  </ng-template>
+  <ng-template #end>
+    <p-select
+      [(ngModel)]="selectedStatus"
+      [options]="statusOptions"
+      [placeholder]="translate.instant('label_filter_by_status')"
+      (onChange)="onStatusChange()"
+      [style]="{ minWidth: '180px' }"
+    />
+  </ng-template>
+</p-toolbar>
+
+<p-table
+  #dt
+  [value]="orderService.orders()"
+  [loading]="orderService.loading()"
+  [rows]="15"
+  [paginator]="true"
+  [globalFilterFields]="['orderNumber', 'tableName', 'waiterName', 'status']"
+  [tableStyle]="{ 'min-width': '70rem' }"
+  [(selection)]="selectedOrders"
+  [rowHover]="true"
+  dataKey="id"
+  [showCurrentPageReport]="true"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} orders"
+  [rowsPerPageOptions]="[15, 30, 50]"
+>
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <h5 class="m-0">{{ translate.instant('label_orders_management') }}</h5>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" [placeholder]="translate.instant('label_search')" />
+      </p-iconfield>
+    </div>
+  </ng-template>
+
+  <ng-template #header>
+    <tr>
+      <th style="width: 3rem">
+        <p-tableHeaderCheckbox />
+      </th>
+      <th pSortableColumn="orderNumber">{{ translate.instant('label_order_number') }} <p-sortIcon field="orderNumber" /></th>
+      <th pSortableColumn="orderType">{{ translate.instant('label_order_type') }} <p-sortIcon field="orderType" /></th>
+      <th pSortableColumn="status">{{ translate.instant('label_status') }} <p-sortIcon field="status" /></th>
+      <th pSortableColumn="tableName">{{ translate.instant('label_table') }} <p-sortIcon field="tableName" /></th>
+      <th pSortableColumn="waiterName">{{ translate.instant('label_waiter') }} <p-sortIcon field="waiterName" /></th>
+      <th pSortableColumn="totalAmount">{{ translate.instant('label_total') }} <p-sortIcon field="totalAmount" /></th>
+      <th pSortableColumn="createdAt">{{ translate.instant('label_created_at') }} <p-sortIcon field="createdAt" /></th>
+      <th style="width: 10rem"></th>
+    </tr>
+  </ng-template>
+
+  <ng-template #body let-order>
+    <tr>
+      <td>
+        <p-tableCheckbox [value]="order" />
+      </td>
+      <td>{{ order.orderNumber }}</td>
+      <td>
+        <p-tag [value]="order.orderType" [severity]="order.orderType === 'QUICK_ORDER' ? 'warn' : 'info'" />
+      </td>
+      <td>
+        <p-tag [value]="order.status" [severity]="getStatusSeverity(order.status)" />
+      </td>
+      <td>{{ order.tableName ?? '-' }}</td>
+      <td>{{ order.waiterName ?? '-' }}</td>
+      <td>{{ order.totalAmount }}</td>
+      <td>{{ order.createdAt | date: 'short' }}</td>
+      <td>
+        <p-button icon="pi pi-eye" [rounded]="true" [text]="true" severity="info" size="small"
+          [pTooltip]="translate.instant('label_view')" (click)="viewOrder(order)" class="m-inline-end-1" />
+        <p-button icon="pi pi-check" [rounded]="true" [text]="true" severity="success" size="small"
+          [pTooltip]="translate.instant('label_complete')" [disabled]="!canComplete(order.status)"
+          (click)="completeOrder(order)" class="m-inline-end-1" />
+        <p-button icon="pi pi-credit-card" [rounded]="true" [text]="true" severity="warn" size="small"
+          [pTooltip]="translate.instant('label_checkout')" [disabled]="!canCheckout(order.status)"
+          (click)="openCheckout(order)" class="m-inline-end-1" />
+        <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" size="small"
+          [pTooltip]="translate.instant('label_delete')" [disabled]="!canDelete(order.status)"
+          (click)="deleteOrder(order)" />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-confirmdialog [style]="{ width: '450px' }" />
+
+<app-checkout-dialog
+  [visible]="showCheckoutDialog()"
+  [orderId]="checkoutOrderId()!"
+  [totalAmount]="checkoutTotal()"
+  (visibleChange)="showCheckoutDialog.set($any($event))"
+  (checkoutDone)="loadOrders()"
+/>

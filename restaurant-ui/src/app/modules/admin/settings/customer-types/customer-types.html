@@ -1,0 +1,81 @@
+<p-toast></p-toast>
+<p-toolbar class="mb-6">
+  <ng-template #start>
+    <p-button [showIfCanCreate]="menuItemId" [label]="translate.instant('label_add_customer_type')" icon="pi pi-plus" severity="secondary" class="m-inline-end-1" (onClick)="openNew()" />
+  </ng-template>
+
+  <ng-template #end>
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt [value]="customerTypeService.customerTypes()" [loading]="customerTypeService.loading()" [rows]="10" [columns]="cols" [paginator]="true"
+  [globalFilterFields]="['type', 'description']"
+  [tableStyle]="{ 'min-width': '50rem' }" [rowHover]="true" dataKey="type"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} customer types" [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[10, 20, 30]">
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <h5 class="m-0">{{ translate.instant('label_manage_customer_types') }}</h5>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" [placeholder]="translate.instant('label_search')" />
+      </p-iconfield>
+    </div>
+  </ng-template>
+
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="type" style="width: 6rem">
+        {{ translate.instant('label_type') }}
+        <p-sortIcon field="type" />
+      </th>
+      <th pSortableColumn="description" style="width:8rem">
+        {{ translate.instant('label_description') }}
+        <p-sortIcon field="description" />
+      </th>
+      <th pSortableColumn="ordering" style="width:4rem">
+        {{ translate.instant('label_ordering') }}
+        <p-sortIcon field="ordering" />
+      </th>
+      <th pSortableColumn="status" style="width:4rem">
+        {{ translate.instant('label_status') }}
+        <p-sortIcon field="status" />
+      </th>
+      <th style="width: 6rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-customerType>
+    <tr>
+      <td>{{ customerType.type }}</td>
+      <td>{{ customerType.description }}</td>
+      <td>{{ customerType.ordering }}</td>
+      <td>
+        <p-tag [value]="customerType.status ? translate.instant('label_active') : translate.instant('label_inactive')" [severity]="customerType.status ? 'success' : 'danger'" />
+      </td>
+      <td>
+        <p-button icon="pi pi-pencil" class="m-inline-end-1" [rounded]="true" [outlined]="true" [showIfCanEdit]="menuItemId" (click)="editCustomerType(customerType)" />
+        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" [showIfCanDelete]="menuItemId" (click)="deleteCustomerType(customerType)" />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [visible]="customerTypeService.customerTypeDialog()" [style]="{ width: '450px' }" [header]="translate.instant('label_customer_type_details')" [modal]="true" (onHide)="hideDialog()">
+
+  <ng-template #content>
+    <form [formGroup]="customerTypeForm" style="padding-top: 20px;">
+      <app-form-input class="mt-5" [control]="$any(customerTypeForm.get('type'))" label="label_type"> </app-form-input>
+      <app-form-input [control]="$any(customerTypeForm.get('description'))" label="label_description"> </app-form-input>
+      <app-form-input [control]="$any(customerTypeForm.get('ordering'))" label="label_ordering" type="number"> </app-form-input>
+      <app-form-input [control]="$any(customerTypeForm.get('status'))" label="label_status" type="checkbox"> </app-form-input>
+    </form>
+  </ng-template>
+
+  <ng-template #footer>
+    <p-button [label]="translate.instant('label_cancel')" icon="pi pi-times" text (click)="hideDialog()" />
+    <p-button [label]="translate.instant('label_save')" icon="pi pi-check" (click)="saveCustomerType()" [loading]="customerTypeService.loadingSave()" />
+  </ng-template>
+
+</p-dialog>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

@@ -1,0 +1,71 @@
+@if(rolesService.selectedRole()) {
+   <ng-template #header>
+  <div class="flex items-center justify-between">
+    <h3 class="m-0">{{ translate.instant('label_role_details') }}</h3>
+  </div>
+</ng-template>
+
+<div class="card">
+  <div [formGroup]="rolesService.roleForm" class=" flex flex-col gap-6 w-full">
+    <div class="font-semibold text-xl">{{ translate.instant('label_role_details') }}</div>
+    <div class="row mt-5">
+
+      <app-form-input class="col-md-12" label="label_name" [control]="$any(rolesService.roleForm.get('name'))"></app-form-input>
+      <app-form-input class="col-md-12" label="label_description"
+        [control]="$any(rolesService.roleForm.get('description'))"></app-form-input>
+      <app-form-input class="col-md-12" label="label_status" [control]="$any(rolesService.roleForm.get('status'))"
+        type="checkbox"></app-form-input>
+
+    </div>
+  </div>
+
+
+  <h1>{{translate.instant('label_modules')}}</h1>
+  <p-divider></p-divider>
+  <div class="p-2">
+    @for (module of rolesService.modules(); track $index) {
+
+    <h5>{{ translate.instant('label_'+module.name) }} </h5>
+
+    <div>
+
+      <!--  <p>{{ translate.instant(menuItem.title) }}</p> -->
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{{ translate.instant('label_parent_menu') }}</th>
+            <th>{{ translate.instant('label_can_create') }}</th>
+            <th>{{ translate.instant('label_can_read') }}</th>
+            <th>{{ translate.instant('label_can_edit') }}</th>
+            <th>{{ translate.instant('label_can_delete') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        @for (menuItem of rolesService.menuItems().filter(item => item.moduleId === module.id); track $index) {
+          <tr>
+            <td>{{ translate.instant(menuItem.title) }}</td>
+            <td><toggle-button [checked]="getRoleIdAndMenuItemId(menuItem.id)?.canCreate" (changed)="onChange($event, menuItem.id, 'canCreate')"></toggle-button></td>
+            <td><toggle-button [checked]="getRoleIdAndMenuItemId(menuItem.id)?.canRead"   (changed)="onChange($event, menuItem.id, 'canRead')"></toggle-button></td>
+            <td><toggle-button [checked]="getRoleIdAndMenuItemId(menuItem.id)?.canEdit"  (changed)="onChange($event, menuItem.id, 'canEdit')"></toggle-button></td>
+            <td><toggle-button [checked]="getRoleIdAndMenuItemId(menuItem.id)?.canDelete" (changed)="onChange($event, menuItem.id, 'canDelete')"></toggle-button></td>
+          </tr>
+        }
+
+      </table>
+
+
+
+    </div>
+    }
+  </div>
+
+</div>
+
+
+
+<ng-template #end>
+  <p-button [label]="translate.instant('label_add_role')" icon="pi pi-check" class="m-inline-end-1" (onClick)="save()" />
+</ng-template>
+}

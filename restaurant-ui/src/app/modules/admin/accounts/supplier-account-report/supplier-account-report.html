@@ -1,0 +1,81 @@
+<p-toast></p-toast>
+<p-toolbar class="mb-6">
+  <ng-template #start>
+    <div class="flex items-center gap-4 flex-wrap">
+      <h5 class="m-0">{{ translate.instant('label_supplier_account_report') }}</h5>
+
+      <p-select style="width: 300px" [options]="supplierOptions()" optionLabel="label" [filter]="true"
+                placeholder="{{ translate.instant('label_select_supplier') }}"
+                [(ngModel)]="selectedSupplier" (onChange)="onFilterChange()">
+      </p-select>
+
+
+    <p-datepicker [(ngModel)]="fromDate" placeholder="From Date" name="fromDate"
+              (onSelectChange)="onFilterChange()" dateFormat="yy-mm-dd">
+    </p-datepicker>
+
+    <p-datepicker [(ngModel)]="toDate" placeholder="To Date" name="toDate"
+                  (onSelectChange)="onFilterChange()" dateFormat="yy-mm-dd">
+    </p-datepicker>
+
+
+    </div>
+  </ng-template>
+
+  <ng-template #end>
+    @if(accountService.supplierReport()?.openingBalance !== undefined) {
+      <div class="text-right font-bold text-lg">
+        {{ translate.instant('label_opening_balance') }}:
+        <span class="text-primary">{{ accountService.supplierReport()?.openingBalance }} {{currencyName}}</span>
+      </div>
+    }
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt [value]="accountService.supplierJournals()" [loading]="accountService.loading()" [rows]="10" [paginator]="true"
+  [globalFilterFields]="['entryNumber', 'description', 'reference']"
+  [tableStyle]="{ 'min-width': '60rem' }" [rowHover]="true" dataKey="entryNumber"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[10, 20, 30]">
+
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="entryNumber" style="width: 8%">{{ translate.instant('label_entry_number') }} <p-sortIcon field="entryNumber" /></th>
+      <th pSortableColumn="date" style="width: 10%">{{ translate.instant('label_date') }} <p-sortIcon field="date" /></th>
+      <th pSortableColumn="description" style="width: 35%">{{ translate.instant('label_description') }} <p-sortIcon field="description" /></th>
+      <th pSortableColumn="reference" style="width: 6%">{{ translate.instant('label_reference') }} <p-sortIcon field="reference" /></th>
+      <th pSortableColumn="debit" style="width: 7%">{{ translate.instant('label_debit') }} <p-sortIcon field="debit" /></th>
+      <th pSortableColumn="credit" style="width: 7%">{{ translate.instant('label_credit') }} <p-sortIcon field="credit" /></th>
+      <th pSortableColumn="runningBalance" style="width: 10%">{{ translate.instant('label_balance') }} <p-sortIcon field="runningBalance" /></th>
+    </tr>
+  </ng-template>
+
+  <ng-template #body let-item>
+    <tr>
+      <td><span class="font-medium">{{ item.entryNumber }}</span></td>
+      <td>{{ item.date | date:'yyyy-MM-dd HH:mm' }}</td>
+      <td>{{ item.description }}</td>
+      <td><p-tag [value]="item.reference" severity="secondary"></p-tag></td>
+      <td class="text-danger font-bold">
+        {{ item.debit > 0 ? (item.debit | number:'1.2-2') : '-' }}
+      </td>
+      <td class="text-success font-bold">
+        {{ item.credit > 0 ? (item.credit | number:'1.2-2') : '-' }}
+      </td>
+      <td class="font-bold">
+        {{ item.runningBalance | number:'1.2-2' }} {{currencyName}}
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template #footer>
+    @if(accountService.supplierReport()?.closingBalance !== undefined) {
+      <tr>
+        <td colspan="6" class="text-right font-bold text-lg">{{ translate.instant('label_closing_balance') }}:</td>
+        <td class="font-bold text-lg text-primary underline">
+          {{ accountService.supplierReport()?.closingBalance | number:'1.2-2' }} {{currencyName}}
+        </td>
+      </tr>
+    }
+  </ng-template>
+</p-table>

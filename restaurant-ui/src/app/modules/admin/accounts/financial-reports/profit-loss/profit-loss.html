@@ -1,0 +1,113 @@
+<p-toast></p-toast>
+
+<p-card [header]="translate.instant('label_profit_loss')">
+  <form [formGroup]="filterForm" class="mb-4">
+    <div class="grid">
+      <div class="col-12 md:col-4">
+        <app-form-input [control]="$any(filterForm.get('startDate'))" label="label_start_date" type="date"> </app-form-input>
+      </div>
+      <div class="col-12 md:col-4">
+        <app-form-input [control]="$any(filterForm.get('endDate'))" label="label_end_date" type="date"> </app-form-input>
+      </div>
+      <div class="col-12 md:col-4 flex items-end">
+        <p-button [label]="translate.instant('label_generate')" icon="pi pi-search" (onClick)="generateReport()"
+          [loading]="reportService.loading()" />
+      </div>
+    </div>
+  </form>
+
+  @if (reportService.profitLoss(); as report) {
+    <!-- Revenue Section -->
+    <h4>{{ translate.instant('label_revenue') }}</h4>
+    <p-table [value]="report.revenueAccounts" [tableStyle]="{ 'min-width': '40rem' }">
+      <ng-template #header>
+        <tr>
+          <th>{{ translate.instant('label_account_code') }}</th>
+          <th>{{ translate.instant('label_account_name') }}</th>
+          <th>{{ translate.instant('label_amount') }}</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-line>
+        <tr>
+          <td>{{ line.accountCode }}</td>
+          <td>{{ line.accountName }}</td>
+          <td>{{ line.amount | number:'1.2-2' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template #footer>
+        <tr class="font-bold">
+          <td colspan="2" class="text-right">{{ translate.instant('label_total_revenue') }}</td>
+          <td>{{ report.totalRevenue | number:'1.2-2' }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <p-divider></p-divider>
+
+    <!-- COGS Section -->
+    <h4>{{ translate.instant('label_cost_of_goods_sold') }}</h4>
+    <p-table [value]="report.cogsAccounts" [tableStyle]="{ 'min-width': '40rem' }">
+      <ng-template #header>
+        <tr>
+          <th>{{ translate.instant('label_account_code') }}</th>
+          <th>{{ translate.instant('label_account_name') }}</th>
+          <th>{{ translate.instant('label_amount') }}</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-line>
+        <tr>
+          <td>{{ line.accountCode }}</td>
+          <td>{{ line.accountName }}</td>
+          <td>{{ line.amount | number:'1.2-2' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template #footer>
+        <tr class="font-bold">
+          <td colspan="2" class="text-right">{{ translate.instant('label_total_cogs') }}</td>
+          <td>{{ report.totalCogs | number:'1.2-2' }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <div class="my-3 p-3 surface-100 border-round">
+      <div class="flex justify-between font-bold text-lg">
+        <span>{{ translate.instant('label_gross_profit') }}</span>
+        <span [class]="report.grossProfit >= 0 ? 'text-green-600' : 'text-red-600'">{{ report.grossProfit | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <p-divider></p-divider>
+
+    <!-- Operating Expenses Section -->
+    <h4>{{ translate.instant('label_operating_expenses') }}</h4>
+    <p-table [value]="report.operatingExpenseAccounts" [tableStyle]="{ 'min-width': '40rem' }">
+      <ng-template #header>
+        <tr>
+          <th>{{ translate.instant('label_account_code') }}</th>
+          <th>{{ translate.instant('label_account_name') }}</th>
+          <th>{{ translate.instant('label_amount') }}</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-line>
+        <tr>
+          <td>{{ line.accountCode }}</td>
+          <td>{{ line.accountName }}</td>
+          <td>{{ line.amount | number:'1.2-2' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template #footer>
+        <tr class="font-bold">
+          <td colspan="2" class="text-right">{{ translate.instant('label_total_operating_expenses') }}</td>
+          <td>{{ report.totalOperatingExpenses | number:'1.2-2' }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <div class="my-3 p-4 surface-200 border-round">
+      <div class="flex justify-between font-bold text-xl">
+        <span>{{ translate.instant('label_net_profit') }}</span>
+        <span [class]="report.netProfit >= 0 ? 'text-green-600' : 'text-red-600'">{{ report.netProfit | number:'1.2-2' }}</span>
+      </div>
+    </div>
+  }
+</p-card>

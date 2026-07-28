@@ -1,0 +1,88 @@
+
+
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  src: url('/public/font/Cairo/Cairo.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  font-family: 'Cairo', sans-serif !important;
+  // Default the application to a light color theme. This can be changed to
+  // `dark` to enable the dark color theme, or to `light dark` to defer to the
+  // user's system settings.
+  color-scheme: light;
+
+  // Set a default background, font and text colors for the application using
+  // Angular Material's system-level CSS variables. Learn more about these
+  // variables at https://material.angular.dev/guide/system-variables
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+
+  // Reset the user agent margin.
+  margin: 0;
+  height: 100%;
+ // --p-floatlabel-over-active-top: -2.25rem !important;
+ --p-floatlabel-active-font-size: 1rem !important;
+ --p-floatlabel-active-font-weight: 500 !important;
+ --p-floatlabel-over-active-top: -1.7rem !important;
+
+}
+/* You can add global styles to this file, and also import other style files */
+
+.pi {
+  font-size: 1.5rem !important;
+}
+
+.mat-mdc-card{
+  background-color: #ffffff !important;
+}
+
+
+
+.circle-avatar-42{
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  object-fit: cover;
+}
+.p-error{
+  font-size: 12px;
+}
+.required-astric{
+  color: #ff1717 !important;
+  font-weight: bold !important;
+}
+
+.ng-invalid-input{
+  border: 1px solid #ff1717 !important;
+}
+
+.p-inputtext{
+  width: 100% !important;
+}
+
+
+.p-floatlabel:has(input:focus) label, .p-floatlabel:has(input.p-filled) label, .p-floatlabel:has(input:-webkit-autofill) label, .p-floatlabel:has(textarea:focus) label, .p-floatlabel:has(textarea.p-filled) label, .p-floatlabel:has(.p-inputwrapper-focus) label, .p-floatlabel:has(.p-inputwrapper-filled) label, .p-floatlabel:has(input[placeholder]) label, .p-floatlabel:has(textarea[placeholder]) label {
+
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+}
+
+.p-avatar img{
+  object-fit: cover;
+}
+
+.m-inline-end-1{
+  margin-inline-end: 1rem !important;
+}
+.m-inline-end-2{
+  margin-inline-end: 2rem !important;
+}

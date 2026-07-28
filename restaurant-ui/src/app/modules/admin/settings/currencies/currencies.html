@@ -1,0 +1,86 @@
+<p-toast></p-toast>
+<p-toolbar class="mb-6">
+  <ng-template #start>
+    <p-button [showIfCanCreate]="menuItemId" [label]="translate.instant('label_add_currency')" icon="pi pi-plus" severity="secondary" class="m-inline-end-1" (onClick)="openNew()" />
+  </ng-template>
+
+  <ng-template #end>
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt [value]="currencyService.currencies()" [loading]="currencyService.loading()" [rows]="10" [columns]="cols" [paginator]="true"
+  [globalFilterFields]="['name', 'code', 'symbol']"
+  [tableStyle]="{ 'min-width': '50rem' }" [rowHover]="true" dataKey="id"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} currencies" [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[10, 20, 30]">
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <h5 class="m-0">{{ translate.instant('label_manage_currencies') }}</h5>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" [placeholder]="translate.instant('label_search')" />
+      </p-iconfield>
+    </div>
+  </ng-template>
+
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="id" style="width: 4rem">
+        {{ translate.instant('label_id') }}
+        <p-sortIcon field="id" />
+      </th>
+      <th pSortableColumn="code" style="width:4rem">
+        {{ translate.instant('label_code') }}
+        <p-sortIcon field="code" />
+      </th>
+      <th pSortableColumn="symbol" style="width:4rem">
+        {{ translate.instant('label_symbol') }}
+        <p-sortIcon field="symbol" />
+      </th>
+      <th pSortableColumn="name" style="width:6rem">
+        {{ translate.instant('label_name') }}
+        <p-sortIcon field="name" />
+      </th>
+      <th pSortableColumn="exchangeRateToUSD" style="width:6rem">
+        {{ translate.instant('label_exchange_rate_to_usd') }}
+        <p-sortIcon field="exchangeRateToUSD" />
+      </th>
+      <th style="width: 6rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-currency>
+    <tr>
+      <td>{{ currency.id }}</td>
+      <td>{{ currency.code }}</td>
+      <td>{{ currency.symbol }}</td>
+      <td>{{ currency.name }}</td>
+      <td>{{ currency.exchangeRateToUSD }}</td>
+      <td>
+        <p-button icon="pi pi-pencil" class="m-inline-end-1" [rounded]="true" [outlined]="true" [showIfCanEdit]="menuItemId" (click)="editCurrency(currency)" />
+        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" [showIfCanDelete]="menuItemId" (click)="deleteCurrency(currency)" />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [visible]="currencyService.currencyDialog()" [style]="{ width: '550px' }" [header]="translate.instant('label_currency_details')" [modal]="true" (onHide)="hideDialog()">
+
+  <ng-template #content>
+    <form [formGroup]="currencyForm" class="pb-3">
+      <div class="mt-4 pt-3">
+        <app-form-input [control]="$any(currencyForm.get('code'))" label="label_code"> </app-form-input>
+        <app-form-input [control]="$any(currencyForm.get('symbol'))" label="label_symbol"> </app-form-input>
+        <app-form-input [control]="$any(currencyForm.get('name'))" label="label_name"> </app-form-input>
+        <app-form-input [control]="$any(currencyForm.get('exchangeRateToUSD'))" label="label_exchange_rate_to_usd"> </app-form-input>
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template #footer>
+    <p-button [label]="translate.instant('label_cancel')" icon="pi pi-times" text (click)="hideDialog()" />
+    <p-button [label]="translate.instant('label_save')" icon="pi pi-check" (click)="saveCurrency()" [loading]="currencyService.loadingSave()" />
+  </ng-template>
+
+</p-dialog>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

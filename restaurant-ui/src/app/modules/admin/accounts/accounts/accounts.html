@@ -1,0 +1,85 @@
+<p-toast></p-toast>
+<p-toolbar class="mb-6">
+  <ng-template #start>
+    <h5 class="m-0">{{ translate.instant('label_account_types') }}</h5>
+
+    <div class="mx-4"></div>
+    <div class="d-flex gap-2">
+      @for (accountType of accountsService.accountTypes(); track $index) {
+      <p-tag>
+        {{ accountType }}
+      </p-tag>
+      }
+    </div>
+  </ng-template>
+  <ng-template #end>
+  </ng-template>
+</p-toolbar>
+
+
+<div class="card p-4">
+  <h2 class="text-2xl font-bold mb-4">{{ translate.instant('label_manage_accounts') }}</h2>
+
+  <p-tabs value="tree">
+    <p-tablist>
+      <p-tab value="tree">
+        <i class="pi pi-sitemap mr-2"></i> {{ translate.instant('label_view_as_tree') }}
+      </p-tab>
+      <p-tab value="flat">
+        <i class="pi pi-list mr-2"></i> {{ translate.instant('label_view_as_flat') }}
+      </p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+
+      <p-tabpanel value="tree">
+        <div class="mt-4">
+          <p-tree [value]="accountsService.accountsTree()" class="w-full">
+            <ng-template let-node pTemplate="default">
+              <span [style.font-weight]="node.data.allowTransaction ? 'normal' : 'bold'">
+                {{ node.label }}
+              </span>
+              <span class="ml-4 font-semibold" [ngClass]="node.data.allowTransaction ? 'text-green-600' : 'text-blue-600'">
+                 ({{ translate.instant('label_account_balance') }} : {{ node.data.balance + ' ' + currencySymbol }})
+              </span>
+            </ng-template>
+          </p-tree>
+        </div>
+      </p-tabpanel>
+
+      <p-tabpanel value="flat">
+        <div class="mt-4">
+          <p-table [value]="accountsService.accountsFlat()" [paginator]="true" [rows]="10" responsiveLayout="scroll">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>{{ translate.instant('label_account_code') }}</th>
+                <th>{{ translate.instant('label_account_name') }}</th>
+                <th>{{ translate.instant('label_account_type') }}</th>
+                <th>{{ translate.instant('label_account_nature') }}</th>
+                <th>{{ translate.instant('label_account_balance') }}</th>
+                <th>{{ translate.instant('label_account_status') }}</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-account>
+              <tr>
+                <td>{{ account.code }}</td>
+                <td [style.padding-right.px]="account.code.length * 5">{{ account.name }}</td>
+                <td><p-tag [value]="account.type" severity="info"></p-tag></td>
+                <td>
+                  <p-tag [value]="account.allowTransaction ? translate.instant('label_sub_account') : translate.instant('label_main_account')"
+                         [severity]="account.allowTransaction ? 'success' : 'warn'">
+                  </p-tag>
+                </td>
+                <td class="font-bold text-lg">{{ account.balance + ' ' + currencySymbol }}</td>
+                <td>
+                  <i class="pi" [ngClass]="account.status ? 'pi-check-circle text-green-500' : 'pi-times-circle text-red-500'"></i>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </p-tabpanel>
+
+    </p-tabpanels>
+  </p-tabs>
+</div>

@@ -1,0 +1,89 @@
+<p-toast></p-toast>
+
+<p-toolbar class="mb-4">
+  <ng-template #start>
+    <h4 class="m-0">{{ translate.instant('label_kitchen_dashboard') }}</h4>
+    <div class="mx-2"></div>
+
+    <div>
+      @for (kitchen of kitchenService.kitchens(); track kitchen.id) {
+        <p-button
+          [label]="kitchen.name"
+          [severity]="kitchen.id === kitchenId ? 'info' : 'primary'"
+          (click)="selectKitchen(kitchen.id)"
+          class="m-inline-end-1"
+        />
+      }
+    </div>
+  </ng-template>
+  <ng-template #end>
+    <p-button icon="pi pi-refresh" severity="secondary" [text]="true" (click)="loadOrders()"
+      [loading]="orderService.loading()" [pTooltip]="translate.instant('label_refresh')" />
+  </ng-template>
+</p-toolbar>
+
+<div class="kitchen-kanban">
+  @for (col of columns; track col.status) {
+    <div class="kanban-col">
+      <div class="kanban-col-header">
+        <p-tag [value]="translate.instant(col.label)" [severity]="col.status === 'PENDING' ? 'secondary' : col.status === 'ACCEPTED' ? 'info' : col.status === 'PREPARING' ? 'warn' : 'success'" />
+        <span class="badge-count">{{ getOrdersByStatus(col.status).length }}</span>
+      </div>
+
+      @for (ko of getOrdersByStatus(col.status); track ko.id) {
+        <div class="kitchen-card">
+          <div class="kitchen-card-header">
+            <strong># {{ ko.orderNumber }}</strong>
+            <small class="text-muted">{{ ko.kitchenName }}</small>
+          </div>
+
+          <div class="kitchen-card-items">
+            @for (item of ko.kitchenOrderItems; track item.id) {
+              <div class="kitchen-item-row">
+                <div class="kitchen-item-info">
+                  <span>{{ item.itemFoodName }}</span>
+                  @if (item.variantName) {
+                    <small class="text-muted">{{ item.variantName }}</small>
+                  }
+                  <small class="text-muted">x{{ item.quantity }}</small>
+                </div>
+                <div class="kitchen-item-actions">
+                  <p-tag [value]="item.status" [severity]="itemStatusSeverity(item.status)" />
+                  @if (canItemReady(item.status)) {
+                    <p-button icon="pi pi-check" size="small" severity="success" [text]="true"
+                      [pTooltip]="translate.instant('label_item_ready')" (click)="markItemReady(ko, item.id)" />
+                  }
+                  @if (canItemServed(item.status)) {
+                    <p-button icon="pi pi-send" size="small" severity="info" [text]="true"
+                      [pTooltip]="translate.instant('label_item_served')" (click)="markItemServed(ko, item.id)" />
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="kitchen-card-footer">
+            @if (canAccept(ko)) {
+              <p-button [label]="translate.instant('label_accept')" icon="pi pi-check" severity="success" size="small"
+                [loading]="orderService.loadingSave()" (click)="accept(ko)" />
+              <p-button [label]="translate.instant('label_reject')" icon="pi pi-times" severity="danger" size="small"
+                [loading]="orderService.loadingSave()" (click)="reject(ko)" />
+            }
+            @if (canPrepare(ko)) {
+              <p-button [label]="translate.instant('label_prepare')" icon="pi pi-bolt" severity="warn" size="small"
+                [loading]="orderService.loadingSave()" (click)="prepare(ko)" />
+            }
+            @if (canMarkReady(ko)) {
+              <p-button [label]="translate.instant('label_mark_ready')" icon="pi pi-flag" severity="info" size="small"
+                [loading]="orderService.loadingSave()" (click)="markReady(ko)" />
+            }
+          </div>
+        </div>
+      }
+
+      @if (getOrdersByStatus(col.status).length === 0) {
+        <div class="kanban-empty text-muted text-center py-3">{{ translate.instant('label_no_orders') }}</div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,81 @@
+<p-toast></p-toast>
+
+<p-card [header]="translate.instant('label_general_ledger')">
+  <form [formGroup]="filterForm" class="mb-4">
+    <div class="grid">
+      <div class="col-12 md:col-4">
+        <app-form-input [control]="$any(filterForm.get('accountId'))" label="label_account" type="select"
+          [options]="accountOptions" [filter]="true"> </app-form-input>
+      </div>
+      <div class="col-12 md:col-3">
+        <app-form-input [control]="$any(filterForm.get('startDate'))" label="label_start_date" type="date"> </app-form-input>
+      </div>
+      <div class="col-12 md:col-3">
+        <app-form-input [control]="$any(filterForm.get('endDate'))" label="label_end_date" type="date"> </app-form-input>
+      </div>
+      <div class="col-12 md:col-2 flex items-end">
+        <p-button [label]="translate.instant('label_generate')" icon="pi pi-search" (onClick)="generateReport()"
+          [loading]="reportService.loading()" />
+      </div>
+    </div>
+  </form>
+
+  @if (reportService.generalLedgerReport(); as report) {
+    <div class="grid mb-4">
+      <div class="col-6 md:col-3">
+        <div class="font-bold">{{ translate.instant('label_account') }}</div>
+        <div>{{ report.accountCode }} - {{ report.accountName }}</div>
+      </div>
+      <div class="col-6 md:col-3">
+        <div class="font-bold">{{ translate.instant('label_account_type') }}</div>
+        <div>{{ report.accountType }}</div>
+      </div>
+      <div class="col-6 md:col-3">
+        <div class="font-bold">{{ translate.instant('label_opening_balance') }}</div>
+        <div>{{ report.openingBalance | number:'1.2-2' }}</div>
+      </div>
+      <div class="col-6 md:col-3">
+        <div class="font-bold">{{ translate.instant('label_closing_balance') }}</div>
+        <div>{{ report.closingBalance | number:'1.2-2' }}</div>
+      </div>
+    </div>
+
+    <p-table [value]="report.lines" [rows]="20" [paginator]="true" [rowHover]="true"
+      [tableStyle]="{ 'min-width': '70rem' }" [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+      <ng-template #header>
+        <tr>
+          <th>{{ translate.instant('label_date') }}</th>
+          <th>{{ translate.instant('label_entry_number') }}</th>
+          <th>{{ translate.instant('label_description') }}</th>
+          <th>{{ translate.instant('label_reference') }}</th>
+          <th>{{ translate.instant('label_debit') }}</th>
+          <th>{{ translate.instant('label_credit') }}</th>
+          <th>{{ translate.instant('label_running_balance') }}</th>
+          <th>{{ translate.instant('label_cost_center') }}</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-line>
+        <tr>
+          <td>{{ line.date }}</td>
+          <td>{{ line.entryNumber }}</td>
+          <td>{{ line.description }}</td>
+          <td>{{ line.reference }}</td>
+          <td>{{ line.debit | number:'1.2-2' }}</td>
+          <td>{{ line.credit | number:'1.2-2' }}</td>
+          <td>{{ line.runningBalance | number:'1.2-2' }}</td>
+          <td>{{ line.costCenterName }}</td>
+        </tr>
+      </ng-template>
+      <ng-template #footer>
+        <tr class="font-bold">
+          <td colspan="4" class="text-right">{{ translate.instant('label_total') }}</td>
+          <td>{{ report.totalDebit | number:'1.2-2' }}</td>
+          <td>{{ report.totalCredit | number:'1.2-2' }}</td>
+          <td>{{ report.closingBalance | number:'1.2-2' }}</td>
+          <td></td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+</p-card>

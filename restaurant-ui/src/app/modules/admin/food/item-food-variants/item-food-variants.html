@@ -1,0 +1,71 @@
+<p-toast></p-toast>
+<p-toolbar class="mb-6">
+  <ng-template #start>
+    <p-button [showIfCanCreate]="menuItemId" [label]="
+
+      translate.instant('label_add_item_food_variant')" icon="pi pi-plus" severity="secondary" class="m-inline-end-1" (onClick)="openNew()" />
+  </ng-template>
+
+  <ng-template #end>
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt [value]="itemFoodVariantService.itemFoodVariants()" [paginator]="false" [globalFilterFields]="['name']" [tableStyle]="{ 'min-width': '30rem' }" [rowHover]="true" dataKey="id" >
+
+
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="id" style="width: 2rem">
+        {{ translate.instant('label_id') }}
+        <p-sortIcon field="id" />
+      </th>
+      <th pSortableColumn="name" style="width:6rem">
+        {{ translate.instant('label_name') }}
+        <p-sortIcon field="name" />
+      </th>
+      <th pSortableColumn="price" style="width:4rem">
+        {{ translate.instant('label_price') }}
+        <p-sortIcon field="price" />
+      </th>
+      <th style="width: 3rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-itemFoodVariant>
+    <tr>
+      <td>{{ itemFoodVariant.id }}</td>
+      <td>{{ itemFoodVariant.name }}</td>
+      <td>{{ itemFoodVariant.price }}</td>
+      <td>
+        <p-button icon="pi pi-pencil" class="m-inline-end-1" [rounded]="true" [outlined]="true" [showIfCanEdit]="menuItemId" (click)="editItemFoodVariant(itemFoodVariant)" />
+        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" [showIfCanDelete]="menuItemId" (click)="deleteItemFoodVariant(itemFoodVariant)" />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [visible]="itemFoodVariantService.itemFoodVariantDialog()" [style]="{ width: '450px' }"
+[header]="translate.instant('label_item_food_variant_details')"
+    [modal]="true"
+    [baseZIndex]="11000"
+    [autoZIndex]="true"
+    appendTo="body"
+    (onHide)="hideDialog()"
+    >
+
+  <ng-template #content>
+    <form [formGroup]="itemFoodVariantForm" class="pb-3">
+      <div class="mt-4 pt-3">
+        <app-form-input [control]="$any(itemFoodVariantForm.get('name'))" label="label_name"> </app-form-input>
+        <app-form-input [control]="$any(itemFoodVariantForm.get('price'))" label="label_price" type="number"> </app-form-input>
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template #footer>
+    <p-button [label]="translate.instant('label_cancel')" icon="pi pi-times" text (click)="hideDialog()" />
+    <p-button [label]="translate.instant('label_save')" icon="pi pi-check" (click)="saveItemFoodVariant()" [loading]="itemFoodVariantService.loadingSave()" />
+  </ng-template>
+
+</p-dialog>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

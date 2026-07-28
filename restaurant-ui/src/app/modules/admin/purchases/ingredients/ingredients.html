@@ -1,0 +1,77 @@
+<p-toast></p-toast>
+<p-toolbar class="mb-6">
+  <ng-template #start>
+    <p-button [showIfCanCreate]="menuItemId" [label]="translate.instant('label_add_ingredient')" icon="pi pi-plus" severity="secondary" class="m-inline-end-1" (onClick)="openNew()" />
+
+  </ng-template>
+  <ng-template #end>
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt [value]="ingredientService.ingredients()" [loading]="ingredientService.loading()" [rows]="10" [paginator]="true"
+  [globalFilterFields]="['name']"
+  [tableStyle]="{ 'min-width': '60rem' }" [(selection)]="selectedIngredients" [rowHover]="true" dataKey="id"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} ingredients" [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[10, 20, 30]">
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <h5 class="m-0">{{ translate.instant('label_manage_ingredients') }}</h5>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" [placeholder]="translate.instant('label_search')" />
+      </p-iconfield>
+    </div>
+  </ng-template>
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="id" style="width: 4rem">{{ translate.instant('label_id') }}<p-sortIcon field="id" /></th>
+      <th pSortableColumn="name" style="width:6rem">{{ translate.instant('label_name') }}<p-sortIcon field="name" /></th>
+      <th pSortableColumn="uom.name" style="width:5rem">{{ translate.instant('label_uom') }}<p-sortIcon field="uom.name" /></th>
+      <th pSortableColumn="stockQuantity" style="width:5rem">{{ translate.instant('label_stock_quantity') }}<p-sortIcon field="stockQuantity" /></th>
+      <th pSortableColumn="minStockQuantity" style="width:5rem">{{ translate.instant('label_min_stock_quantity') }}<p-sortIcon field="minStockQuantity" /></th>
+      <th pSortableColumn="status" style="width:4rem">{{ translate.instant('label_status') }}<p-sortIcon field="status" /></th>
+      <th style="width: 6rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-ingredient>
+    <tr>
+      <td>{{ ingredient.id }}</td>
+      <td>{{ ingredient.name }}</td>
+      <td>{{ ingredient.uomName }}</td>
+      <td>{{ ingredient.stockQuantity }}</td>
+      <td>{{ ingredient.minStockQuantity }}</td>
+      <td>
+        <p-tag [value]="ingredient.status ? translate.instant('label_active') : translate.instant('label_inactive')"
+          [severity]="ingredient.status ? 'success' : 'danger'"></p-tag>
+      </td>
+      <td>
+        <p-button icon="pi pi-pencil" class="m-inline-end-1" [rounded]="true" [outlined]="true" [showIfCanEdit]="menuItemId" (click)="editIngredient(ingredient)" />
+        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" [showIfCanDelete]="menuItemId" (click)="deleteIngredient(ingredient)" />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [visible]="ingredientService.ingredientDialog()" [style]="{ width: '650px' }" [header]="translate.instant('label_ingredient_details')" [modal]="true" (onHide)="hideDialog()">
+  <ng-template #content>
+    <form [formGroup]="ingredientForm" class="pb-3">
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <app-form-input [control]="$any(ingredientForm.get('name'))" label="label_name"></app-form-input>
+          <app-form-input [control]="$any(ingredientForm.get('uomId'))" label="label_uom" [options]="uomOptions()" type="select" [filter]="true"></app-form-input>
+          <app-form-input [control]="$any(ingredientForm.get('status'))" label="label_status" type="checkbox"></app-form-input>
+        </div>
+        <div class="col-md-6">
+          <app-form-input [control]="$any(ingredientForm.get('stockQuantity'))" label="label_stock_quantity" type="number"></app-form-input>
+          <app-form-input [control]="$any(ingredientForm.get('minStockQuantity'))" label="label_min_stock_quantity" type="number"></app-form-input>
+        </div>
+      </div>
+    </form>
+  </ng-template>
+  <ng-template #footer>
+    <p-button [label]="translate.instant('label_cancel')" icon="pi pi-times" text (click)="hideDialog()" />
+    <p-button [label]="translate.instant('label_save')" icon="pi pi-check" (click)="saveIngredient()" [loading]="ingredientService.loadingSave()" />
+  </ng-template>
+</p-dialog>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

@@ -1,0 +1,62 @@
+<p-toast></p-toast>
+
+<div class="card">
+  <div class="flex items-center justify-between mb-4">
+    <h5 class="m-0">{{ translate.instant('label_application_settings') }}</h5>
+  </div>
+
+  <form [formGroup]="settingService.settingForm" enctype="multipart/form-data" class="pb-3">
+    <div class="row">
+      <div class="col-md-6">
+        <app-form-input [control]="$any(settingService.settingForm.get('applicationTitle'))" label="label_application_title"> </app-form-input>
+        <app-form-input [control]="$any(settingService.settingForm.get('storeName'))" label="label_store_name"> </app-form-input>
+        <app-form-input [control]="$any(settingService.settingForm.get('address'))" label="label_address"> </app-form-input>
+        <app-form-input [control]="$any(settingService.settingForm.get('phone'))" label="label_phone"> </app-form-input>
+        <app-form-input [control]="$any(settingService.settingForm.get('openingTime'))" label="label_opening_time"> </app-form-input>
+        <app-form-input [control]="$any(settingService.settingForm.get('closingTime'))" label="label_closing_time"> </app-form-input>
+        <app-form-input [control]="$any(settingService.settingForm.get('discountType'))" label="label_discount_type" [options]="discountTypeOptions" type="select"> </app-form-input>
+        <app-form-input [control]="$any(settingService.settingForm.get('discountPercentage'))" label="label_discount_percentage"> </app-form-input>
+        <app-form-input [control]="$any(settingService.settingForm.get('serviceChargeType'))" label="label_service_charge_type" [options]="serviceChargeTypeOptions" type="select"> </app-form-input>
+        <app-form-input [control]="$any(settingService.settingForm.get('taxPercentage'))" label="label_tax_percentage"> </app-form-input>
+        <app-form-input [control]="$any(settingService.settingForm.get('taxNumber'))" label="label_tax_number"> </app-form-input>
+      </div>
+      <div class="col-md-6">
+        <app-form-input [control]="$any(settingService.settingForm.get('currencyId'))" label="label_currency" [options]="currencyOptions()" type="select"> </app-form-input>
+        <app-form-input [control]="$any(settingService.settingForm.get('languageCode'))" label="label_language" [options]="languageOptions()" type="select"> </app-form-input>
+        <app-form-input [control]="$any(settingService.settingForm.get('dateFormat'))" label="label_date_format"> </app-form-input>
+        <app-form-input [control]="$any(settingService.settingForm.get('timezone'))" label="label_timezone"> </app-form-input>
+        <app-form-input [control]="$any(settingService.settingForm.get('applicationDirection'))" label="label_application_direction" [options]="directionOptions" type="select"> </app-form-input>
+        <app-form-input [control]="$any(settingService.settingForm.get('poweredByText'))" label="label_powered_by_text"> </app-form-input>
+        <app-form-input [control]="$any(settingService.settingForm.get('footerText'))" label="label_footer_text"> </app-form-input>
+
+        <div class="mb-3">
+          <label class="mb-2 d-block">{{ translate.instant('label_icon') }}</label>
+          <img [src]="settingService.iconPreview()" class="image-preview mb-2" style="max-width: 100px; max-height: 100px;">
+          <label for="iconInput">
+            <div class="upload-image-btn">
+              <i class="pi pi-upload"></i>
+              <span>{{ translate.instant('label_select_image') }}</span>
+            </div>
+            <input id="iconInput" type="file" hidden (change)="onIconSelected($event)" />
+          </label>
+        </div>
+
+        <div class="mb-3">
+          <label class="mb-2 d-block">{{ translate.instant('label_logo') }}</label>
+          <img [src]="settingService.logoPreview()" class="image-preview mb-2" style="max-width: 100px; max-height: 100px;">
+          <label for="logoInput">
+            <div class="upload-image-btn">
+              <i class="pi pi-upload"></i>
+              <span>{{ translate.instant('label_select_image') }}</span>
+            </div>
+            <input id="logoInput" type="file" hidden (change)="onLogoSelected($event)" />
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end mt-4">
+      <p-button [showIfCanEdit]="menuItemId" [label]="translate.instant('label_save')" icon="pi pi-check" (click)="saveSetting()" [loading]="settingService.loadingSave()" />
+    </div>
+  </form>
+</div>

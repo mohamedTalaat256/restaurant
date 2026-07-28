@@ -1,0 +1,127 @@
+<!-- <p-toast></p-toast>
+
+<p-card [header]="translate.instant('label_manual_journal_entry')">
+  <form [formGroup]="entryForm">
+    <div class="grid">
+      <div class="col-12 md:col-4">
+        <app-form-input [control]="$any(entryForm.get('entryDate'))" label="label_entry_date" type="date"> </app-form-input>
+      </div>
+      <div class="col-12 md:col-4">
+        <app-form-input [control]="$any(entryForm.get('description'))" label="label_description"> </app-form-input>
+      </div>
+      <div class="col-12 md:col-4">
+        <app-form-input [control]="$any(entryForm.get('reference'))" label="label_reference"> </app-form-input>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <div class="flex justify-between items-center mb-3">
+        <h5 class="m-0">{{ translate.instant('label_journal_items') }}</h5>
+        <p-button icon="pi pi-plus" [label]="translate.instant('label_add_line')" severity="secondary" (onClick)="addItem()" />
+      </div>
+
+      <p-table [value]="items.controls" [tableStyle]="{ 'min-width': '60rem' }">
+        <ng-template #header>
+          <tr>
+            <th style="width: 3rem">#</th>
+            <th>{{ translate.instant('label_account') }}</th>
+            <th style="width: 10rem">{{ translate.instant('label_debit') }}</th>
+            <th style="width: 10rem">{{ translate.instant('label_credit') }}</th>
+            <th>{{ translate.instant('label_cost_center') }}</th>
+            <th style="width: 4rem"></th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-item let-i="rowIndex">
+          <tr [formGroup]="$any(item)">
+            <td>{{ i + 1 }}</td>
+            <td>
+              <p-select formControlName="accountId" [options]="accountOptions" optionLabel="label" optionValue="value"
+                [placeholder]="translate.instant('label_select_account')" [filter]="true" appendTo="body"  [style]="{ width: '100%' }"></p-select>
+            </td>
+            <td>
+              <input pInputText type="number" formControlName="debit" [style]="{ width: '100%' }" />
+            </td>
+            <td>
+              <input pInputText type="number" formControlName="credit" [style]="{ width: '100%' }" />
+            </td>
+            <td>
+              <p-select formControlName="costCenterId" [options]="costCenterOptions" optionLabel="label" optionValue="value"
+                [placeholder]="translate.instant('label_select_cost_center')" [showClear]="true" [filter]="true" appendTo="body" [style]="{ width: '100%' }"></p-select>
+            </td>
+            <td>
+              <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
+                (click)="removeItem(i)" [disabled]="items.length <= 2" />
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template #footer>
+          <tr>
+            <td colspan="2" class="text-right font-bold">{{ translate.instant('label_total') }}</td>
+            <td class="font-bold">{{ totalDebit | number:'1.2-2' }}</td>
+            <td class="font-bold">{{ totalCredit | number:'1.2-2' }}</td>
+            <td colspan="2">
+              @if (!isBalanced) {
+                <p-tag [value]="translate.instant('label_not_balanced')" severity="danger"></p-tag>
+              } @else {
+                <p-tag [value]="translate.instant('label_balanced')" severity="success"></p-tag>
+              }
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <div class="flex justify-end gap-2 mt-4">
+      <p-button [label]="translate.instant('label_reset')" icon="pi pi-refresh" severity="secondary" (onClick)="resetForm()" />
+      <p-button [label]="translate.instant('label_submit')" icon="pi pi-check" (onClick)="submitEntry()"
+        [loading]="journalEntryService.loadingSave()" [disabled]="!isBalanced" />
+    </div>
+  </form>
+</p-card>
+ -->
+
+
+<p-toast></p-toast>
+
+
+<p-card [header]="translate.instant('label_manual_journal_entry')">
+  <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()">
+    <div class="w-100 row">
+      <app-form-input class="col-md-6" [control]="$any(transactionForm.get('transactionDate'))"
+        label="label_date" placeholder="dd/mm/yyyy" type="date"></app-form-input>
+
+      <app-form-input class="col-md-6" [control]="$any(transactionForm.get('transactionType'))"
+        label="label_transaction_type" placeholder="label_select_transaction_type" [options]="transactionTypes()" type="select" [filter]="true"></app-form-input>
+
+      <app-form-input class="col-md-5" [control]="$any(transactionForm.get('sourceAccountId'))"
+        label="label_source_account" placeholder="label_select_source_account" [options]="sourceAccountOptions()" type="select" [filter]="true"></app-form-input>
+
+      <app-form-input class="col-md-2" [control]="$any(transactionForm.get('amount'))"
+        label="label_amount" placeholder="label_amount" type="number"></app-form-input>
+
+      <app-form-input class="col-md-5" [control]="$any(transactionForm.get('destinationAccountId'))"
+        label="label_destination_account" placeholder="label_select_destination_account" [options]="destinationAccountOptions()" type="select" [filter]="true"></app-form-input>
+
+      <app-form-input class="col-md-6" [control]="$any(transactionForm.get('costCenterId'))"
+        label="label_cost_center" placeholder="label_select_cost_center" [options]="costCenterOptions()" type="select"></app-form-input>
+
+      <app-form-input class="col-md-6" [control]="$any(transactionForm.get('reference'))"
+        label="label_reference" type="text"></app-form-input>
+
+      <app-form-input class="col-md-12" [control]="$any(transactionForm.get('description'))"
+        label="label_description" type="textarea"></app-form-input>
+
+
+
+      <div class="col-12 flex justify-content-start gap-2">
+        <p-button [label]="translate.instant('label_submit')" icon="pi pi-check" severity="success" type="submit"
+          [disabled]="transactionForm.invalid" [loading]="loading">
+        </p-button>
+        <p-button [label]="translate.instant('label_reset')" icon="pi pi-refresh" severity="secondary" type="button" (onClick)="initForm()">
+        </p-button>
+      </div>
+
+    </div>
+  </form>
+</p-card>
+

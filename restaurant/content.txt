@@ -1,0 +1,835 @@
+## Complete Code Pattern Analysis
+
+I've thoroughly explored all the code patterns in your Spring Boot restaurant project. Here's the complete breakdown:
+
+### **1. BaseEntity** [src/main/java/com/mtalaat/restaurant/entity/BaseEntity.java](src/main/java/com/mtalaat/restaurant/entity/BaseEntity.java)
+```java
+@MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
+public abstract class BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @CreatedDate
+    private LocalDateTime createdAt;
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
+    
+    @CreatedBy @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "created_by")
+    private User createdBy;
+    @LastModifiedBy @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "updated_by")
+    private User updatedBy;
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "deleted_by")
+    private User deletedBy;
+    
+    @PreRemove
+    public void preRemove() {
+        this.deletedAt = LocalDateTime.now();
+    }
+}
+```
+**Key Pattern**: Auditing base class with soft-delete support via `@PreRemove` hook.
+
+---
+
+### **2. Settings Module Entities**
+
+#### **Floor** [src/main/java/com/mtalaat/restaurant/modules/settings/entity/Floor.java](src/main/java/com/mtalaat/restaurant/modules/settings/entity/Floor.java)
+```java
+@Entity @Table(name = "floors")
+@Builder @Data @NoArgsConstructor @AllArgsConstructor
+public class Floor {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(name = "name", nullable = false)
+    private String name;
+}
+```
+
+#### **Kitchen** [src/main/java/com/mtalaat/restaurant/modules/settings/entity/Kitchen.java](src/main/java/com/mtalaat/restaurant/modules/settings/entity/Kitchen.java)
+```java
+@Entity @Table(name = "kitchens")
+@Builder @Data @NoArgsConstructor @AllArgsConstructor
+public class Kitchen {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(name = "name", nullable = false)
+    private String name;
+    
+    @Column(name = "ip_address")
+    private String ipAddress;
+    
+    @Column(name = "port")
+    private Integer port;
+    
+    @Builder.Default
+    @Column(name = "status", nullable = false)
+    private Boolean status = true;
+}
+```
+
+#### **RestaurantTable** [src/main/java/com/mtalaat/restaurant/modules/settings/entity/RestaurantTable.java](src/main/java/com/mtalaat/restaurant/modules/settings/entity/RestaurantTable.java)
+```java
+@Entity @Table(name = "tables")
+@Builder @Data @NoArgsConstructor @AllArgsConstructor
+public class RestaurantTable {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(name = "name", nullable = false)
+    private String name;
+    
+    @Column(name = "capacity", nullable = false)
+    private Integer capacity;
+    
+    @Column(name = "icon")
+    private String icon;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "floor_id")
+    private Floor floor;
+    
+    @Builder.Default
+    @Column(name = "status", nullable = false)
+    private Boolean status = true;
+}
+```
+
+#### **UnitOfMeasurement** [src/main/java/com/mtalaat/restaurant/modules/settings/entity/UnitOfMeasurement.java](src/main/java/com/mtalaat/restaurant/modules/settings/entity/UnitOfMeasurement.java)
+```java
+@Entity @Table(name = "unit_of_measurements")
+@Builder @Data @NoArgsConstructor @AllArgsConstructor
+public class UnitOfMeasurement {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(name = "name", nullable = false)
+    private String name;
+    
+    @Column(name = "short_name")
+    private String shortName;
+    
+    @Builder.Default
+    @Column(name = "status", nullable = false)
+    private Boolean status = true;
+}
+```
+
+**Pattern Note**: Settings entities are simple POJOs without BaseEntity inheritance. They use Lombok `@Builder` and `@Data` for conciseness.
+
+---
+
+### **3. DTOs (Data Transfer Objects)**
+
+#### **FloorDto** [src/main/java/com/mtalaat/restaurant/modules/settings/dto/FloorDto.java](src/main/java/com/mtalaat/restaurant/modules/settings/dto/FloorDto.java)
+```java
+@Data @Builder @NoArgsConstructor @AllArgsConstructor
+public class FloorDto {
+    private Long id;
+    
+    @NotBlank(message = "Name is required")
+    private String name;
+}
+```
+
+#### **KitchenDto** [src/main/java/com/mtalaat/restaurant/modules/settings/dto/KitchenDto.java](src/main/java/com/mtalaat/restaurant/modules/settings/dto/KitchenDto.java)
+```java
+@Data @Builder @NoArgsConstructor @AllArgsConstructor
+public class KitchenDto {
+    private Long id;
+    
+    @NotBlank(message = "Name is required")
+    private String name;
+    
+    private String ipAddress;
+    private Integer port;
+    private Boolean status;
+}
+```
+
+#### **TableDto** [src/main/java/com/mtalaat/restaurant/modules/settings/dto/TableDto.java](src/main/java/com/mtalaat/restaurant/modules/settings/dto/TableDto.java)
+```java
+@Data @Builder @NoArgsConstructor @AllArgsConstructor
+public class TableDto {
+    private Long id;
+    
+    @NotBlank(message = "Name is required")
+    private String name;
+    
+    @NotNull(message = "Capacity is required")
+    private Integer capacity;
+    
+    private String icon;
+    
+    @NotNull(message = "Floor is required")
+    private Long floorId;
+    
+    private String floorName;  // Display field
+    private Boolean status;
+}
+```
+
+#### **UnitOfMeasurementDto** [src/main/java/com/mtalaat/restaurant/modules/settings/dto/UnitOfMeasurementDto.java](src/main/java/com/mtalaat/restaurant/modules/settings/dto/UnitOfMeasurementDto.java)
+```java
+@Data @Builder @NoArgsConstructor @AllArgsConstructor
+public class UnitOfMeasurementDto {
+    private Long id;
+    
+    @NotBlank(message = "Name is required")
+    private String name;
+    
+    private String shortName;
+    private Boolean status;
+}
+```
+
+**Pattern Note**: DTOs include related entity IDs for form submission and display fields for read responses.
+
+---
+
+### **4. Mappers (@Component)**
+
+#### **FloorMapper** [src/main/java/com/mtalaat/restaurant/modules/settings/mapping/FloorMapper.java](src/main/java/com/mtalaat/restaurant/modules/settings/mapping/FloorMapper.java)
+```java
+@Component
+public class FloorMapper {
+    public FloorDto toDto(Floor entity) {
+        return FloorDto.builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .build();
+    }
+    
+    public Floor toEntity(FloorDto dto) {
+        return Floor.builder()
+                .name(dto.getName())
+                .build();
+    }
+}
+```
+
+#### **KitchenMapper** [src/main/java/com/mtalaat/restaurant/modules/settings/mapping/KitchenMapper.java](src/main/java/com/mtalaat/restaurant/modules/settings/mapping/KitchenMapper.java)
+```java
+@Component
+public class KitchenMapper {
+    public KitchenDto toDto(Kitchen entity) {
+        return KitchenDto.builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .ipAddress(entity.getIpAddress())
+                .port(entity.getPort())
+                .status(entity.getStatus())
+                .build();
+    }
+    
+    public Kitchen toEntity(KitchenDto dto) {
+        return Kitchen.builder()
+                .name(dto.getName())
+                .ipAddress(dto.getIpAddress())
+                .port(dto.getPort())
+                .status(dto.getStatus() == null ? Boolean.TRUE : dto.getStatus())
+                .build();
+    }
+}
+```
+
+#### **TableMapper** [src/main/java/com/mtalaat/restaurant/modules/settings/mapping/TableMapper.java](src/main/java/com/mtalaat/restaurant/modules/settings/mapping/TableMapper.java)
+```java
+@Component
+public class TableMapper {
+    public TableDto toDto(RestaurantTable entity) {
+        return TableDto.builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .capacity(entity.getCapacity())
+                .icon(entity.getIcon())
+                .floorId(entity.getFloor() != null ? entity.getFloor().getId() : null)
+                .floorName(entity.getFloor() != null ? entity.getFloor().getName() : null)
+                .status(entity.getStatus())
+                .build();
+    }
+    
+    public RestaurantTable toEntity(TableDto dto, Floor floor) {
+        return RestaurantTable.builder()
+                .name(dto.getName())
+                .capacity(dto.getCapacity())
+                .icon(dto.getIcon())
+                .floor(floor)
+                .status(dto.getStatus() == null ? Boolean.TRUE : dto.getStatus())
+                .build();
+    }
+}
+```
+
+#### **UnitOfMeasurementMapper** [src/main/java/com/mtalaat/restaurant/modules/settings/mapping/UnitOfMeasurementMapper.java](src/main/java/com/mtalaat/restaurant/modules/settings/mapping/UnitOfMeasurementMapper.java)
+```java
+@Component
+public class UnitOfMeasurementMapper {
+    public UnitOfMeasurementDto toDto(UnitOfMeasurement entity) {
+        return UnitOfMeasurementDto.builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .shortName(entity.getShortName())
+                .status(entity.getStatus())
+                .build();
+    }
+    
+    public UnitOfMeasurement toEntity(UnitOfMeasurementDto dto) {
+        return UnitOfMeasurement.builder()
+                .name(dto.getName())
+                .shortName(dto.getShortName())
+                .status(dto.getStatus() == null ? Boolean.TRUE : dto.getStatus())
+                .build();
+    }
+}
+```
+
+**Pattern Note**: Mappers handle null safety and default values. `toEntity` often receives dependency parameters (like Floor).
+
+---
+
+### **5. Repositories**
+
+#### **FloorRepository** [src/main/java/com/mtalaat/restaurant/modules/settings/repository/FloorRepository.java](src/main/java/com/mtalaat/restaurant/modules/settings/repository/FloorRepository.java)
+```java
+public interface FloorRepository extends JpaRepository<Floor, Long> {
+}
+```
+
+#### **KitchenRepository** [src/main/java/com/mtalaat/restaurant/modules/settings/repository/KitchenRepository.java](src/main/java/com/mtalaat/restaurant/modules/settings/repository/KitchenRepository.java)
+```java
+public interface KitchenRepository extends JpaRepository<Kitchen, Long> {
+}
+```
+
+#### **TableRepository** [src/main/java/com/mtalaat/restaurant/modules/settings/repository/TableRepository.java](src/main/java/com/mtalaat/restaurant/modules/settings/repository/TableRepository.java)
+```java
+public interface TableRepository extends JpaRepository<RestaurantTable, Long> {
+}
+```
+
+#### **UnitOfMeasurementRepository** [src/main/java/com/mtalaat/restaurant/modules/settings/repository/UnitOfMeasurementRepository.java](src/main/java/com/mtalaat/restaurant/modules/settings/repository/UnitOfMeasurementRepository.java)
+```java
+public interface UnitOfMeasurementRepository extends JpaRepository<UnitOfMeasurement, Long> {
+}
+```
+
+**Pattern**: Simple interfaces extending `JpaRepository`. No custom queries for the settings module.
+
+---
+
+### **6. Services (@Service, @RequiredArgsConstructor)**
+
+#### **FloorService** [src/main/java/com/mtalaat/restaurant/modules/settings/service/FloorService.java](src/main/java/com/mtalaat/restaurant/modules/settings/service/FloorService.java)
+```java
+@Service
+@RequiredArgsConstructor
+public class FloorService {
+    private final FloorRepository floorRepository;
+    private final FloorMapper floorMapper;
+    
+    public FloorDto add(FloorDto dto) {
+        return create(dto);
+    }
+    
+    public FloorDto create(FloorDto dto) {
+        Floor entity = floorMapper.toEntity(dto);
+        return floorMapper.toDto(floorRepository.save(entity));
+    }
+    
+    public FloorDto getById(Long id) {
+        Floor entity = floorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Floor not found with id: " + id));
+        return floorMapper.toDto(entity);
+    }
+    
+    public List<FloorDto> getAll() {
+        return floorRepository.findAll().stream().map(floorMapper::toDto).toList();
+    }
+    
+    public FloorDto update(Long id, FloorDto dto) {
+        Floor entity = floorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Floor not found with id: " + id));
+        entity.setName(dto.getName());
+        return floorMapper.toDto(floorRepository.save(entity));
+    }
+    
+    public void delete(Long id) {
+        Floor entity = floorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Floor not found with id: " + id));
+        floorRepository.delete(entity);
+    }
+}
+```
+
+#### **KitchenService** [src/main/java/com/mtalaat/restaurant/modules/settings/service/KitchenService.java](src/main/java/com/mtalaat/restaurant/modules/settings/service/KitchenService.java)
+```java
+@Service
+@RequiredArgsConstructor
+public class KitchenService {
+    private final KitchenRepository kitchenRepository;
+    private final KitchenMapper kitchenMapper;
+    
+    public KitchenDto add(KitchenDto dto) { return create(dto); }
+    
+    public KitchenDto create(KitchenDto dto) {
+        Kitchen entity = kitchenMapper.toEntity(dto);
+        return kitchenMapper.toDto(kitchenRepository.save(entity));
+    }
+    
+    public KitchenDto getById(Long id) {
+        Kitchen entity = kitchenRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Kitchen not found with id: " + id));
+        return kitchenMapper.toDto(entity);
+    }
+    
+    public List<KitchenDto> getAll() {
+        return kitchenRepository.findAll().stream().map(kitchenMapper::toDto).toList();
+    }
+    
+    public KitchenDto update(Long id, KitchenDto dto) {
+        Kitchen entity = kitchenRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Kitchen not found with id: " + id));
+        entity.setName(dto.getName());
+        entity.setIpAddress(dto.getIpAddress());
+        entity.setPort(dto.getPort());
+        entity.setStatus(dto.getStatus() == null ? Boolean.TRUE : dto.getStatus());
+        return kitchenMapper.toDto(kitchenRepository.save(entity));
+    }
+    
+    public void delete(Long id) {
+        Kitchen entity = kitchenRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Kitchen not found with id: " + id));
+        kitchenRepository.delete(entity);
+    }
+}
+```
+
+#### **TableService** [src/main/java/com/mtalaat/restaurant/modules/settings/service/TableService.java](src/main/java/com/mtalaat/restaurant/modules/settings/service/TableService.java)
+```java
+@Service
+@RequiredArgsConstructor
+public class TableService {
+    private final TableRepository tableRepository;
+    private final FloorRepository floorRepository;
+    private final TableMapper tableMapper;
+    
+    public TableDto add(TableDto dto) { return create(dto); }
+    
+    public TableDto create(TableDto dto) {
+        Floor floor = floorRepository.findById(dto.getFloorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Floor not found with id: " + dto.getFloorId()));
+        RestaurantTable entity = tableMapper.toEntity(dto, floor);
+        return tableMapper.toDto(tableRepository.save(entity));
+    }
+    
+    public TableDto getById(Long id) {
+        RestaurantTable entity = tableRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Table not found with id: " + id));
+        return tableMapper.toDto(entity);
+    }
+    
+    public List<TableDto> getAll() {
+        return tableRepository.findAll().stream().map(tableMapper::toDto).toList();
+    }
+    
+    public TableDto update(Long id, TableDto dto) {
+        RestaurantTable entity = tableRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Table not found with id: " + id));
+        Floor floor = floorRepository.findById(dto.getFloorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Floor not found with id: " + dto.getFloorId()));
+        entity.setName(dto.getName());
+        entity.setCapacity(dto.getCapacity());
+        entity.setIcon(dto.getIcon());
+        entity.setFloor(floor);
+        entity.setStatus(dto.getStatus() == null ? Boolean.TRUE : dto.getStatus());
+        return tableMapper.toDto(tableRepository.save(entity));
+    }
+    
+    public void delete(Long id) {
+        RestaurantTable entity = tableRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Table not found with id: " + id));
+        tableRepository.delete(entity);
+    }
+}
+```
+
+#### **UnitOfMeasurementService** [src/main/java/com/mtalaat/restaurant/modules/settings/service/UnitOfMeasurementService.java](src/main/java/com/mtalaat/restaurant/modules/settings/service/UnitOfMeasurementService.java)
+```java
+@Service
+@RequiredArgsConstructor
+public class UnitOfMeasurementService {
+    private final UnitOfMeasurementRepository unitOfMeasurementRepository;
+    private final UnitOfMeasurementMapper unitOfMeasurementMapper;
+    
+    public UnitOfMeasurementDto add(UnitOfMeasurementDto dto) { return create(dto); }
+    
+    public UnitOfMeasurementDto create(UnitOfMeasurementDto dto) {
+        UnitOfMeasurement entity = unitOfMeasurementMapper.toEntity(dto);
+        return unitOfMeasurementMapper.toDto(unitOfMeasurementRepository.save(entity));
+    }
+    
+    public UnitOfMeasurementDto getById(Long id) {
+        UnitOfMeasurement entity = unitOfMeasurementRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Unit of measurement not found with id: " + id));
+        return unitOfMeasurementMapper.toDto(entity);
+    }
+    
+    public List<UnitOfMeasurementDto> getAll() {
+        return unitOfMeasurementRepository.findAll().stream().map(unitOfMeasurementMapper::toDto).toList();
+    }
+    
+    public UnitOfMeasurementDto update(Long id, UnitOfMeasurementDto dto) {
+        UnitOfMeasurement entity = unitOfMeasurementRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Unit of measurement not found with id: " + id));
+        entity.setName(dto.getName());
+        entity.setShortName(dto.getShortName());
+        entity.setStatus(dto.getStatus() == null ? Boolean.TRUE : dto.getStatus());
+        return unitOfMeasurementMapper.toDto(unitOfMeasurementRepository.save(entity));
+    }
+    
+    public void delete(Long id) {
+        UnitOfMeasurement entity = unitOfMeasurementRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Unit of measurement not found with id: " + id));
+        unitOfMeasurementRepository.delete(entity);
+    }
+}
+```
+
+**Pattern**: All services follow identical CRUD pattern with `add()` delegating to `create()`. Error handling via `ResourceNotFoundException`.
+
+---
+
+### **7. Controllers**
+
+#### **FloorController** [src/main/java/com/mtalaat/restaurant/modules/settings/controller/FloorController.java](src/main/java/com/mtalaat/restaurant/modules/settings/controller/FloorController.java)
+```java
+@RestController
+@RequestMapping("/api/settings/floors")
+@RequiredArgsConstructor
+public class FloorController {
+    private final FloorService floorService;
+    private final PermissionChecker permissionChecker;
+    
+    @Value("${app.menu.floor-id}")
+    private Long menuId;
+    
+    @PostMapping("/add")
+    public ResponseEntity<ApiResponse> add(@Valid @RequestBody FloorDto dto) {
+        permissionChecker.checkCreate(menuId);
+        FloorDto created = floorService.add(dto);
+        HttpStatus status = HttpStatus.CREATED;
+        return ResponseEntity.status(status)
+                .body(ApiResponse.success("msg_floor_added", created, status.value()));
+    }
+    
+    @PostMapping
+    public ResponseEntity<ApiResponse> create(@Valid @RequestBody FloorDto dto) {
+        permissionChecker.checkCreate(menuId);
+        FloorDto created = floorService.create(dto);
+        HttpStatus status = HttpStatus.CREATED;
+        return ResponseEntity.status(status)
+                .body(ApiResponse.success("msg_floor_created", created, status.value()));
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse> getById(@PathVariable Long id) {
+        permissionChecker.checkRead(menuId);
+        FloorDto floor = floorService.getById(id);
+        HttpStatus status = HttpStatus.OK;
+        return ResponseEntity.status(status)
+                .body(ApiResponse.success("msg_floor_fetched", floor, status.value()));
+    }
+    
+    @GetMapping
+    public ResponseEntity<ApiResponse> getAll() {
+        permissionChecker.checkRead(menuId);
+        HttpStatus status = HttpStatus.OK;
+        return ResponseEntity.status(status)
+                .body(ApiResponse.success("msg_floor_fetched", floorService.getAll(), status.value()));
+    }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse> update(@PathVariable Long id, @Valid @RequestBody FloorDto dto) {
+        permissionChecker.checkEdit(menuId);
+        FloorDto updated = floorService.update(id, dto);
+        HttpStatus status = HttpStatus.OK;
+        return ResponseEntity.status(status)
+                .body(ApiResponse.success("msg_floor_updated", updated, status.value()));
+    }
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse> delete(@PathVariable Long id) {
+        permissionChecker.checkDelete(menuId);
+        floorService.delete(id);
+        HttpStatus status = HttpStatus.OK;
+        return ResponseEntity.status(status)
+                .body(ApiResponse.success("msg_floor_deleted", null, status.value()));
+    }
+}
+```
+
+#### **KitchenController** [src/main/java/com/mtalaat/restaurant/modules/settings/controller/KitchenController.java](src/main/java/com/mtalaat/restaurant/modules/settings/controller/KitchenController.java)
+Similar pattern to FloorController with `@Value("${app.menu.kitchen-id}")` and identical CRUD operations with permission checks.
+
+#### **TableController** [src/main/java/com/mtalaat/restaurant/modules/settings/controller/TableController.java](src/main/java/com/mtalaat/restaurant/modules/settings/controller/TableController.java)
+Similar pattern with `@Value("${app.menu.table-id}")`.
+
+#### **UnitOfMeasurementController** [src/main/java/com/mtalaat/restaurant/modules/settings/controller/UnitOfMeasurementController.java](src/main/java/com/mtalaat/restaurant/modules/settings/controller/UnitOfMeasurementController.java)
+```java
+@RestController
+@RequestMapping("/api/settings/unit-of-measurements")
+@RequiredArgsConstructor
+public class UnitOfMeasurementController {
+    private final UnitOfMeasurementService unitOfMeasurementService;
+    
+    // Same CRUD operations as other controllers, but WITHOUT permission checks
+    // Note: UOM doesn't have menuId injection
+}
+```
+
+**Pattern Note**: Permission checks are conditional—Floor, Kitchen, Table use them; UnitOfMeasurement doesn't.
+
+---
+
+### **8. PermissionChecker** [src/main/java/com/mtalaat/restaurant/modules/auth/security/PermissionChecker.java](src/main/java/com/mtalaat/restaurant/modules/auth/security/PermissionChecker.java)
+```java
+@Component
+public class PermissionChecker {
+    @Autowired
+    UserRepository userRepository;
+    
+    public void checkPermission(Long menuId, String action) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ForbiddenException("msg_access_denied");
+        }
+        
+        // Admin has full access
+        for (GrantedAuthority authority : authentication.getAuthorities()) {
+            if ("ROLE_ADMIN".equals(authority.getAuthority())) {
+                return;
+            }
+        }
+        
+        String requiredAuthority = "MENU_" + menuId + "_" + action.toUpperCase();
+        boolean hasPermission = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals(requiredAuthority));
+        
+        if (!hasPermission) {
+            throw new ForbiddenException("msg_access_denied");
+        }
+    }
+    
+    public void checkRead(Long menuId) { checkPermission(menuId, "READ"); }
+    public void checkCreate(Long menuId) { checkPermission(menuId, "CREATE"); }
+    public void checkEdit(Long menuId) { checkPermission(menuId, "EDIT"); }
+    public void checkDelete(Long menuId) { checkPermission(menuId, "DELETE"); }
+    
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+        Long userId = principal.getId();
+        return userRepository.findById(userId).orElseThrow(() -> new ForbiddenException("msg_access_denied"));
+    }
+}
+```
+
+---
+
+### **9. ApiResponse** [src/main/java/com/mtalaat/restaurant/payload/ApiResponse.java](src/main/java/com/mtalaat/restaurant/payload/ApiResponse.java)
+```java
+@Data @Builder @NoArgsConstructor @AllArgsConstructor
+public class ApiResponse {
+    private boolean status;
+    private String message;
+    private Object data;
+    private int code;
+    
+    public static ApiResponse success(String message, Object data, int code) {
+        return ApiResponse.builder()
+                .status(true)
+                .message(message)
+                .data(data)
+                .code(code)
+                .build();
+    }
+    
+    public static ApiResponse error(String message, Object data, int code) {
+        return ApiResponse.builder()
+                .status(false)
+                .message(message)
+                .data(data)
+                .code(code)
+                .build();
+    }
+}
+```
+
+---
+
+### **10. FileUtility** [src/main/java/com/mtalaat/restaurant/utility/FileUtility.java](src/main/java/com/mtalaat/restaurant/utility/FileUtility.java)
+```java
+@Component
+public class FileUtility {
+    private final Path baseStoragePath;
+    
+    public FileUtility(@Value("${app.files.base-dir:uploads}") String baseStorageDir) {
+        this.baseStoragePath = Paths.get(baseStorageDir).toAbsolutePath().normalize();
+    }
+    
+    public String saveFile(MultipartFile file, String locationToSave) {
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("File is required");
+        }
+        
+        String originalFilename = StringUtils.cleanPath(file.getOriginalFilename() == null ? "" : file.getOriginalFilename());
+        if (originalFilename.contains("..")) {
+            throw new BadRequestException("Invalid file name");
+        }
+        
+        String normalizedLocation = normalizeLocation(locationToSave);
+        Path targetDirectory = normalizedLocation.isBlank()
+                ? baseStoragePath
+                : baseStoragePath.resolve(normalizedLocation).normalize();
+        
+        if (!targetDirectory.startsWith(baseStoragePath)) {
+            throw new BadRequestException("Invalid save location");
+        }
+        
+        String extension = "";
+        int extensionIndex = originalFilename.lastIndexOf('.');
+        if (extensionIndex >= 0) {
+            extension = originalFilename.substring(extensionIndex);
+        }
+        String generatedFilename = UUID.randomUUID() + extension;
+        
+        try {
+            Files.createDirectories(targetDirectory);
+            Path targetFile = targetDirectory.resolve(generatedFilename);
+            try (InputStream inputStream = file.getInputStream()) {
+                Files.copy(inputStream, targetFile, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (IOException ex) {
+            throw new InternalServerErrorException("Could not save file");
+        }
+        
+        return normalizedLocation.isBlank()
+                ? "/files/" + generatedFilename
+                : "/files/" + normalizedLocation + "/" + generatedFilename;
+    }
+    
+    private String normalizeLocation(String locationToSave) {
+        if (locationToSave == null || locationToSave.isBlank()) {
+            return "";
+        }
+        String normalized = locationToSave.trim().replace('\\', '/');
+        normalized = normalized.replaceAll("^/+|/+$", "");
+        return normalized;
+    }
+}
+```
+
+---
+
+### **11. Exception Classes**
+
+All exceptions extend `RuntimeException`:
+
+- [BadRequestException](src/main/java/com/mtalaat/restaurant/exceptions/BadRequestException.java): HTTP 400
+- [ResourceNotFoundException](src/main/java/com/mtalaat/restaurant/exceptions/ResourceNotFoundException.java): HTTP 404  
+- [UnauthorizedException](src/main/java/com/mtalaat/restaurant/exceptions/UnauthorizedException.java): HTTP 401
+- [ForbiddenException](src/main/java/com/mtalaat/restaurant/exceptions/ForbiddenException.java): HTTP 403
+- [InternalServerErrorException](src/main/java/com/mtalaat/restaurant/exceptions/InternalServerErrorException.java): HTTP 500
+
+#### **GlobalExceptionHandler** [src/main/java/com/mtalaat/restaurant/exceptions/GlobalExceptionHandler.java](src/main/java/com/mtalaat/restaurant/exceptions/GlobalExceptionHandler.java)
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiResponse> handleNotFound(ResourceNotFoundException ex) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        return ResponseEntity.status(status)
+                .body(ApiResponse.error(ex.getMessage(), null, status.value()));
+    }
+    
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ApiResponse> handleBadRequest(BadRequestException ex) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        return ResponseEntity.status(status)
+                .body(ApiResponse.error(ex.getMessage(), null, status.value()));
+    }
+    
+    // ... similar handlers for other exceptions
+    
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse> handleValidation(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        return ResponseEntity.status(status)
+                .body(ApiResponse.error("Validation failed", errors, status.value()));
+    }
+}
+```
+
+---
+
+### **12. Application Configuration** [src/main/resources/application.properties](src/main/resources/application.properties)
+```properties
+spring.application.name=restaurant
+server.port=8080
+
+spring.datasource.url=jdbc:mysql://localhost:3306/restaurant_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=root
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+spring.jackson.write-dates-as-timestamps=false
+
+app.jwt.secret=VGhpc0lzQVN1cGVyU2VjdXJlSldUU2VjcmV0S2V5Rm9yUmVzdGF1cmFudEFwcA==
+app.jwt.access-token-expiration-ms=86400000
+app.cors.allowed-origin=http://localhost:4200
+
+app.files.base-dir=uploads
+
+# Menu IDs for permission checks
+app.menu.floor-id=1
+app.menu.table-id=2
+app.menu.kitchen-id=3
+app.menu.item-category-id=4
+app.menu.menu-type-id=5
+app.menu.item-food-id=6
+app.menu.item-food-variant-id=7
+app.menu.item-food-add-ons-id=8
+app.menu.item-food-add-ons-association-id=9
+```
+
+---
+
+## **Key Patterns Summary**
+
+1. **Layered Architecture**: Controller → Service → Repository, with Mapper between Entity and DTO
+2. **Consistent CRUD**: All services implement `add/create/getById/getAll/update/delete`
+3. **Permission System**: Menu-based granular permissions via `PermissionChecker`
+4. **Standardized Responses**: All endpoints return `ApiResponse` with status/message/data/code
+5. **Error Handling**: Custom exceptions mapped to HTTP statuses via `GlobalExceptionHandler`
+6. **Validation**: DTOs use Jakarta validation annotations
+7. **Constructor Injection**: All dependencies via `@RequiredArgsConstructor`
+8. **Lombok Utilities**: Reduces boilerplate with `@Data`, `@Builder`, `@RequiredArgsConstructor`
+9. **Soft Deletes**: BaseEntity supports audit tracking and soft deletes
+10. **File Management**: Centralized `FileUtility` with security checks
+
+This is a well-structured, enterprise-grade Spring Boot application following clean code principles.

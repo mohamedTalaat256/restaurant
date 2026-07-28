@@ -1,0 +1,65 @@
+<p-toast></p-toast>
+
+<p-card [header]="translate.instant('label_year_end_closing')">
+  <form [formGroup]="form" class="mb-4">
+    <div class="grid">
+      <div class="col-12 md:col-6">
+        <app-form-input [control]="$any(form.get('fiscalYear'))" label="label_fiscal_year" type="select"
+          [options]="yearOptions"> </app-form-input>
+      </div>
+      <div class="col-12 md:col-6 flex items-end">
+        <p-button [label]="translate.instant('label_perform_closing')" icon="pi pi-check-circle" severity="warn"
+          (onClick)="performClosing()" [loading]="reportService.loadingSave()" />
+      </div>
+    </div>
+  </form>
+
+  @if (reportService.yearEndClosingResult(); as result) {
+    <div class="grid mt-4">
+      <div class="col-12 md:col-4">
+        <div class="p-3 surface-100 border-round">
+          <div class="text-sm text-color-secondary">{{ translate.instant('label_fiscal_year') }}</div>
+          <div class="text-xl font-bold">{{ result.fiscalYear }}</div>
+        </div>
+      </div>
+      <div class="col-12 md:col-4">
+        <div class="p-3 surface-100 border-round">
+          <div class="text-sm text-color-secondary">{{ translate.instant('label_closing_entry_number') }}</div>
+          <div class="text-xl font-bold">{{ result.closingEntryNumber }}</div>
+        </div>
+      </div>
+      <div class="col-12 md:col-4">
+        <div class="p-3 surface-100 border-round">
+          <div class="text-sm text-color-secondary">{{ translate.instant('label_closing_date') }}</div>
+          <div class="text-xl font-bold">{{ result.closingDate }}</div>
+        </div>
+      </div>
+      <div class="col-12 md:col-3">
+        <div class="p-3 surface-100 border-round">
+          <div class="text-sm text-color-secondary">{{ translate.instant('label_total_revenue') }}</div>
+          <div class="text-xl font-bold text-green-600">{{ result.totalRevenue | number:'1.2-2' }}</div>
+        </div>
+      </div>
+      <div class="col-12 md:col-3">
+        <div class="p-3 surface-100 border-round">
+          <div class="text-sm text-color-secondary">{{ translate.instant('label_total_expenses') }}</div>
+          <div class="text-xl font-bold text-red-600">{{ result.totalExpenses | number:'1.2-2' }}</div>
+        </div>
+      </div>
+      <div class="col-12 md:col-3">
+        <div class="p-3 surface-100 border-round">
+          <div class="text-sm text-color-secondary">{{ translate.instant('label_net_income') }}</div>
+          <div class="text-xl font-bold" [class]="result.netIncome >= 0 ? 'text-green-600' : 'text-red-600'">{{ result.netIncome | number:'1.2-2' }}</div>
+        </div>
+      </div>
+      <div class="col-12 md:col-3">
+        <div class="p-3 surface-100 border-round">
+          <div class="text-sm text-color-secondary">{{ translate.instant('label_accounts_closed') }}</div>
+          <div class="text-xl font-bold">{{ result.accountsClosed }}</div>
+        </div>
+      </div>
+    </div>
+  }
+</p-card>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

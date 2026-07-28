@@ -1,0 +1,80 @@
+<p-toast></p-toast>
+<p-toolbar class="mb-6">
+  <ng-template #start>
+    <p-button [showIfCanCreate]="menuItemId" [label]="translate.instant('label_add_language_translation')" icon="pi pi-plus" severity="secondary" class="m-inline-end-1" (onClick)="openNew()" />
+  </ng-template>
+
+  <ng-template #end>
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt [value]="translationService.translations()" [loading]="translationService.loading()" [rows]="50" [columns]="cols" [paginator]="true"
+  [globalFilterFields]="['key', 'value']"
+  [tableStyle]="{ 'min-width': '50rem' }" [rowHover]="true" dataKey="id"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} translations" [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[50, 100, 200]">
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <h5 class="m-0">{{ translate.instant('label_manage_language_translations') }}</h5>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" [placeholder]="translate.instant('label_search')" />
+      </p-iconfield>
+    </div>
+  </ng-template>
+
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="id" style="width: 2rem">
+        {{ translate.instant('label_id') }}
+        <p-sortIcon field="id" />
+      </th>
+      <th pSortableColumn="language.name" style="width:2rem">
+        {{ translate.instant('label_language') }}
+        <p-sortIcon field="language.name" />
+      </th>
+      <th pSortableColumn="key" style="width:300px">
+        {{ translate.instant('label_key') }}
+        <p-sortIcon field="key" />
+      </th>
+      <th pSortableColumn="value" style="width:400px">
+        {{ translate.instant('label_value') }}
+        <p-sortIcon field="value" />
+      </th>
+      <th style="width: 2rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-translation>
+    <tr>
+      <td>{{ translation.id }}</td>
+      <td>{{ translation.languageName }}</td>
+      <td>{{ translation.key }}</td>
+      <td>{{ translation.value }}</td>
+      <td>
+        <p-button icon="pi pi-pencil" class="m-inline-end-1" [rounded]="true" [outlined]="true" [showIfCanEdit]="menuItemId" (click)="editTranslation(translation)" />
+        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" [showIfCanDelete]="menuItemId" (click)="deleteTranslation(translation)" />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [visible]="translationService.translationDialog()" [style]="{ width: '550px' }" [header]="translate.instant('label_language_translation_details')" [modal]="true" (onHide)="hideDialog()">
+
+  <ng-template #content>
+    <form [formGroup]="translationForm" class="pb-3">
+      <div class="mt-4 pt-3">
+        <app-form-input [control]="$any(translationForm.get('languageCode'))" label="label_language" [options]="languageOptions()" type="select"> </app-form-input>
+        <app-form-input [control]="$any(translationForm.get('key'))" label="label_key"> </app-form-input>
+        <app-form-input [control]="$any(translationForm.get('value'))" label="label_value"> </app-form-input>
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template #footer>
+    <p-button [label]="translate.instant('label_cancel')" icon="pi pi-times" text (click)="hideDialog()" />
+    <p-button [label]="translate.instant('label_save')" icon="pi pi-check" (click)="saveTranslation()" [loading]="translationService.loadingSave()" />
+  </ng-template>
+
+</p-dialog>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

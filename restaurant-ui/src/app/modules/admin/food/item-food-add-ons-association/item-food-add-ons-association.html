@@ -1,0 +1,64 @@
+<p-toast></p-toast>
+<p-toolbar class="mb-6">
+  <ng-template #start>
+    <p-button [showIfCanCreate]="menuItemId" [label]="translate.instant('label_add_item_food_add_ons_association')" icon="pi pi-plus" severity="secondary" class="m-inline-end-1" (onClick)="openNew()" />
+  </ng-template>
+
+  <ng-template #end>
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt [value]="itemFoodAddOnsAssociationService.itemFoodAddOnsAssociations()" [loading]="itemFoodAddOnsAssociationService.loading()"  [paginator]="false"
+  [globalFilterFields]="['itemFood.name', 'itemFoodAddOns.name']"
+  [tableStyle]="{ 'min-width': '30rem' }" [rowHover]="true" dataKey="id" >
+  <ng-template #caption>
+
+  </ng-template>
+
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="id" style="width: 4rem">
+        {{ translate.instant('label_id') }}
+        <p-sortIcon field="id" />
+      </th>
+      <th pSortableColumn="itemFoodAddOns.name" style="width:6rem">
+        {{ translate.instant('label_item_food_add_ons') }}
+        <p-sortIcon field="itemFoodAddOns.name" />
+      </th>
+      <th style="width: 6rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-association>
+    <tr>
+      <td>{{ association.id }}</td>
+       <td>{{ association.itemFoodAddOnsName }}</td>
+      <td>
+        <p-button icon="pi pi-pencil" class="m-inline-end-1" [rounded]="true" [outlined]="true" [showIfCanEdit]="menuItemId" (click)="editItemFoodAddOnsAssociation(association)" />
+        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" [showIfCanDelete]="menuItemId" (click)="deleteItemFoodAddOnsAssociation(association)" />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [visible]="itemFoodAddOnsAssociationService.itemFoodAddOnsAssociationDialog()" [style]="{ width: '450px' , height: '600px' }"
+[header]="translate.instant('label_item_food_add_ons_association_details')" [modal]="true" [baseZIndex]="11000"
+    [autoZIndex]="true"
+    appendTo="body"
+    (onHide)="hideDialog()">
+
+  <ng-template #content>
+    <form [formGroup]="itemFoodAddOnsAssociationForm" class="pb-3">
+      <div class="mt-4 pt-3">
+        <app-form-input [control]="$any(itemFoodAddOnsAssociationForm.get('itemFoodAddOnsId'))" label="label_item_food_add_ons" [options]="itemFoodAddOnsOptions()" type="select" [filter]="true"> </app-form-input>
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template #footer>
+    <p-button [label]="translate.instant('label_cancel')" icon="pi pi-times" text (click)="hideDialog()" />
+    <p-button [label]="translate.instant('label_save')" icon="pi pi-check" (click)="saveItemFoodAddOnsAssociation()" [loading]="itemFoodAddOnsAssociationService.loadingSave()" />
+  </ng-template>
+
+</p-dialog>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

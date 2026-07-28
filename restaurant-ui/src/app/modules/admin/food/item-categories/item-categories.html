@@ -1,0 +1,112 @@
+<p-toast></p-toast>
+<p-toolbar class="mb-6">
+  <ng-template #start>
+
+      <p-button [showIfCanCreate]="menuItemId" [label]="translate.instant('label_add_item_category')" icon="pi pi-plus" severity="secondary" class="m-inline-end-1" (onClick)="openNew()" />
+
+  </ng-template>
+
+  <ng-template #end>
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt [value]="itemCategoryService.itemCategories()" [loading]="itemCategoryService.loading()" [rows]="10" [paginator]="true"
+  [globalFilterFields]="['name']"
+  [tableStyle]="{ 'min-width': '60rem' }" [rowHover]="true" dataKey="id"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} item categories" [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[10, 20, 30]">
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <h5 class="m-0">{{ translate.instant('label_manage_item_categories') }}</h5>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" [placeholder]="translate.instant('label_search')" />
+      </p-iconfield>
+    </div>
+  </ng-template>
+
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="id" style="width: 2rem">
+        {{ translate.instant('label_id') }}
+        <p-sortIcon field="id" />
+      </th>
+      <th pSortableColumn="name" style="width:8rem">
+        {{ translate.instant('label_name') }}
+        <p-sortIcon field="name" />
+      </th>
+      <th pSortableColumn="position" style="width:4rem">
+        {{ translate.instant('label_position') }}
+        <p-sortIcon field="position" />
+      </th>
+      <th pSortableColumn="isOffer" style="width:4rem">
+        {{ translate.instant('label_is_offer') }}
+        <p-sortIcon field="isOffer" />
+      </th>
+      <th pSortableColumn="status" style="width:4rem">
+        {{ translate.instant('label_status') }}
+        <p-sortIcon field="status" />
+      </th>
+      <th style="width: 6rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-itemCategory>
+    <tr>
+      <td>{{ itemCategory.id }}</td>
+      <td>
+        <div class="d-flex align-items-center gap-2">
+          <img [src]="imagesUrl+itemCategory.image" class="image">
+          {{ itemCategory.name }}
+        </div>
+      </td>
+      <td>{{ itemCategory.position }}</td>
+      <td>
+        <p-tag [value]="itemCategory.isOffer ? translate.instant('label_yes') : translate.instant('label_no')"
+          [severity]="itemCategory.isOffer ? 'info' : 'secondary'"></p-tag>
+      </td>
+      <td>
+        <p-tag [value]="itemCategory.status ? translate.instant('label_active') : translate.instant('label_inactive')"
+          [severity]="itemCategory.status ? 'success' : 'danger'"></p-tag>
+      </td>
+      <td>
+        <p-button icon="pi pi-pencil" class="m-inline-end-1" [rounded]="true" [outlined]="true" [showIfCanEdit]="menuItemId" (click)="editItemCategory(itemCategory)" />
+        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" [showIfCanDelete]="menuItemId" (click)="deleteItemCategory(itemCategory)" />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [visible]="itemCategoryService.itemCategoryDialog()" [style]="{ width: '550px' }" [header]="translate.instant('label_item_category_details')" [modal]="true" (onHide)="hideDialog()">
+
+  <ng-template #content>
+    <form [formGroup]="itemCategoryForm" class="pb-3">
+      <div class="mt-4 pt-3">
+        <app-form-input [control]="$any(itemCategoryForm.get('name'))" label="label_name"> </app-form-input>
+        <app-form-input [control]="$any(itemCategoryForm.get('position'))" label="label_position" type="number"> </app-form-input>
+        <app-form-input [control]="$any(itemCategoryForm.get('isOffer'))" label="label_is_offer" type="checkbox"> </app-form-input>
+        @if(itemCategoryForm.get('isOffer')?.value){
+          <ng-container>
+            <app-form-input [control]="$any(itemCategoryForm.get('offerStartDate'))" label="label_offer_start_date" type="date"> </app-form-input>
+            <app-form-input [control]="$any(itemCategoryForm.get('offerEndDate'))" label="label_offer_end_date" type="date"> </app-form-input>
+          </ng-container>
+        }
+
+
+        <app-form-input [control]="$any(itemCategoryForm.get('status'))" label="label_status" type="checkbox"> </app-form-input>
+
+        <div class="mb-3">
+          <label class="form-label">{{ translate.instant('label_image') }}</label>
+          <input type="file" class="form-control" accept="image/*" (change)="onImageSelected($event)" />
+        </div>
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template #footer>
+    <p-button [label]="translate.instant('label_cancel')" icon="pi pi-times" text (click)="hideDialog()" />
+    <p-button [label]="translate.instant('label_save')" icon="pi pi-check" (click)="saveItemCategory()" [loading]="itemCategoryService.loadingSave()" />
+  </ng-template>
+
+</p-dialog>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

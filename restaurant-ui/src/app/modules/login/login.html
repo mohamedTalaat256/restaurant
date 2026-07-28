@@ -1,0 +1,28 @@
+ <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-screen overflow-hidden">
+  <div class="flex flex-col items-center justify-center">
+    <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
+      <div class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20" style="border-radius: 53px">
+        <div class="text-center mb-8">
+          <img [src]="imageUrl + applicationSettings?.logo" alt="Logo" class="w-16 h-16 mx-auto mb-4 logo-image">
+          <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">{{ translate.instant('label_welcome') }}</div>
+          <span class="text-muted-color font-medium">{{ translate.instant('label_sign_in') }}</span>
+        </div>
+
+        <div>
+          <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+
+            <app-form-input [control]="$any(loginForm.get('email'))" label="label_email" icon="pi pi-envelope"  placeholder="mohamed@example.com">
+            </app-form-input>
+
+            <app-form-input [control]="$any(loginForm.get('password'))" label="label_password" icon="pi pi-lock" type="password">
+            </app-form-input>
+
+            <p-button [label]="translate.instant('label_login')" styleClass="w-full" type="submit" [loading]="loginService.isLoading()"></p-button>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

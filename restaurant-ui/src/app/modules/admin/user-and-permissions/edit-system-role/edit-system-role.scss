@@ -1,0 +1,28 @@
+.table{
+  width: 100% !important;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.table th, .table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+/* make first and last cell in table header and last row rounded */
+.table thead th:first-child {
+  border-top-left-radius: 11px !important;
+}
+
+.table thead th:last-child {
+  border-top-right-radius: 11px !important;
+}
+
+.table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 11px !important;
+}
+
+.table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 11px !important;
+}

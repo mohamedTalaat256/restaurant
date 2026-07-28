@@ -1,0 +1,91 @@
+<p-toast></p-toast>
+
+<app-cash-register-dialog></app-cash-register-dialog>
+
+<p-toolbar class="mb-6">
+  <ng-template #start>
+    @if (!cashRegisterService.currentOpenRegister()) {
+    <p-button [label]="translate.instant('label_open_cash_register')" icon="pi pi-lock-open" severity="success" class="m-inline-end-1" (onClick)="showOpenDialog()" />
+    } @else {
+    <p-button [label]="translate.instant('label_close_cash_register')" icon="pi pi-lock" severity="danger" class="m-inline-end-1" (onClick)="showCloseDialog()" />
+    }
+  </ng-template>
+
+  <ng-template #end>
+    @if (cashRegisterService.currentOpenRegister(); as register) {
+    <div class="d-flex align-items-center gap-3">
+      <p-tag [value]="translate.instant('label_open')" severity="success"></p-tag>
+      <span class="f-w-bold">{{ translate.instant('label_counter') }}: {{ register.cashCounterNumber }}</span>
+      <span>{{ translate.instant('label_opening_balance') }}: {{ register.openingBalance }}</span>
+    </div>
+    }
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt [value]="cashRegisterService.cashRegisters()" [loading]="cashRegisterService.loading()" [rows]="10" [paginator]="true"
+  [globalFilterFields]="['userName', 'cashCounterNumber']"
+  [tableStyle]="{ 'min-width': '70rem' }" [rowHover]="true" dataKey="id"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} registers" [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[10, 20, 30]">
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <h5 class="m-0">{{ translate.instant('label_cash_registers') }}</h5>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" [placeholder]="translate.instant('label_search')" />
+      </p-iconfield>
+    </div>
+  </ng-template>
+
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="id" style="width: 3rem">
+        {{ translate.instant('label_id') }}
+        <p-sortIcon field="id" />
+      </th>
+      <th pSortableColumn="userName" style="width: 6rem">
+        {{ translate.instant('label_user') }}
+        <p-sortIcon field="userName" />
+      </th>
+      <th pSortableColumn="cashCounterNumber" style="width: 4rem">
+        {{ translate.instant('label_counter') }}
+        <p-sortIcon field="cashCounterNumber" />
+      </th>
+      <th pSortableColumn="openingBalance" style="width: 5rem">
+        {{ translate.instant('label_opening_balance') }}
+        <p-sortIcon field="openingBalance" />
+      </th>
+      <th pSortableColumn="closingBalance" style="width: 5rem">
+        {{ translate.instant('label_closing_balance') }}
+        <p-sortIcon field="closingBalance" />
+      </th>
+      <th pSortableColumn="openingTime" style="width: 6rem">
+        {{ translate.instant('label_opening_time') }}
+        <p-sortIcon field="openingTime" />
+      </th>
+      <th pSortableColumn="closingTime" style="width: 6rem">
+        {{ translate.instant('label_closing_time') }}
+        <p-sortIcon field="closingTime" />
+      </th>
+      <th pSortableColumn="status" style="width: 4rem">
+        {{ translate.instant('label_status') }}
+        <p-sortIcon field="status" />
+      </th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-register>
+    <tr>
+      <td>{{ register.id }}</td>
+      <td>{{ register.userName }}</td>
+      <td>{{ register.cashCounterNumber }}</td>
+      <td>{{ register.openingBalance }}</td>
+      <td>{{ register.closingBalance }}</td>
+      <td>{{ register.openingTime }}</td>
+      <td>{{ register.closingTime }}</td>
+      <td>
+        <p-tag [value]="register.status ? translate.instant('label_open') : translate.instant('label_closed')"
+          [severity]="register.status ? 'success' : 'danger'"></p-tag>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>

@@ -1,0 +1,268 @@
+<p-toast></p-toast>
+
+<app-cash-register-dialog></app-cash-register-dialog>
+
+<p-toolbar class="mb-6">
+  <ng-template #start>
+    <p-button [showIfCanCreate]="ordersMenuItemId" [label]="translate.instant('label_on_going_orders')" severity="info" class="m-inline-end-1" (onClick)="openOnGoingOrders()" />
+    <p-button [showIfCanCreate]="kitchenDashboardMenuItemId" [label]="translate.instant('label_kitchen_status')" severity="success" class="m-inline-end-1" (onClick)="openKitchenStatus()" />
+    <p-button [showIfCanCreate]="ordersMenuItemId" [label]="translate.instant('label_today_orders')" severity="warn" class="m-inline-end-1" (onClick)="openTodayOrders()" />
+
+  </ng-template>
+  <ng-template #end>
+    @if (cashRegisterService.currentOpenRegister()) {
+    <p-button [label]="translate.instant('label_close_cash_register')" icon="pi pi-lock" severity="danger" (onClick)="closeCashRegister()" />
+    }
+  </ng-template>
+</p-toolbar>
+
+<form [formGroup]="posService.posForm">
+  <div class="row">
+    <!-- Food Items Section -->
+    <div class="col-8">
+      <div class="card">
+        <div class="flex flex-column mb-4">
+          <h5 class="m-0">{{ translate.instant('label_item_categories') }}</h5>
+          <div class="d-flex gap-3 flex-wrap mt-3">
+            @for (itemCategory of posService.itemCategoryService.itemCategories(); track $index) {
+            <div class="card-category">
+              <img [src]="imagesUrl+itemCategory.image" [alt]="itemCategory.name" class="image-category">
+              <span>{{ itemCategory.name }}</span>
+            </div>
+            }
+          </div>
+        </div>
+
+        <!-- Item Foods Grid -->
+        <div class="flex flex-column mb-4">
+          <h5 class="m-0">{{ translate.instant('label_item_foods') }}</h5>
+          <div class="d-flex gap-3 flex-wrap mt-3">
+            @for (itemFood of posService.itemFoodService.itemFoods(); track itemFood.id) {
+            <div class="card-item-food" (click)="openItemDialog(itemFood)">
+              <div class="card-item-food-image-wrapper">
+                <img [src]="imagesUrl+itemFood.image" [alt]="itemFood.name" class="image-item-food">
+                @if (itemFood.offerIsAvailable) {
+                <span class="card-item-food-badge">{{ translate.instant('label_offer') }}</span>
+                }
+              </div>
+              <div class="card-item-food-info">
+                <span class="card-item-food-name">{{ itemFood.name }}</span>
+                @if (itemFood.variants && itemFood.variants.length > 0) {
+                <span class="card-item-food-price">{{ itemFood.variants[0].price }} - {{
+                  itemFood.variants[itemFood.variants.length - 1].price }}</span>
+                }
+                <span class="card-item-food-category">{{ $any(itemFood).categoryName }}</span>
+              </div>
+              <div class="card-item-food-overlay">
+                <i class="pi pi-plus-circle"></i>
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Summary Section -->
+    <div class="col-4">
+      <div class="card">
+          <div class="row w-100">
+          <app-form-input class="col-md-6" [control]="$any(posService.posForm.get('customerType'))" label="label_customer_type"
+            type="select" [options]="posService.customerTypesOptions()">
+          </app-form-input>
+
+          @if(posService.posForm.value.customerType === CustomerType.WALK_IN_CUSTOMER) {
+            <app-form-input class="col-md-6" [control]="$any(posService.posForm.get('customerId'))" label="label_customer"
+            placeholder="label_select_customer" [options]="posService.customerOptions()"
+              type="select" [filter]="true">
+            </app-form-input>
+
+
+          }
+
+           <app-form-input class="col-md-6" [control]="$any(posService.posForm.get('waiterId'))" label="label_waiter"
+           placeholder="label_select_waiter"
+            type="select" [options]="posService.waiterOptions()" [filter]="true">
+          </app-form-input>
+
+          <app-form-input class="col-md-6" [control]="$any(posService.posForm.get('tableId'))" label="label_table" type="select"
+          placeholder="label_select_table"
+            [options]="posService.tableOptions()">
+          </app-form-input>
+
+          @if(posService.posForm.value.customerType === CustomerType.THIRD_PARTY_CUSTOMER) {
+          <app-form-input class="col-md-6" [control]="$any(posService.posForm.get('thirdPartyCustomerId'))"
+            label="label_third_party_customer" placeholder="label_select_third_party_customer" [options]="posService.thirdPartyCustomerOptions()"
+            type="select" [filter]="true">
+          </app-form-input>
+          }
+
+
+        </div>
+      </div>
+      <div class="card">
+
+
+
+
+
+        <h5 class="m-0 mb-3">{{ translate.instant('label_order_items') }}</h5>
+
+        <table>
+          <thead>
+            <tr>
+              <th>{{ translate.instant('label_item_food') }}</th>
+              <th>{{ translate.instant('label_quantity') }}</th>
+              <th>{{ translate.instant('label_price') }}</th>
+              <th>{{ translate.instant('label_total') }}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody formArrayName="orderItems">
+            @for(orderItem of orderItems.controls; track $index; let i = $index) {
+            <tr [formGroupName]="i">
+              <td>
+                <div class="d-flex flex-column">
+                  <span class="f-w-bold">{{ orderItem.get('itemFoodName')?.value }}</span>
+                  @if (orderItem.get('variantName')?.value) {
+                  <small class="text-muted">{{ orderItem.get('variantName')?.value }}</small>
+                  }
+                  @if (orderItem.get('addOnNames')?.value) {
+                  <small class="text-muted">{{ orderItem.get('addOnNames')?.value }}</small>
+                  }
+                </div>
+              </td>
+              <td>
+                <div class="d-flex align-items-center gap-1">
+                  <p-button icon="pi pi-minus" [rounded]="true" [text]="true" severity="danger" size="small"
+                    (click)="decrementQuantity(i)" />
+                  <span class="qti">{{ orderItem.get('quantity')?.value }}</span>
+                  <p-button icon="pi pi-plus" [rounded]="true" [text]="true" severity="success" size="small"
+                    (click)="incrementQuantity(i)" />
+                </div>
+              </td>
+              <td>{{ orderItem.get('price')?.value }}</td>
+              <td>{{ orderItem.get('price')?.value * orderItem.get('quantity')?.value }}</td>
+              <td>
+                <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [text]="true" size="small"
+                  (click)="removeOrderItem(i)" />
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+
+        <!-- Invoice Total -->
+        <div class="invoice-total mt-3">
+          <div class="d-flex justify-content-between align-items-center p-3">
+            <span class="f-w-bold">{{ translate.instant('label_sub_total') }}</span>
+            <span class="f-w-bold">{{ invoiceTotal +' ' + currencySymbol }}</span>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center p-3">
+            <span class="f-w-bold">{{ translate.instant('label_vat') }}</span>
+            <span class="f-w-bold">{{ (invoiceTotal * taxPercentage / 100) +' ' + currencySymbol }}</span>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center p-3">
+            <span class="f-w-bold">{{ translate.instant('label_total') }}</span>
+            <span class="invoice-total-amount">{{ (invoiceTotal + (invoiceTotal * taxPercentage / 100)) +' ' + currencySymbol }}</span>
+          </div>
+
+        </div>
+
+        <div class="row w-100 mt-3">
+          <app-form-input class="col-md-6" [control]="$any(posService.posForm.get('paymentMethodId'))" label="label_payment_method" type="select"
+            placeholder="label_select_payment_method"
+              [options]="posService.paymentMethodOptions()">
+            </app-form-input>
+            <app-form-input class="col-md-6" [control]="$any(posService.posForm.get('paidAmount'))" label="label_paid_amount" type="number" placeholder="0">
+              </app-form-input>
+        </div>
+
+
+        <div class="d-flex justify-content-between mt-3">
+          <p-button [label]="translate.instant('label_place_order')" icon="pi pi-check" severity="info"
+            (click)="placeOrder()" />
+
+          <p-button [label]="translate.instant('label_quick_order')" icon="pi pi-check" severity="primary"
+            class="ml-2" (click)="quickOrder()" />
+            </div>
+
+      </div>
+    </div>
+  </div>
+
+</form>
+
+
+<!-- Item Food Dialog -->
+<p-dialog [header]="selectedItemFood?.name" [(visible)]="showItemDialog" [modal]="true" [style]="{width: '500px'}"
+  [closable]="true">
+
+  @if (selectedItemFood) {
+  <div class="dialog-content">
+
+    <!-- Variants (required - price comes from variant) -->
+    @if (selectedItemFood.variants && selectedItemFood.variants.length > 0) {
+    <div class="mb-3">
+      <label class="f-w-bold mb-2 d-block">{{ translate.instant('label_variants') }} *</label>
+      <div class="d-flex gap-3 flex-wrap">
+        @for (variant of selectedItemFood.variants; track variant.id) {
+        <div class="variant-option" [class.variant-option-selected]="dialogVariantId === variant.id"
+          (click)="selectVariant(variant.id)">
+          <span class="variant-name">{{ variant.name }}</span>
+          <span class="variant-price">{{ variant.price }}</span>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    <!-- Add-ons -->
+    @if (selectedItemFood.addOnsAssociations && selectedItemFood.addOnsAssociations.length > 0) {
+    <div class="mb-3">
+      <label class="f-w-bold mb-2 d-block">{{ translate.instant('label_add_ons') }}</label>
+      <div class="d-flex gap-4 flex-wrap">
+        @for (addOn of selectedItemFood.addOnsAssociations; track addOn.itemFoodAddOnsId) {
+        <div class="flex items-center gap-2">
+          <p-checkbox [binary]="true" [ngModel]="dialogAddOns.includes(addOn.itemFoodAddOnsId)"
+            (ngModelChange)="toggleDialogAddOn(addOn.itemFoodAddOnsId, $event)" [ngModelOptions]="{standalone: true}">
+          </p-checkbox>
+          <span>{{ addOn.itemFoodAddOnsName + ' (' + addOn.itemFoodAddOnsPrice + ')' }}</span>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    <!-- Quantity -->
+    <div class="mb-3">
+      <label class="f-w-bold mb-2 d-block">{{ translate.instant('label_quantity') }}</label>
+      <div class="d-flex align-items-center gap-2">
+        <p-button icon="pi pi-minus" [rounded]="true" [outlined]="true" severity="danger"
+          (click)="dialogQuantity > 1 ? dialogQuantity = dialogQuantity - 1 : null" />
+        <span class="dialog-quantity">{{ dialogQuantity }}</span>
+        <p-button icon="pi pi-plus" [rounded]="true" [outlined]="true" severity="success"
+          (click)="dialogQuantity = dialogQuantity + 1" />
+      </div>
+    </div>
+
+    <!-- Selected Price Display -->
+    <div class="dialog-price-display mb-3">
+      <span class="f-w-bold">{{ translate.instant('label_price') }}:</span>
+      <span class="dialog-price-value">{{ getDialogSelectedPrice() +' ' + currencySymbol }}</span>
+    </div>
+
+    <!-- Dialog Actions -->
+    <div class="d-flex justify-content-end gap-2 mt-4">
+      <p-button [label]="translate.instant('label_add_another')" icon="pi pi-plus" severity="secondary"
+        [outlined]="true" (click)="addFromDialog()" />
+      <p-button [label]="translate.instant('label_add_and_close')" icon="pi pi-check" severity="primary"
+        (click)="addAndClose()" />
+    </div>
+  </div>
+  }
+
+</p-dialog>
+

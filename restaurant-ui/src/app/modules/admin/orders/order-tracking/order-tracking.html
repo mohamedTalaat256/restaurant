@@ -1,0 +1,50 @@
+@if (orderService.loading() && !orderService.tracking()) {
+  <div class="d-flex justify-content-center p-5">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+  </div>
+} @else if (orderService.tracking(); as tracking) {
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <p-button icon="pi pi-arrow-left" [text]="true" (click)="goBack()" />
+    <h4 class="m-0"># {{ tracking.orderNumber }}</h4>
+    <p-tag [value]="tracking.overallStatus" [severity]="orderStatusSeverity(tracking.overallStatus)" />
+    <small class="text-muted ms-auto">{{ translate.instant('label_auto_refresh_5s') }}</small>
+  </div>
+
+  <!-- Overall Progress -->
+  <p-card class="mb-4">
+    <div class="d-flex justify-content-between mb-2">
+      <span>{{ translate.instant('label_items_ready') }}</span>
+      <strong>{{ tracking.readyItems }} / {{ tracking.totalItems }}</strong>
+    </div>
+    <p-progressbar [value]="progressPercent" [style]="{ height: '18px' }" />
+    <div class="text-center mt-1">{{ progressPercent }}%</div>
+  </p-card>
+
+  <!-- Per Kitchen sections -->
+  @for (kp of tracking.kitchenProgress; track kp.kitchenOrderId) {
+    <p-card class="mb-3">
+      <ng-template #header>
+        <div class="d-flex align-items-center gap-2 p-3">
+          <strong>{{ kp.kitchenName }}</strong>
+          <p-tag [value]="kp.kitchenOrderStatus" [severity]="kitchenStatusSeverity(kp.kitchenOrderStatus)" />
+        </div>
+      </ng-template>
+
+      <div class="d-flex flex-wrap gap-2">
+        @for (item of kp.items; track item.kitchenOrderItemId) {
+          <div class="tracking-item-chip" [class]="'chip-' + item.itemStatus.toLowerCase()">
+            <span class="chip-name">{{ item.itemFoodName }}</span>
+            @if (item.quantity > 1) {
+              <span class="chip-qty">x{{ item.quantity }}</span>
+            }
+            <p-tag [value]="item.itemStatus" [severity]="itemStatusSeverity(item.itemStatus)" />
+          </div>
+        }
+      </div>
+    </p-card>
+  }
+} @else {
+  <div class="text-center p-5 text-muted">
+    {{ translate.instant('label_no_tracking_data') }}
+  </div>
+}
