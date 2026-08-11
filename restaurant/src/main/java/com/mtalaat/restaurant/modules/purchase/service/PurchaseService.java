@@ -46,8 +46,8 @@ public class PurchaseService {
         //make money operation
         BigDecimal totalAmount = BigDecimal.valueOf(calculateTotalAmount(entity.getItems()));
 
-        Account cashSubAccount =  accountService.findAccountByCode(accountParentCodes.getCashSubAccount());
-        Account inventorySubAccount = accountService.findAccountByCode(accountParentCodes.getInventorySubAccount());
+        Account cashSubAccount =  accountService.findAccountByCode(accountParentCodes.getCashAndBank());
+        Account inventorySubAccount = accountService.findAccountByCode(accountParentCodes.getInventory());
         if ( dto.getPaymentMethod() == PaymentMethod.CASH) {
 
             financialPostingService.postSupplierPurchase(

@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { RippleModule } from 'primeng/ripple';
 import { filter } from 'rxjs/operators';
 import { LayoutService } from '../../../core/service/layout.service';
+import { TranslateService } from '../../../core/service/translate.service';
 
 
 @Component({
@@ -11,12 +12,12 @@ import { LayoutService } from '../../../core/service/layout.service';
     imports: [CommonModule, RouterModule, RippleModule],
     template: `
         @if (root() && isVisible()) {
-            <div class="layout-menuitem-root-text">{{ item().label }}</div>
+            <div class="layout-menuitem-root-text">{{ translate.instant(item().label) }}</div>
         }
         @if ((!hasRouterLink() || hasChildren()) && isVisible()) {
             <a [attr.href]="item().url" (click)="itemClick($event)" [ngClass]="item().class" [attr.target]="item().target" tabindex="0" pRipple>
                 <i [ngClass]="item().icon" class="layout-menuitem-icon"></i>
-                <span class="layout-menuitem-text">{{ item().label }}</span>
+                <span class="layout-menuitem-text">{{ translate.instant(item().label) }}</span>
                 @if (hasChildren()) {
                     <i class="pi pi-fw pi-angle-down layout-submenu-toggler"></i>
                 }
@@ -41,7 +42,7 @@ import { LayoutService } from '../../../core/service/layout.service';
                 pRipple
             >
                 <i [ngClass]="item().icon" class="layout-menuitem-icon"></i>
-                <span class="layout-menuitem-text">{{ item().label }}</span>
+                <span class="layout-menuitem-text">{{ translate.instant(item().label) }}</span>
                 @if (hasChildren()) {
                     <i class="pi pi-fw pi-angle-down layout-submenu-toggler"></i>
                 }
@@ -95,6 +96,7 @@ import { LayoutService } from '../../../core/service/layout.service';
 })
 export class AppMenuitem {
     layoutService = inject(LayoutService);
+    translate = inject(TranslateService);
 
     router = inject(Router);
 

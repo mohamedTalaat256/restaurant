@@ -51,6 +51,12 @@ public class SupplierService {
         entity.setPhone(dto.getPhone());
         entity.setAddress(dto.getAddress());
         entity.setStatus(dto.getStatus() == null ? Boolean.TRUE : dto.getStatus());
+
+        //update the associated account name if the supplier name changes
+
+        accountService.updateAccountName(entity.getAccount().getId(), "مورد - " + dto.getName());
+
+
         return supplierMapper.toDto(supplierRepository.save(entity));
     }
 

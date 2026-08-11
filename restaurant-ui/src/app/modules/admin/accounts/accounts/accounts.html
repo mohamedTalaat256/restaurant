@@ -37,7 +37,7 @@
           <p-tree [value]="accountsService.accountsTree()" class="w-full">
             <ng-template let-node pTemplate="default">
               <span [style.font-weight]="node.data.allowTransaction ? 'normal' : 'bold'">
-                {{ node.label }}
+                {{ node.data.code + ' - ' + translate.instant(node.label) }}
               </span>
               <span class="ml-4 font-semibold" [ngClass]="node.data.allowTransaction ? 'text-green-600' : 'text-blue-600'">
                  ({{ translate.instant('label_account_balance') }} : {{ node.data.balance + ' ' + currencySymbol }})
@@ -64,7 +64,7 @@
             <ng-template pTemplate="body" let-account>
               <tr>
                 <td>{{ account.code }}</td>
-                <td [style.padding-right.px]="account.code.length * 5">{{ account.name }}</td>
+                <td [style.padding-right.px]="account.code.length * 5">{{ translate.instant(account.name) }}</td>
                 <td><p-tag [value]="account.type" severity="info"></p-tag></td>
                 <td>
                   <p-tag [value]="account.allowTransaction ? translate.instant('label_sub_account') : translate.instant('label_main_account')"

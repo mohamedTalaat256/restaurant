@@ -76,42 +76,42 @@ export class AppSidebar implements OnInit, OnDestroy {
       {
         label: 'Home',
         items: [
-          { label: this.translate.instant('label_dashboard'), icon: 'pi pi-fw pi-home', routerLink: ['/admin/dashboard'] },
-          { label: this.translate.instant('label_pos'), icon: 'pi pi-fw pi-desktop', routerLink: ['/admin/pos'] }
+          { label: 'label_dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/admin/dashboard'] },
+          { label: 'label_pos', icon: 'pi pi-fw pi-desktop', routerLink: ['/admin/pos'] }
         ],
       },
 
       {
-        label: this.translate.instant('title_operations'),
+        label: 'title_operations',
         items: [
           {
-            label: this.translate.instant('label_purchases'),
-            icon: 'pi pi-fw pi-cart-minus',
+            label: 'label_purchases',
+            icon: 'pi pi-fw pi-cart-minus text-red-500',
             path: '/admin/purchases',
             items: [
-              { label: this.translate.instant('label_purchases'), routerLink: ['/admin/purchases'] },
-              { label: this.translate.instant('label_ingredients'), routerLink: ['/admin/ingredients'] },
-              { label: this.translate.instant('label_suppliers'), routerLink: ['/admin/suppliers'] },
+              { label: 'label_purchases', routerLink: ['/admin/purchases'] },
+              { label: 'label_ingredients', routerLink: ['/admin/ingredients'] },
+              { label: 'label_suppliers', routerLink: ['/admin/suppliers'] },
 
             ]
           },
           {
-            label: this.translate.instant('label_orders_management'),
-            icon: 'pi pi-fw pi-receipt',
+            label: 'label_orders_management',
+            icon: 'pi pi-fw pi-receipt text-blue-500',
             path: '/admin/orders',
             items: [
-              { label: this.translate.instant('label_pos'), routerLink: ['/admin/pos'] },
-              { label: this.translate.instant('label_cash_counters'), routerLink: ['/admin/cash-counters'] },
-              { label: this.translate.instant('label_cash_registers'), routerLink: ['/admin/cash-registers'] }
+              { label: 'label_pos', routerLink: ['/admin/pos'] },
+              { label: 'label_cash_counters', routerLink: ['/admin/cash-counters'] },
+              { label: 'label_cash_registers', routerLink: ['/admin/cash-registers'] }
             ]
           },
           {
-            label: this.translate.instant('label_delivery_module'),
-            icon: 'pi pi-fw pi-truck',
+            label: 'label_delivery_module',
+            icon: 'pi pi-fw pi-truck text-green-500',
             path: '/admin/deliveries',
             items: [
-              { label: this.translate.instant('label_deliveries'), routerLink: ['/admin/deliveries'] },
-              { label: this.translate.instant('label_drivers'), routerLink: ['/admin/drivers'] },
+              { label: 'label_deliveries', routerLink: ['/admin/deliveries'] },
+              { label: 'label_drivers', routerLink: ['/admin/drivers'] },
             ]
           }
 
@@ -120,71 +120,71 @@ export class AppSidebar implements OnInit, OnDestroy {
 
 
       {
-        label: this.translate.instant('label_application_settings'),
+        label: 'label_application_settings',
         items: [
            {
-            label: this.translate.instant('label_accounts'),
-            icon: 'pi pi-fw pi-calculator',
+            label: 'label_accounts',
+            icon: 'pi pi-fw pi-calculator text-yellow-500',
             path: '/admin/accounts',
             items: [
-              { label: this.translate.instant('label_accounts'), routerLink: ['/admin/accounts'] },
-              { label: this.translate.instant('label_customer_account_report'),  routerLink: ['/admin/customer-account-report'] },
-              { label: this.translate.instant('label_supplier_account_report'),  routerLink: ['/admin/supplier-account-report'] },
-              { label: this.translate.instant('label_cost_centers'), routerLink: ['/admin/cost-centers'] },
-              { label: this.translate.instant('label_fiscal_periods'), routerLink: ['/admin/fiscal-periods'] },
-              { label: this.translate.instant('label_journal_entries'), routerLink: ['/admin/journal-entries'] },
-              { label: this.translate.instant('label_general_ledger'), routerLink: ['/admin/general-ledger'] },
-              { label: this.translate.instant('label_trial_balance'), routerLink: ['/admin/trial-balance'] },
-              { label: this.translate.instant('label_profit_loss'), routerLink: ['/admin/profit-loss'] },
-              { label: this.translate.instant('label_balance_sheet'), routerLink: ['/admin/balance-sheet'] },
-              { label: this.translate.instant('label_year_end_closing'), routerLink: ['/admin/year-end-closing'] }
+              { label: 'label_accounts', routerLink: ['/admin/accounts'] },
+              { label: 'label_customer_account_report',  routerLink: ['/admin/customer-account-report'] },
+              { label: 'label_supplier_account_report',  routerLink: ['/admin/supplier-account-report'] },
+              { label: 'label_cost_centers', routerLink: ['/admin/cost-centers'] },
+              { label: 'label_fiscal_periods', routerLink: ['/admin/fiscal-periods'] },
+              { label: 'label_journal_entries', routerLink: ['/admin/journal-entries'] },
+              { label: 'label_general_ledger', routerLink: ['/admin/general-ledger'] },
+              { label: 'label_trial_balance', routerLink: ['/admin/trial-balance'] },
+              { label: 'label_profit_loss', routerLink: ['/admin/profit-loss'] },
+              { label: 'label_balance_sheet', routerLink: ['/admin/balance-sheet'] },
+              { label: 'label_year_end_closing', routerLink: ['/admin/year-end-closing'] }
             ]
           },
           {
-            label: this.translate.instant('label_food_management'),
-            icon: 'pi pi-fw pi-database',
+            label: 'label_food_management',
+            icon: 'pi pi-fw pi-database text-gray-500',
             path: '/food-management',
             items: [
-              { label: this.translate.instant('label_item_categories'), routerLink: ['/admin/item-categories'] },
-              { label: this.translate.instant('label_menu_types'), routerLink: ['/admin/menu-types'] },
-              { label: this.translate.instant('label_item_foods'), routerLink: ['/admin/item-foods'] },
-              { label: this.translate.instant('label_item_food_add_ons'), routerLink: ['/admin/item-food-add-ons'] },
+              { label: 'label_item_categories', routerLink: ['/admin/item-categories'] },
+              { label: 'label_menu_types', routerLink: ['/admin/menu-types'] },
+              { label: 'label_item_foods', routerLink: ['/admin/item-foods'] },
+              { label: 'label_item_food_add_ons', routerLink: ['/admin/item-food-add-ons'] },
             ]
 
           },
           {
-            label: this.translate.instant('label_settings'),
+            label: 'label_settings',
             icon: 'pi pi-fw pi-cog',
             path: '/restaurant-settings',
             items: [
-              { label: this.translate.instant('label_application_settings'), routerLink: ['/admin/application-settings'] },
-              { label: this.translate.instant('label_currencies'), routerLink: ['/admin/currencies'] },
-              { label: this.translate.instant('label_languages'), routerLink: ['/admin/languages'] },
-              { label: this.translate.instant('label_language_translations'), routerLink: ['/admin/language-translations'] },
-              { label: this.translate.instant('label_units_of_measurment'), routerLink: ['/admin/uoms'] },
-              { label: this.translate.instant('label_floors'), routerLink: ['/admin/floors'] },
-              { label: this.translate.instant('label_tables'), routerLink: ['/admin/tables'] },
-              { label: this.translate.instant('label_kitchens'), routerLink: ['/admin/kitchens'] },
+              { label: 'label_application_settings', routerLink: ['/admin/application-settings'] },
+              { label: 'label_currencies', routerLink: ['/admin/currencies'] },
+              { label: 'label_languages', routerLink: ['/admin/languages'] },
+              { label: 'label_language_translations', routerLink: ['/admin/language-translations'] },
+              { label: 'label_units_of_measurment', routerLink: ['/admin/uoms'] },
+              { label: 'label_floors', routerLink: ['/admin/floors'] },
+              { label: 'label_tables', routerLink: ['/admin/tables'] },
+              { label: 'label_kitchens', routerLink: ['/admin/kitchens'] },
 
             ]
           },
           {
-            label: this.translate.instant('label_customers'),
+            label: 'label_customers',
             icon: 'pi pi-fw pi-users',
             path: '/admin/customers',
             items: [
-              { label: this.translate.instant('label_customers'), routerLink: ['/admin/customers'] },
-              { label: this.translate.instant('label_customer_types'), routerLink: ['/admin/customer-types'] },
-              { label: this.translate.instant('label_third_party_customers'), routerLink: ['/admin/third-party-customers'] }
+              { label: 'label_customers', routerLink: ['/admin/customers'] },
+              { label: 'label_customer_types', routerLink: ['/admin/customer-types'] },
+              { label: 'label_third_party_customers', routerLink: ['/admin/third-party-customers'] }
             ]
           },
           {
-            label: this.translate.instant('label_users'),
+            label: 'label_users',
             icon: 'pi pi-fw pi-users',
             path: '/admin/users',
             items: [
-              { label: this.translate.instant('label_manage_users'), routerLink: ['/admin/users'] },
-              { label: this.translate.instant('label_manage_roles'), routerLink: ['/admin/roles'] }
+              { label: 'label_manage_users', routerLink: ['/admin/users'] },
+              { label: 'label_manage_roles', routerLink: ['/admin/roles'] }
             ]
           }
         ]

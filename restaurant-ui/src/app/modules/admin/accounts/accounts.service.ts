@@ -129,12 +129,12 @@ export class AccountsService {
 
   private mapToPrimeNgTree(accounts: Account[]): TreeNode[] {
     return accounts.map(acc => ({
-      label: `${acc.code} - ${acc.name}`, // النص الذي سيظهر بالشجرة
-      data: acc,                          // البيانات الأصلية للحساب بالكامل
-      expanded: acc.code.length <= 2,     // جعل المستويات الرئيسية مفتوحة تلقائياً
+      label: acc.name, // Just pass the translation key directly as the label
+      data: acc,
+      expanded: acc.code.length <= 2,
       children: acc.children && acc.children.length > 0
         ? this.mapToPrimeNgTree(acc.children)
         : []
     }));
-  }
+}
 }

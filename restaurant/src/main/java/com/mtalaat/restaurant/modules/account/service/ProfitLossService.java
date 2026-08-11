@@ -37,7 +37,7 @@ public class ProfitLossService {
         List<Account> revenueAccounts = accountRepository.findByTypeIn(List.of(AccountType.REVENUE));
         List<Account> expenseAccounts = accountRepository.findByTypeIn(List.of(AccountType.EXPENSE));
 
-        String cogsParentCode = parentCodes.getCogsRawMaterials();
+        String cogsParentCode = parentCodes.getCogs();
 
         // REVENUE section
         List<ProfitLossLineDTO> revenueLines = new ArrayList<>();

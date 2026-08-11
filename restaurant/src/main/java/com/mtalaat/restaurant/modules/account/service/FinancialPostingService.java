@@ -187,15 +187,21 @@ public class FinancialPostingService {
      */
     @Transactional
     public JournalEntry postOrderSale(BigDecimal amount, String orderNumber, boolean isCash) {
-        Account cashAccount = accountRepository.findByCode(parentCodes.getCashSubAccount())
-                .orElseThrow(() -> new RuntimeException(
-                        translate.get("error_accounting_missing_code") + " " + parentCodes.getCashSubAccount()));
+        // 1. Determine Debit Account Code (Cash and Bank vs Accounts Receivable)
+        String debitCode = isCash ? parentCodes.getCashAndBank() : parentCodes.getCustomers();
 
-        Account salesAccount = accountRepository.findByCode(parentCodes.getRestaurantSales())
+        Account debitAccount = accountRepository.findByCode(debitCode)
                 .orElseThrow(() -> new RuntimeException(
-                        translate.get("error_accounting_missing_code") + " " + parentCodes.getRestaurantSales()));
+                        translate.get("error_accounting_missing_code") + " " + debitCode));
 
-        return postCustomerSale(cashAccount.getId(), salesAccount.getId(), amount, orderNumber, isCash);
+        // 2. Determine Credit Account Code (Defaulting to Food Sales Revenue)
+        String creditCode = parentCodes.getRevenue(); // Root code, or use a specific child sub-account if preferred
+
+        Account salesAccount = accountRepository.findByCode(creditCode)
+                .orElseThrow(() -> new RuntimeException(
+                        translate.get("error_accounting_missing_code") + " " + creditCode));
+
+        return postCustomerSale(debitAccount.getId(), salesAccount.getId(), amount, orderNumber, isCash);
     }
 
     @Transactional
@@ -222,8 +228,8 @@ public class FinancialPostingService {
 
     @Transactional
     public void postSalaryPayment(Long cashAccountId, BigDecimal totalSalaries, String month) {
-        Account salaryExpenseAcc = accountRepository.findByCode(parentCodes.getSalariesExpense())
-                .orElseThrow(() -> new RuntimeException(translate.get("error_accounting_missing_code") + " " + parentCodes.getSalariesExpense()));
+        Account salaryExpenseAcc = accountRepository.findByCode(parentCodes.getOpex())
+                .orElseThrow(() -> new RuntimeException(translate.get("error_accounting_missing_code") + " " + parentCodes.getOpex()));
 
         List<JournalItemBuilder> items = new ArrayList<>();
         items.add(new JournalItemBuilder(salaryExpenseAcc.getId(), totalSalaries, BigDecimal.ZERO));

@@ -1742,7 +1742,7 @@ a {
 
 .layout-menu ul a .layout-submenu-toggler {
     font-size: 75%;
-    margin-left: auto;
+    margin-inline-start: auto;
     transition: transform var(--element-transition-duration)
 }
 

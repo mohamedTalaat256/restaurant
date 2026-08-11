@@ -137,6 +137,13 @@ public class AccountService {
         return accountRepository.save(subAccount);
     }
 
+    public void updateAccountName(Long accountId, String newName) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("الحساب المالي غير موجود بـ ID: " + accountId));
+        account.setName(newName);
+        accountRepository.save(account);
+    }
+
     /**
      * تسجيل قيد يومية جديد وتحديث الأرصدة تلقائياً
      */
