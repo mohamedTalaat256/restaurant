@@ -3,6 +3,7 @@ package com.mtalaat.restaurant.modules.account.dto;
 import com.mtalaat.restaurant.modules.account.enums.AccountType;
 import lombok.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -17,4 +18,5 @@ public class AccountDTO {
     private Long parentId;
     private String parentName;
     private List<AccountDTO> children;
+    private LocalDateTime updatedAt;
 }

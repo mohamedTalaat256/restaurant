@@ -170,7 +170,7 @@ public class FinancialPostingService {
     // ===================================================================
 
     @Transactional
-    public void postCustomerSale(Long creditOrCashAccountId, Long salesAccountId, BigDecimal amount, String invoiceNo, boolean isCash) {
+    public JournalEntry postCustomerSale(Long creditOrCashAccountId, Long salesAccountId, BigDecimal amount, String invoiceNo, boolean isCash) {
         List<JournalItemBuilder> items = new ArrayList<>();
         items.add(new JournalItemBuilder(creditOrCashAccountId, amount, BigDecimal.ZERO));
         items.add(new JournalItemBuilder(salesAccountId, BigDecimal.ZERO, amount));
@@ -178,7 +178,24 @@ public class FinancialPostingService {
         String msgKey = isCash ? "phrase_accounting_cash_sale" : "phrase_accounting_credit_sale";
         String description = translate.get(msgKey);
 
-        saveAndPostEntry(description+ " " + invoiceNo, invoiceNo, items);
+        return saveAndPostEntry(description + " " + invoiceNo, invoiceNo, items);
+    }
+
+    /**
+     * Auto-resolves the cash and restaurant-sales accounts from system configuration
+     * so the caller does not need to supply account IDs.
+     */
+    @Transactional
+    public JournalEntry postOrderSale(BigDecimal amount, String orderNumber, boolean isCash) {
+        Account cashAccount = accountRepository.findByCode(parentCodes.getCashSubAccount())
+                .orElseThrow(() -> new RuntimeException(
+                        translate.get("error_accounting_missing_code") + " " + parentCodes.getCashSubAccount()));
+
+        Account salesAccount = accountRepository.findByCode(parentCodes.getRestaurantSales())
+                .orElseThrow(() -> new RuntimeException(
+                        translate.get("error_accounting_missing_code") + " " + parentCodes.getRestaurantSales()));
+
+        return postCustomerSale(cashAccount.getId(), salesAccount.getId(), amount, orderNumber, isCash);
     }
 
     @Transactional

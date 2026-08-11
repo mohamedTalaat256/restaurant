@@ -1,4 +1,4 @@
-export type OrderType = 'QUICK_ORDER' | 'PLACE_ORDER';
+export type OrderType = 'QUICK_ORDER' | 'PLACE_ORDER' | 'DELIVERY';
 
 export type OrderStatus =
   | 'NEW'
@@ -14,7 +14,6 @@ export type OrderStatus =
 export type KitchenOrderStatus = 'PENDING' | 'ACCEPTED' | 'PREPARING' | 'READY';
 export type KitchenOrderItemStatus = 'PENDING' | 'ACCEPTED' | 'PREPARING' | 'READY' | 'SERVED' | 'REJECTED';
 export type PaymentMethod = 'CASH' | 'CARD' | 'MIXED';
-export type PaymentStatus = 'PENDING' | 'PAID' | 'PARTIALLY_PAID' | 'REFUNDED';
 
 export interface OrderItemAddOn {
   id: number;
@@ -89,18 +88,7 @@ export interface Order {
   completedAt?: string;
 }
 
-export interface Payment {
-  id: number;
-  orderId: number;
-  orderNumber: string;
-  paymentMethod: PaymentMethod;
-  totalAmount: number;
-  paidAmount: number;
-  remainingAmount: number;
-  changeAmount: number;
-  status: PaymentStatus;
-  createdAt: string;
-}
+
 
 export interface OrderTrackingItem {
   kitchenOrderItemId: number;
@@ -158,8 +146,8 @@ export interface OrderItemRequest {
 }
 
 export interface CheckoutRequest {
-  paymentMethod: PaymentMethod;
   paidAmount: number;
+  isCash: boolean;
 }
 
 export interface SplitOrderRequest {

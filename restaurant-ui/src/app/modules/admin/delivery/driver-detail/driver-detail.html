@@ -1,0 +1,169 @@
+<p-toast></p-toast>
+
+@if (driverService.loading()) {
+  <div class="d-flex justify-content-center p-5">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+  </div>
+} @else if (driverService.driver()) {
+  <!-- Header -->
+  <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+    <p-button icon="pi pi-arrow-left" [text]="true" (click)="goBack()" />
+    <h4 class="m-0">{{ driverService.driver()!.fullName }}</h4>
+    <p-tag
+      [value]="driverService.driver()!.status"
+      [severity]="getDriverStatusSeverity(driverService.driver()!.status)"
+    />
+  </div>
+
+  <div class="row">
+    <!-- Profile Card -->
+    <div class="col-md-4 mb-4">
+      <p-card [header]="translate.instant('label_driver_profile')">
+        <div class="d-flex flex-column gap-2">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <div
+              class="d-flex align-items-center justify-content-center rounded-circle bg-primary"
+              style="width: 56px; height: 56px; font-size: 1.5rem; color: white"
+            >
+              <i class="pi pi-user"></i>
+            </div>
+            <div>
+              <div class="font-semibold" style="font-size: 1.1rem">
+                {{ driverService.driver()!.fullName }}
+              </div>
+              <div class="text-muted text-sm">{{ driverService.driver()!.email }}</div>
+            </div>
+          </div>
+          <p-divider />
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">{{ translate.instant('label_phone') }}</span>
+            <span>{{ driverService.driver()!.phone }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">{{ translate.instant('label_vehicle_type') }}</span>
+            <span>{{ driverService.driver()!.vehicleType }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">{{ translate.instant('label_vehicle_plate') }}</span>
+            <span>{{ driverService.driver()!.vehiclePlate }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">{{ translate.instant('label_is_online') }}</span>
+            <span>
+              @if (driverService.driver()!.isOnline) {
+                <i class="pi pi-circle-fill text-success"></i>
+              } @else {
+                <i class="pi pi-circle text-muted"></i>
+              }
+            </span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">{{ translate.instant('label_created_at') }}</span>
+            <span>{{ driverService.driver()!.createdAt | date: 'mediumDate' }}</span>
+          </div>
+          <p-divider />
+          <div>
+            <label class="form-label">{{ translate.instant('label_change_status') }}</label>
+            <p-select
+              [options]="statusOptions"
+              [ngModel]="driverService.driver()!.status"
+              (ngModelChange)="onChangeStatus($event)"
+              styleClass="w-100"
+              [loading]="driverService.loadingSave()"
+            />
+          </div>
+        </div>
+      </p-card>
+    </div>
+
+    <!-- Current Active Delivery -->
+    <div class="col-md-8 mb-4">
+      <p-card [header]="translate.instant('label_current_delivery')">
+        @if (driverService.currentDelivery()) {
+          <div class="d-flex flex-column gap-2">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="font-semibold" style="font-size: 1.1rem">
+                # {{ driverService.currentDelivery()!.orderNumber }}
+              </span>
+              <p-tag
+                [value]="driverService.currentDelivery()!.status"
+                [severity]="getDeliveryStatusSeverity(driverService.currentDelivery()!.status)"
+              />
+            </div>
+            <p-divider />
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">{{ translate.instant('label_delivery_fee') }}</span>
+              <span>{{ driverService.currentDelivery()!.deliveryFee ?? '—' }}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">{{ translate.instant('label_created_at') }}</span>
+              <span>{{ driverService.currentDelivery()!.createdAt | date: 'short' }}</span>
+            </div>
+            <div class="mt-2">
+              <p-button
+                [label]="translate.instant('label_view_delivery')"
+                icon="pi pi-arrow-right"
+                severity="info"
+                [text]="true"
+                (onClick)="goToDelivery(driverService.currentDelivery()!.id)"
+              />
+            </div>
+          </div>
+        } @else {
+          <div class="d-flex flex-column align-items-center gap-2 p-3 text-muted">
+            <i class="pi pi-inbox" style="font-size: 2rem"></i>
+            <span>{{ translate.instant('label_no_active_delivery') }}</span>
+          </div>
+        }
+      </p-card>
+    </div>
+  </div>
+
+  <!-- Delivery History -->
+  <p-card [header]="translate.instant('label_delivery_history')">
+    <p-table
+      [value]="driverService.deliveryHistory()"
+      [rows]="10"
+      [paginator]="true"
+      [tableStyle]="{ 'min-width': '40rem' }"
+      [rowHover]="true"
+    >
+      <ng-template #header>
+        <tr>
+          <th>{{ translate.instant('label_order_number') }}</th>
+          <th>{{ translate.instant('label_status') }}</th>
+          <th>{{ translate.instant('label_delivery_fee') }}</th>
+          <th>{{ translate.instant('label_created_at') }}</th>
+          <th>{{ translate.instant('label_delivered_at') }}</th>
+          <th></th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-delivery>
+        <tr>
+          <td><span class="font-semibold"># {{ delivery.orderNumber }}</span></td>
+          <td>
+            <p-tag [value]="delivery.status" [severity]="getDeliveryStatusSeverity(delivery.status)" />
+          </td>
+          <td>{{ delivery.deliveryFee ?? '—' }}</td>
+          <td>{{ delivery.createdAt | date: 'short' }}</td>
+          <td>{{ (delivery.deliveredAt | date: 'short') ?? '—' }}</td>
+          <td>
+            <p-button
+              icon="pi pi-eye"
+              [text]="true"
+              severity="info"
+              (onClick)="goToDelivery(delivery.id)"
+            />
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="6" class="text-center p-4">
+            {{ translate.instant('label_no_delivery_history') }}
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+}

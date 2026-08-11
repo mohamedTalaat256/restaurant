@@ -3,15 +3,14 @@ import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
-import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { CheckboxModule } from 'primeng/checkbox';
 import { OrderService } from '../orders/order.service';
 import { TranslateService } from '../../../../core/service/translate.service';
-import { PaymentMethod } from '../../../../core/model/order.model';
 
 @Component({
   selector: 'app-checkout-dialog',
-  imports: [DialogModule, ButtonModule, SelectModule, InputNumberModule, FormsModule, DecimalPipe],
+  imports: [DialogModule, ButtonModule, InputNumberModule, FormsModule, DecimalPipe, CheckboxModule],
   template: `
     <p-dialog
       [header]="translate.instant('label_checkout')"
@@ -25,17 +24,7 @@ import { PaymentMethod } from '../../../../core/model/order.model';
         <div class="d-flex flex-column gap-3 py-3">
           <div class="d-flex justify-content-between">
             <span>{{ translate.instant('label_total') }}</span>
-            <strong>{{ totalAmount }}</strong>
-          </div>
-
-          <div>
-            <label class="f-w-bold mb-1 d-block">{{ translate.instant('label_payment_method') }}</label>
-            <p-select
-              [(ngModel)]="paymentMethod"
-              [options]="paymentMethodOptions"
-              [placeholder]="translate.instant('label_select_payment_method')"
-              class="w-100"
-            />
+            <strong>{{ totalAmount | number: '1.2-2' }}</strong>
           </div>
 
           <div>
@@ -50,10 +39,15 @@ import { PaymentMethod } from '../../../../core/model/order.model';
             />
           </div>
 
-          @if (paymentMethod === 'CASH' && paidAmount > 0) {
+          <div class="d-flex align-items-center gap-2">
+            <p-checkbox [(ngModel)]="isCash" [binary]="true" inputId="isCash" />
+            <label for="isCash">{{ translate.instant('label_cash_payment') }}</label>
+          </div>
+
+          @if (isCash && paidAmount > 0) {
             <div class="d-flex justify-content-between">
               <span>{{ translate.instant('label_change') }}</span>
-              <strong class="{{ change >= 0 ? 'text-success' : 'text-danger' }}">{{ change | number: '1.2-2' }}</strong>
+              <strong [class]="change >= 0 ? 'text-success' : 'text-danger'">{{ change | number: '1.2-2' }}</strong>
             </div>
             <div class="d-flex justify-content-between">
               <span>{{ translate.instant('label_remaining') }}</span>
@@ -69,7 +63,7 @@ import { PaymentMethod } from '../../../../core/model/order.model';
           icon="pi pi-credit-card"
           severity="success"
           [loading]="orderService.loadingSave()"
-          [disabled]="!paymentMethod || paidAmount <= 0"
+          [disabled]="paidAmount <= 0"
           (click)="submit()"
         />
       </ng-template>
@@ -86,20 +80,13 @@ export class CheckoutDialogComponent implements OnChanges {
   readonly orderService = inject(OrderService);
   readonly translate = inject(TranslateService);
 
-  paymentMethod: PaymentMethod | null = null;
   paidAmount = 0;
+  isCash = true;
   change = 0;
   remaining = 0;
 
-  paymentMethodOptions: { label: string; value: PaymentMethod }[] = [
-    { label: 'CASH', value: 'CASH' },
-    { label: 'CARD', value: 'CARD' },
-    { label: 'MIXED', value: 'MIXED' },
-  ];
-
   ngOnChanges() {
     if (this.visible) {
-      this.paymentMethod = null;
       this.paidAmount = this.totalAmount;
       this.onPaidAmountChange();
     }
@@ -111,10 +98,14 @@ export class CheckoutDialogComponent implements OnChanges {
   }
 
   submit() {
-    if (!this.paymentMethod || this.paidAmount <= 0 || !this.orderId) return;
-    this.orderService.checkoutOrder(this.orderId, { paymentMethod: this.paymentMethod, paidAmount: this.paidAmount }, () => {
-      this.visibleChange.emit(false);
-      this.checkoutDone.emit();
-    });
+    if (this.paidAmount <= 0 || !this.orderId) return;
+    this.orderService.checkoutOrder(
+      this.orderId,
+      { paidAmount: this.paidAmount, isCash: this.isCash },
+      () => {
+        this.visibleChange.emit(false);
+        this.checkoutDone.emit();
+      }
+    );
   }
 }

@@ -17,6 +17,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse> handleNotFound(ResourceNotFoundException ex) {
         HttpStatus status = HttpStatus.NOT_FOUND;
+        ex.printStackTrace(); // Log the exception trace to the console
         return ResponseEntity.status(status)
                 .body(ApiResponse.error(ex.getMessage(), null, status.value()));
     }
@@ -24,6 +25,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ApiResponse> handleBadRequest(BadRequestException ex) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
+        ex.printStackTrace(); // Log the exception trace to the console
         return ResponseEntity.status(status)
                 .body(ApiResponse.error(ex.getMessage(), null, status.value()));
     }
@@ -31,6 +33,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ApiResponse> handleUnauthorized(UnauthorizedException ex) {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
+        ex.printStackTrace(); // Log the exception trace to the console
         return ResponseEntity.status(status)
                 .body(ApiResponse.error(ex.getMessage(), null, status.value()));
     }
@@ -38,6 +41,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ApiResponse> handleForbidden(ForbiddenException ex) {
         HttpStatus status = HttpStatus.FORBIDDEN;
+        ex.printStackTrace(); // Log the exception trace to the console
         return ResponseEntity.status(status)
                 .body(ApiResponse.error(ex.getMessage(), null, status.value()));
     }
@@ -45,6 +49,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InternalServerErrorException.class)
     public ResponseEntity<ApiResponse> handleInternal(InternalServerErrorException ex) {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        ex.printStackTrace(); // Log the exception trace to the console
         return ResponseEntity.status(status)
                 .body(ApiResponse.error(ex.getMessage(), null, status.value()));
     }
@@ -56,6 +61,7 @@ public class GlobalExceptionHandler {
             errors.put(fieldError.getField(), fieldError.getDefaultMessage());
         }
         HttpStatus status = HttpStatus.BAD_REQUEST;
+        ex.printStackTrace(); // Log the exception trace to the console
         return ResponseEntity.status(status)
                 .body(ApiResponse.error("Validation failed", errors, status.value()));
     }
@@ -63,6 +69,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse> handleGeneral(Exception ex) {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        ex.printStackTrace(); // Log the exception trace to the console
         return ResponseEntity.status(status)
                 .body(ApiResponse.error(ex.getMessage(), null, status.value()));
     }
@@ -70,6 +77,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnbalancedJournalException.class)
     public ResponseEntity<ApiResponse> handleRuntime(UnbalancedJournalException ex) {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        ex.printStackTrace(); // Log the exception trace to the console
         return ResponseEntity.status(status)
                 .body(ApiResponse.error(ex.getMessage(), null, status.value()));
     }
@@ -77,6 +85,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PeriodLockedException.class)
     public ResponseEntity<ApiResponse> handlePeriodLocked(PeriodLockedException ex) {
         HttpStatus status = HttpStatus.CONFLICT;
+        ex.printStackTrace(); // Log the exception trace to the console
         return ResponseEntity.status(status)
                 .body(ApiResponse.error(ex.getMessage(), null, status.value()));
     }

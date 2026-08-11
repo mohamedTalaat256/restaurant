@@ -1,0 +1,182 @@
+<p-toast></p-toast>
+
+<p-toolbar class="mb-6">
+  <ng-template #start>
+    <h5 class="m-0">{{ translate.instant('label_deliveries_management') }}</h5>
+  </ng-template>
+  <ng-template #end>
+    <p-select
+      [(ngModel)]="selectedStatus"
+      [options]="statusOptions"
+      [placeholder]="translate.instant('label_filter_by_status')"
+      (onChange)="onStatusChange()"
+      [style]="{ minWidth: '200px' }"
+      class="m-inline-end-2"
+    />
+    <p-button
+      [label]="translate.instant('label_create_delivery')"
+      icon="pi pi-plus"
+      (onClick)="openCreateDialog()"
+    />
+  </ng-template>
+</p-toolbar>
+
+<p-table
+  #dt
+  [value]="deliveryService.deliveries()"
+  [loading]="deliveryService.loading()"
+  [rows]="15"
+  [paginator]="true"
+  [globalFilterFields]="['orderNumber', 'driver.fullName', 'status']"
+  [tableStyle]="{ 'min-width': '60rem' }"
+  [rowHover]="true"
+  dataKey="id"
+  [showCurrentPageReport]="true"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+  [rowsPerPageOptions]="[15, 30, 50]"
+>
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <span class="text-muted">{{ translate.instant('label_all') }}</span>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          (input)="onGlobalFilter(dt, $event)"
+          [placeholder]="translate.instant('label_search')"
+        />
+      </p-iconfield>
+    </div>
+  </ng-template>
+
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="orderNumber">
+        {{ translate.instant('label_order_number') }} <p-sortIcon field="orderNumber" />
+      </th>
+      <th>{{ translate.instant('label_driver') }}</th>
+      <th pSortableColumn="status">
+        {{ translate.instant('label_status') }} <p-sortIcon field="status" />
+      </th>
+      <th pSortableColumn="deliveryFee">
+        {{ translate.instant('label_delivery_fee') }} <p-sortIcon field="deliveryFee" />
+      </th>
+      <th pSortableColumn="createdAt">
+        {{ translate.instant('label_created_at') }} <p-sortIcon field="createdAt" />
+      </th>
+      <th>{{ translate.instant('label_actions') }}</th>
+    </tr>
+  </ng-template>
+
+  <ng-template #body let-delivery>
+    <tr [style]="{ cursor: 'pointer' }" (click)="goToDetail(delivery)">
+      <td>
+        <span class="font-semibold"># {{ delivery.orderNumber }}</span>
+      </td>
+      <td>
+        @if (delivery.driver) {
+          <div>
+            <div class="font-semibold">{{ delivery.driver.fullName }}</div>
+            <div class="text-sm text-muted">{{ delivery.driver.phone }}</div>
+          </div>
+        } @else {
+          <span class="text-muted">—</span>
+        }
+      </td>
+      <td>
+        <p-tag [value]="delivery.status" [severity]="getStatusSeverity(delivery.status)" />
+      </td>
+      <td>{{ delivery.deliveryFee ?? '—' }}</td>
+      <td>{{ delivery.createdAt | date: 'short' }}</td>
+      <td (click)="$event.stopPropagation()">
+        <p-button
+          icon="pi pi-eye"
+          [text]="true"
+          severity="info"
+          [pTooltip]="translate.instant('label_view')"
+          (onClick)="goToDetail(delivery)"
+        />
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="6" class="text-center p-4">
+        {{ translate.instant('label_no_deliveries') }}
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<!-- Create Delivery Dialog -->
+<p-dialog
+  [header]="translate.instant('label_create_delivery')"
+  [(visible)]="showCreateDialog"
+  [modal]="true"
+  [style]="{ width: '480px' }"
+  [closable]="true"
+>
+  <form [formGroup]="createForm" class="d-flex flex-column gap-3 pt-2">
+    <div>
+      <label class="form-label">{{ translate.instant('label_order_id') }} *</label>
+      <p-inputnumber
+        formControlName="orderId"
+        [min]="1"
+        [useGrouping]="false"
+        styleClass="w-100"
+        [placeholder]="translate.instant('label_order_id')"
+      />
+    </div>
+
+    <div>
+      <label class="form-label">{{ translate.instant('label_delivery_fee') }}</label>
+      <p-inputnumber
+        formControlName="deliveryFee"
+        [min]="0"
+        [minFractionDigits]="2"
+        [maxFractionDigits]="2"
+        styleClass="w-100"
+        [placeholder]="translate.instant('label_delivery_fee')"
+      />
+    </div>
+
+    <div>
+      <label class="form-label">{{ translate.instant('label_estimated_delivery_time') }}</label>
+      <p-datepicker
+        formControlName="estimatedDeliveryTime"
+        [showTime]="true"
+        styleClass="w-100"
+        [placeholder]="translate.instant('label_estimated_delivery_time')"
+      />
+    </div>
+
+    <div>
+      <label class="form-label">{{ translate.instant('label_notes') }}</label>
+      <textarea
+        pTextarea
+        formControlName="notes"
+        rows="3"
+        class="w-100"
+        [placeholder]="translate.instant('label_notes')"
+      ></textarea>
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <p-button
+      [label]="translate.instant('label_cancel')"
+      severity="secondary"
+      [text]="true"
+      (onClick)="showCreateDialog.set(false)"
+    />
+    <p-button
+      [label]="translate.instant('label_create_delivery')"
+      icon="pi pi-check"
+      [loading]="deliveryService.loadingSave()"
+      [disabled]="createForm.invalid"
+      (onClick)="submitCreate()"
+    />
+  </ng-template>
+</p-dialog>

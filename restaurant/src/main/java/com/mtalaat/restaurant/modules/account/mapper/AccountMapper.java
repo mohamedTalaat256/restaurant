@@ -19,6 +19,7 @@ public class AccountMapper {
                 .balance(account.getBalance())
                 .parentId(account.getParent() != null ? account.getParent().getId() : null)
                 .parentName(account.getParent() != null ? account.getParent().getName() : null)
+                .updatedAt(account.getUpdatedAt())
                 .build();
     }
 }

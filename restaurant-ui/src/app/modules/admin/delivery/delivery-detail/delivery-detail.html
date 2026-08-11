@@ -1,0 +1,236 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+@if (deliveryService.loading()) {
+  <div class="d-flex justify-content-center p-5">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+  </div>
+} @else if (delivery) {
+  <!-- Header -->
+  <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+    <p-button icon="pi pi-arrow-left" [text]="true" (click)="goBack()" />
+    <h4 class="m-0">{{ translate.instant('label_delivery') }} # {{ delivery.orderNumber }}</h4>
+    <p-tag [value]="delivery.status" [severity]="getStatusSeverity(delivery.status)" />
+    <div class="ms-auto d-flex gap-2 flex-wrap">
+      @if (canAssign()) {
+        <p-button
+          [label]="translate.instant('label_assign_driver')"
+          icon="pi pi-user-plus"
+          severity="info"
+          (onClick)="showAssignDialog.set(true)"
+        />
+      }
+      @if (canReassign()) {
+        <p-button
+          [label]="translate.instant('label_reassign_driver')"
+          icon="pi pi-user-edit"
+          severity="warn"
+          (onClick)="showReassignDialog.set(true)"
+        />
+      }
+      @if (canComplete()) {
+        <p-button
+          [label]="translate.instant('label_complete_delivery')"
+          icon="pi pi-check"
+          severity="success"
+          [loading]="deliveryService.loadingSave()"
+          (onClick)="completeDelivery()"
+        />
+      }
+      @if (canCancel()) {
+        <p-button
+          [label]="translate.instant('label_cancel_delivery')"
+          icon="pi pi-times"
+          severity="danger"
+          [outlined]="true"
+          (onClick)="showCancelDialog.set(true)"
+        />
+      }
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Delivery Info -->
+    <div class="col-md-4 mb-4">
+      <p-card [header]="translate.instant('label_delivery_info')">
+        <div class="d-flex flex-column gap-2">
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">{{ translate.instant('label_order_number') }}</span>
+            <span class="font-semibold"># {{ delivery.orderNumber }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">{{ translate.instant('label_delivery_fee') }}</span>
+            <span>{{ delivery.deliveryFee ?? '—' }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">{{ translate.instant('label_estimated_delivery_time') }}</span>
+            <span>{{ (delivery.estimatedDeliveryTime | date: 'short') ?? '—' }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">{{ translate.instant('label_actual_delivery_time') }}</span>
+            <span>{{ (delivery.actualDeliveryTime | date: 'short') ?? '—' }}</span>
+          </div>
+          @if (delivery.notes) {
+            <p-divider />
+            <div>
+              <span class="text-muted d-block mb-1">{{ translate.instant('label_notes') }}</span>
+              <span>{{ delivery.notes }}</span>
+            </div>
+          }
+          <p-divider />
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">{{ translate.instant('label_created_at') }}</span>
+            <span>{{ delivery.createdAt | date: 'short' }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">{{ translate.instant('label_updated_at') }}</span>
+            <span>{{ delivery.updatedAt | date: 'short' }}</span>
+          </div>
+        </div>
+      </p-card>
+    </div>
+
+    <!-- Driver Info -->
+    <div class="col-md-4 mb-4">
+      <p-card [header]="translate.instant('label_driver_info')">
+        @if (delivery.driver) {
+          <div class="d-flex flex-column gap-2">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <i class="pi pi-user" style="font-size: 1.5rem"></i>
+              <span class="font-semibold" style="font-size: 1.1rem">{{ delivery.driver.fullName }}</span>
+            </div>
+            <p-divider />
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">{{ translate.instant('label_phone') }}</span>
+              <span>{{ delivery.driver.phone }}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">{{ translate.instant('label_vehicle_type') }}</span>
+              <span>{{ delivery.driver.vehicleType }}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">{{ translate.instant('label_vehicle_plate') }}</span>
+              <span>{{ delivery.driver.vehiclePlate }}</span>
+            </div>
+            <p-divider />
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">{{ translate.instant('label_assigned_at') }}</span>
+              <span>{{ (delivery.assignedAt | date: 'short') ?? '—' }}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">{{ translate.instant('label_accepted_at') }}</span>
+              <span>{{ (delivery.acceptedAt | date: 'short') ?? '—' }}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">{{ translate.instant('label_picked_up_at') }}</span>
+              <span>{{ (delivery.pickedUpAt | date: 'short') ?? '—' }}</span>
+            </div>
+          </div>
+        } @else {
+          <div class="d-flex flex-column align-items-center gap-2 p-3 text-muted">
+            <i class="pi pi-user-minus" style="font-size: 2rem"></i>
+            <span>{{ translate.instant('label_no_driver_assigned') }}</span>
+          </div>
+        }
+      </p-card>
+    </div>
+
+    <!-- Status Timeline -->
+    <div class="col-md-4 mb-4">
+      <p-card [header]="translate.instant('label_status_timeline')">
+        <ul class="delivery-timeline list-unstyled m-0">
+          @for (step of statusTimeline; track step.status) {
+            <li
+              class="timeline-item"
+              [class.reached]="isStatusReached(step.status)"
+              [class.current]="delivery.status === step.status"
+            >
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <span class="timeline-label">{{ translate.instant(step.label) }}</span>
+              </div>
+            </li>
+          }
+          @if (delivery.status === 'CANCELLED') {
+            <li class="timeline-item timeline-cancelled">
+              <div class="timeline-dot danger"></div>
+              <div class="timeline-content">
+                <span class="timeline-label">{{ translate.instant('label_status_cancelled') }}</span>
+                <span class="text-muted ms-2 text-sm">
+                  {{ (delivery.cancelledAt | date: 'short') ?? '' }}
+                </span>
+              </div>
+            </li>
+          }
+          @if (delivery.status === 'FAILED') {
+            <li class="timeline-item timeline-failed">
+              <div class="timeline-dot danger"></div>
+              <div class="timeline-content">
+                <span class="timeline-label">{{ translate.instant('label_status_failed') }}</span>
+              </div>
+            </li>
+          }
+        </ul>
+      </p-card>
+    </div>
+  </div>
+
+  <!-- Live Tracking Map -->
+  @if (showTrackingMap()) {
+    <div class="mb-4">
+      <app-delivery-tracking-map [deliveryId]="delivery.id" [deliveryStatus]="delivery.status" />
+    </div>
+  }
+}
+
+<!-- Assign Driver Dialog -->
+<app-assign-driver-dialog
+  [deliveryId]="deliveryId"
+  [visible]="showAssignDialog()"
+  (visibleChange)="showAssignDialog.set(!!$event)"
+  (assigned)="onDriverAssigned()"
+/>
+
+<!-- Reassign Driver Dialog -->
+<app-reassign-driver-dialog
+  [deliveryId]="deliveryId"
+  [visible]="showReassignDialog()"
+  (visibleChange)="showReassignDialog.set(!!$event)"
+  (reassigned)="onDriverReassigned()"
+/>
+
+<!-- Cancel Dialog -->
+<p-dialog
+  [header]="translate.instant('label_cancel_delivery')"
+  [visible]="showCancelDialog()"
+  (visibleChange)="showCancelDialog.set(!!$event)"
+  [modal]="true"
+  [style]="{ width: '420px' }"
+>
+  <div class="d-flex flex-column gap-3 pt-2">
+    <label>{{ translate.instant('label_cancel_reason') }} *</label>
+    <textarea
+      pTextarea
+      [(ngModel)]="cancelReason"
+      rows="3"
+      class="w-100"
+      [placeholder]="translate.instant('label_cancel_reason')"
+    ></textarea>
+  </div>
+  <ng-template #footer>
+    <p-button
+      [label]="translate.instant('label_cancel')"
+      severity="secondary"
+      [text]="true"
+      (onClick)="showCancelDialog.set(false)"
+    />
+    <p-button
+      [label]="translate.instant('label_confirm')"
+      icon="pi pi-check"
+      severity="danger"
+      [disabled]="!cancelReason.trim()"
+      [loading]="deliveryService.loadingSave()"
+      (onClick)="onCancelSubmit()"
+    />
+  </ng-template>
+</p-dialog>

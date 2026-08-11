@@ -2,6 +2,7 @@ package com.mtalaat.restaurant.modules.order.controller;
 
 import com.mtalaat.restaurant.modules.auth.entity.User;
 import com.mtalaat.restaurant.modules.auth.security.PermissionChecker;
+import com.mtalaat.restaurant.modules.account.dto.JournalEntryDTO;
 import com.mtalaat.restaurant.modules.order.dto.*;
 import com.mtalaat.restaurant.modules.order.enums.OrderStatus;
 import com.mtalaat.restaurant.modules.order.service.OrderService;
@@ -158,10 +159,10 @@ public class OrderController {
             @PathVariable Long id,
             @Valid @RequestBody CheckoutDto dto) {
         permissionChecker.checkEdit(menuId);
-        PaymentDto payment = orderService.checkout(id, dto);
+        JournalEntryDTO journalEntry = orderService.checkout(id, dto);
         HttpStatus status = HttpStatus.OK;
         return ResponseEntity.status(status)
-                .body(ApiResponse.success("msg_order_checked_out", payment, status.value()));
+                .body(ApiResponse.success("msg_order_checked_out", journalEntry, status.value()));
     }
 
     // ─────────────────────────────────────────────

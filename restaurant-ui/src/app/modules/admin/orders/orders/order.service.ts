@@ -7,7 +7,6 @@ import {
   Order,
   OrderStatus,
   OrderTracking,
-  Payment,
   CreateOrderRequest,
   OrderItemRequest,
   CheckoutRequest,
@@ -16,6 +15,7 @@ import {
   KitchenOrder,
   KitchenOrderStatus,
 } from '../../../../core/model/order.model';
+import { JournalEntry } from '../../../../core/model/journal-entry.model';
 import { env } from '../../../../../environment/env';
 
 @Injectable({ providedIn: 'root' })
@@ -25,7 +25,7 @@ export class OrderService {
   kitchenOrders = signal<KitchenOrder[]>([]);
   kitchenOrder = signal<KitchenOrder | null>(null);
   tracking = signal<OrderTracking | null>(null);
-  payment = signal<Payment | null>(null);
+  journalEntry = signal<JournalEntry | null>(null);
 
   loading = signal(false);
   loadingSave = signal(false);
@@ -202,13 +202,13 @@ export class OrderService {
     });
   }
 
-  checkoutOrder(orderId: number, req: CheckoutRequest, onSuccess?: (payment: Payment) => void) {
+  checkoutOrder(orderId: number, req: CheckoutRequest, onSuccess?: (journalEntry: JournalEntry) => void) {
     this.loadingSave.set(true);
-    this.http.post<ApiResponse<Payment>>(`${this.baseUrl}/${orderId}/checkout`, req).subscribe({
+    this.http.post<ApiResponse<JournalEntry>>(`${this.baseUrl}/${orderId}/checkout`, req).subscribe({
       next: (res) => {
         this.loadingSave.set(false);
         if (res.status) {
-          this.payment.set(res.data);
+          this.journalEntry.set(res.data);
           this.orders.update(list => list.map(o => o.id === orderId ? { ...o, status: 'CHECKED_OUT' } : o));
           this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
           onSuccess?.(res.data);

@@ -68,9 +68,9 @@ export class OrderDetail implements OnInit, OnDestroy {
   }
 
   private startPolling(id: number) {
-    this.pollingInterval = setInterval(() => {
+   /*  this.pollingInterval = setInterval(() => {
       this.orderService.loadTracking(id);
-    }, 5000);
+    }, 5000); */
   }
 
   private stopPolling() {

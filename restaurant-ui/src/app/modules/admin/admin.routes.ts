@@ -43,6 +43,10 @@ import { TrialBalanceComponent } from "./accounts/financial-reports/trial-balanc
 import { ProfitLossComponent } from "./accounts/financial-reports/profit-loss/profit-loss";
 import { BalanceSheetComponent } from "./accounts/financial-reports/balance-sheet/balance-sheet";
 import { YearEndClosingComponent } from "./accounts/financial-reports/year-end-closing/year-end-closing";
+import { Deliveries } from "./delivery/deliveries/deliveries";
+import { DeliveryDetail } from "./delivery/delivery-detail/delivery-detail";
+import { Drivers } from "./delivery/drivers/drivers";
+import { DriverDetail } from "./delivery/driver-detail/driver-detail";
 
 export const ADMIN_ROUTES: Routes = [
   {
@@ -112,6 +116,12 @@ export const ADMIN_ROUTES: Routes = [
       {path:'kitchen-dashboard', component: KitchenDashboard},
       {path:'cash-counters', component: CashCounters},
       {path:'cash-registers', component: CashRegisters},
+
+      /* delivery */
+      {path:'deliveries', component: Deliveries},
+      {path:'deliveries/:id', component: DeliveryDetail},
+      {path:'drivers', component: Drivers},
+      {path:'drivers/:id', component: DriverDetail},
     ],
 
   }

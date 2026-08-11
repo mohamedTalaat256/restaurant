@@ -12,10 +12,13 @@ import com.mtalaat.restaurant.modules.foodManagement.repository.ItemFoodVariantR
 import com.mtalaat.restaurant.modules.order.dto.*;
 import com.mtalaat.restaurant.modules.order.entity.*;
 import com.mtalaat.restaurant.modules.order.enums.*;
+import com.mtalaat.restaurant.modules.account.dto.JournalEntryDTO;
+import com.mtalaat.restaurant.modules.account.entity.JournalEntry;
+import com.mtalaat.restaurant.modules.account.mapper.JournalMapper;
+import com.mtalaat.restaurant.modules.account.service.FinancialPostingService;
 import com.mtalaat.restaurant.modules.order.mapping.OrderMapper;
 import com.mtalaat.restaurant.modules.order.repository.KitchenOrderRepository;
 import com.mtalaat.restaurant.modules.order.repository.OrderRepository;
-import com.mtalaat.restaurant.modules.order.repository.PaymentRepository;
 import com.mtalaat.restaurant.modules.settings.entity.Customer;
 import com.mtalaat.restaurant.modules.settings.entity.Kitchen;
 import com.mtalaat.restaurant.modules.settings.entity.RestaurantTable;
@@ -37,7 +40,8 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final KitchenOrderRepository kitchenOrderRepository;
-    private final PaymentRepository paymentRepository;
+    private final FinancialPostingService financialPostingService;
+    private final JournalMapper journalMapper;
     private final ItemFoodRepository itemFoodRepository;
     private final ItemFoodVariantRepository itemFoodVariantRepository;
     private final ItemFoodAddOnsRepository itemFoodAddOnsRepository;
@@ -327,38 +331,25 @@ public class OrderService {
     // CHECKOUT
     // ─────────────────────────────────────────────
 
-    public PaymentDto checkout(Long orderId, CheckoutDto dto) {
+    public JournalEntryDTO checkout(Long orderId, CheckoutDto dto) {
         Order order = findOrderOrThrow(orderId);
 
         if (!OrderStatus.COMPLETED.equals(order.getStatus())) {
             throw new BadRequestException("Cannot checkout order that is not completed");
         }
 
-        double totalAmount = order.getTotalAmount();
-        double paidAmount = dto.getPaidAmount();
-        double remainingAmount = Math.max(0, totalAmount - paidAmount);
-        double changeAmount = Math.max(0, paidAmount - totalAmount);
+        JournalEntry journalEntry = financialPostingService.postOrderSale(
+                dto.getPaidAmount(),
+                order.getOrderNumber(),
+                dto.isCash()
+        );
 
-        PaymentStatus paymentStatus = remainingAmount > 0 ? PaymentStatus.PARTIALLY_PAID : PaymentStatus.PAID;
-
-        Payment payment = Payment.builder()
-                .order(order)
-                .paymentMethod(dto.getPaymentMethod())
-                .totalAmount(totalAmount)
-                .paidAmount(paidAmount)
-                .remainingAmount(remainingAmount)
-                .changeAmount(changeAmount)
-                .status(paymentStatus)
-                .build();
-
-        payment = paymentRepository.save(payment);
-
-        if (PaymentStatus.PAID.equals(paymentStatus)) {
+        if (dto.getPaidAmount().compareTo(java.math.BigDecimal.valueOf(order.getTotalAmount())) >= 0) {
             order.setStatus(OrderStatus.CHECKED_OUT);
             orderRepository.save(order);
         }
 
-        return toPaymentDto(payment);
+        return journalMapper.toDTO(journalEntry);
     }
 
     // ─────────────────────────────────────────────
@@ -620,18 +611,5 @@ public class OrderService {
         return "ORD-" + datePart + "-" + String.format("%04d", id);
     }
 
-    private PaymentDto toPaymentDto(Payment payment) {
-        return PaymentDto.builder()
-                .id(payment.getId())
-                .orderId(payment.getOrder().getId())
-                .orderNumber(payment.getOrder().getOrderNumber())
-                .paymentMethod(payment.getPaymentMethod())
-                .totalAmount(payment.getTotalAmount())
-                .paidAmount(payment.getPaidAmount())
-                .remainingAmount(payment.getRemainingAmount())
-                .changeAmount(payment.getChangeAmount())
-                .status(payment.getStatus())
-                .createdAt(payment.getCreatedAt())
-                .build();
-    }
 }
+

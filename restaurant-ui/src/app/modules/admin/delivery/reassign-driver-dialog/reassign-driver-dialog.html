@@ -1,0 +1,65 @@
+<p-toast></p-toast>
+
+<p-dialog
+  [header]="translate.instant('label_reassign_driver')"
+  [visible]="visible"
+  (visibleChange)="visibleChange.emit($event)"
+  [modal]="true"
+  [style]="{ width: '460px' }"
+  [closable]="true"
+>
+  <form [formGroup]="form" class="d-flex flex-column gap-3 pt-2">
+    <div>
+      <label class="form-label">{{ translate.instant('label_select_driver') }} *</label>
+      @if (driverService.loading()) {
+        <div class="d-flex align-items-center gap-2">
+          <i class="pi pi-spin pi-spinner"></i>
+          <span class="text-muted">{{ translate.instant('label_loading') }}</span>
+        </div>
+      } @else if (noDrivers) {
+        <div class="text-danger">
+          <i class="pi pi-exclamation-triangle me-1"></i>
+          {{ translate.instant('label_no_available_drivers') }}
+        </div>
+      } @else {
+        <p-select
+          formControlName="newDriverId"
+          [options]="driverOptions"
+          [placeholder]="translate.instant('label_select_driver')"
+          styleClass="w-100"
+        />
+      }
+    </div>
+
+    <div>
+      <label class="form-label">{{ translate.instant('label_reason') }} *</label>
+      <textarea
+        pTextarea
+        formControlName="reason"
+        rows="3"
+        class="w-100"
+        [placeholder]="translate.instant('label_reassign_reason_placeholder')"
+      ></textarea>
+      @if (form.get('reason')?.invalid && form.get('reason')?.touched) {
+        <small class="text-danger">{{ translate.instant('label_reason_required') }}</small>
+      }
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <p-button
+      [label]="translate.instant('label_cancel')"
+      severity="secondary"
+      [text]="true"
+      (onClick)="close()"
+    />
+    <p-button
+      [label]="translate.instant('label_reassign_driver')"
+      icon="pi pi-user-edit"
+      severity="warn"
+      [disabled]="form.invalid || noDrivers"
+      [loading]="deliveryService.loadingSave()"
+      (onClick)="submit()"
+    />
+  </ng-template>
+</p-dialog>

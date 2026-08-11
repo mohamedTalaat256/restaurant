@@ -1,6 +1,7 @@
 package com.mtalaat.restaurant.modules.order.entity;
 
 import com.mtalaat.restaurant.modules.auth.entity.User;
+import com.mtalaat.restaurant.modules.delivery.entity.Delivery;
 import com.mtalaat.restaurant.modules.order.enums.OrderStatus;
 import com.mtalaat.restaurant.modules.order.enums.OrderType;
 import com.mtalaat.restaurant.modules.settings.entity.Customer;
@@ -84,9 +85,14 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<KitchenOrder> kitchenOrders = new ArrayList<>();
 
-    @Builder.Default
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<Payment> payments = new ArrayList<>();
+    /**
+     * The delivery record for this order, if it is of type DELIVERY.
+     * mappedBy: FK lives on the Delivery side.
+     * LAZY: delivery data is only needed in delivery-specific use-cases.
+     * No cascade: Delivery lifecycle is managed independently by DeliveryService.
+     */
+    @OneToOne(mappedBy = "order", fetch = FetchType.LAZY)
+    private Delivery delivery;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)

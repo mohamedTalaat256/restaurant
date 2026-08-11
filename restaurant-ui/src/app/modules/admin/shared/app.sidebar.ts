@@ -104,6 +104,15 @@ export class AppSidebar implements OnInit, OnDestroy {
               { label: this.translate.instant('label_cash_counters'), routerLink: ['/admin/cash-counters'] },
               { label: this.translate.instant('label_cash_registers'), routerLink: ['/admin/cash-registers'] }
             ]
+          },
+          {
+            label: this.translate.instant('label_delivery_module'),
+            icon: 'pi pi-fw pi-truck',
+            path: '/admin/deliveries',
+            items: [
+              { label: this.translate.instant('label_deliveries'), routerLink: ['/admin/deliveries'] },
+              { label: this.translate.instant('label_drivers'), routerLink: ['/admin/drivers'] },
+            ]
           }
 
         ],

@@ -20,7 +20,7 @@
 <div class="card p-4">
   <h2 class="text-2xl font-bold mb-4">{{ translate.instant('label_manage_accounts') }}</h2>
 
-  <p-tabs value="tree">
+  <p-tabs value="flat">
     <p-tablist>
       <p-tab value="tree">
         <i class="pi pi-sitemap mr-2"></i> {{ translate.instant('label_view_as_tree') }}
@@ -57,6 +57,7 @@
                 <th>{{ translate.instant('label_account_type') }}</th>
                 <th>{{ translate.instant('label_account_nature') }}</th>
                 <th>{{ translate.instant('label_account_balance') }}</th>
+                <th>{{ translate.instant('label_date') }}</th>
                 <th>{{ translate.instant('label_account_status') }}</th>
               </tr>
             </ng-template>
@@ -71,6 +72,7 @@
                   </p-tag>
                 </td>
                 <td class="font-bold text-lg">{{ account.balance + ' ' + currencySymbol }}</td>
+                <td class="font-bold text-lg">{{ account.updatedAt | date:'short' }}</td>
                 <td>
                   <i class="pi" [ngClass]="account.status ? 'pi-check-circle text-green-500' : 'pi-times-circle text-red-500'"></i>
                 </td>

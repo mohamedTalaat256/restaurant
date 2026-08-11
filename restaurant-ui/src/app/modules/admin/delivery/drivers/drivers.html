@@ -1,0 +1,111 @@
+<p-toast></p-toast>
+
+<p-toolbar class="mb-6">
+  <ng-template #start>
+    <h5 class="m-0">{{ translate.instant('label_drivers_management') }}</h5>
+  </ng-template>
+  <ng-template #end>
+    <p-button
+      icon="pi pi-refresh"
+      severity="secondary"
+      [text]="true"
+      [pTooltip]="translate.instant('label_refresh')"
+      (onClick)="driverService.loadDrivers()"
+    />
+  </ng-template>
+</p-toolbar>
+
+<p-table
+  #dt
+  [value]="driverService.drivers()"
+  [loading]="driverService.loading()"
+  [rows]="15"
+  [paginator]="true"
+  [globalFilterFields]="['fullName', 'phone', 'vehicleType', 'vehiclePlate', 'status']"
+  [tableStyle]="{ 'min-width': '60rem' }"
+  [rowHover]="true"
+  dataKey="id"
+  [showCurrentPageReport]="true"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} drivers"
+  [rowsPerPageOptions]="[15, 30, 50]"
+>
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <span class="text-muted">{{ translate.instant('label_all') }}</span>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          (input)="onGlobalFilter(dt, $event)"
+          [placeholder]="translate.instant('label_search')"
+        />
+      </p-iconfield>
+    </div>
+  </ng-template>
+
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="fullName">
+        {{ translate.instant('label_name') }} <p-sortIcon field="fullName" />
+      </th>
+      <th pSortableColumn="phone">
+        {{ translate.instant('label_phone') }} <p-sortIcon field="phone" />
+      </th>
+      <th pSortableColumn="vehicleType">
+        {{ translate.instant('label_vehicle_type') }} <p-sortIcon field="vehicleType" />
+      </th>
+      <th pSortableColumn="vehiclePlate">
+        {{ translate.instant('label_vehicle_plate') }} <p-sortIcon field="vehiclePlate" />
+      </th>
+      <th pSortableColumn="status">
+        {{ translate.instant('label_status') }} <p-sortIcon field="status" />
+      </th>
+      <th>{{ translate.instant('label_change_status') }}</th>
+      <th>{{ translate.instant('label_actions') }}</th>
+    </tr>
+  </ng-template>
+
+  <ng-template #body let-driver>
+    <tr [style]="{ cursor: 'pointer' }" (click)="goToDetail(driver)">
+      <td>
+        <div class="font-semibold">{{ driver.fullName }}</div>
+        <div class="text-sm text-muted">{{ driver.email }}</div>
+      </td>
+      <td>{{ driver.phone }}</td>
+      <td>
+        <p-tag [value]="driver.vehicleType" severity="secondary" />
+      </td>
+      <td>{{ driver.vehiclePlate }}</td>
+      <td>
+        <p-tag [value]="driver.status" [severity]="getStatusSeverity(driver.status)" />
+      </td>
+      <td (click)="$event.stopPropagation()">
+        <p-select
+          [options]="statusOptions"
+          [ngModel]="driver.status"
+          (ngModelChange)="onChangeStatus(driver, $event)"
+          [style]="{ minWidth: '130px' }"
+          [loading]="driverService.loadingSave()"
+        />
+      </td>
+      <td (click)="$event.stopPropagation()">
+        <p-button
+          icon="pi pi-eye"
+          [text]="true"
+          severity="info"
+          [pTooltip]="translate.instant('label_view')"
+          (onClick)="goToDetail(driver)"
+        />
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="7" class="text-center p-4">
+        {{ translate.instant('label_no_drivers') }}
+      </td>
+    </tr>
+  </ng-template>
+</p-table>

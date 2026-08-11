@@ -62,6 +62,9 @@ public class AccountParentCodes {
     @Value("${app.accounting.parent-sub-codes.inventory-sub-account}")
     private String inventorySubAccount;
 
+    @Value("${app.accounting.parent-codes.restaurant-sales}")
+    private String restaurantSales;
+
     // Level 2 - Equity
     @Value("${app.accounting.parent-codes.retained-earnings}")
     private String retainedEarnings;
