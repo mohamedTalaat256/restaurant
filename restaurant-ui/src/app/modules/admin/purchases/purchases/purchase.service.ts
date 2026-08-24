@@ -75,11 +75,11 @@ export class PurchaseService {
           this.loadingSave.set(false);
           this.purchaseDialog.set(false);
           this.savedSuccess.set(true);
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: res.message, life: 3000 });
         } else {
           this.loadingSave.set(false);
           this.error.set(res.message);
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loadingSave.set(false); }
@@ -96,11 +96,11 @@ export class PurchaseService {
           this.loadingSave.set(false);
           this.purchaseDialog.set(false);
           this.savedSuccess.set(true);
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: res.message, life: 3000 });
         } else {
           this.loadingSave.set(false);
           this.error.set(res.message);
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loadingSave.set(false); }
@@ -112,7 +112,7 @@ export class PurchaseService {
       next: (res: ApiResponse<any>) => {
         if (res.status) {
           this.purchases.update((items) => items.filter(item => item.id !== id));
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: res.message, life: 3000 });
         }
       },
       error: () => {}
@@ -127,9 +127,9 @@ export class PurchaseService {
           this.purchase.set(res.data);
           this.purchases.update((items) => items.map(item => item.id === res.data.id ? res.data : item));
           this.savedSuccess.set(true);
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: res.message, life: 3000 });
         } else {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
         this.loadingSave.set(false);
       },
@@ -143,9 +143,9 @@ export class PurchaseService {
       next: (res) => {
         if (res.status) {
           this.purchases.update((items) => items.map(item => item.id === res.data.id ? res.data : item));
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: res.message, life: 3000 });
         } else {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
         this.loadingSave.set(false);
       },

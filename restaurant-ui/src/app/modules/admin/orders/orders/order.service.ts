@@ -71,11 +71,11 @@ export class OrderService {
         this.loadingSave.set(false);
         if (res.status) {
           this.orders.update(list => [res.data, ...list]);
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: res.message, life: 3000 });
           this.savedSuccess.set(true);
           onSuccess?.(res.data);
         } else {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loadingSave.set(false); }
@@ -89,9 +89,9 @@ export class OrderService {
         this.loading.set(false);
         if (res.status) {
           this.orders.update(list => list.filter(o => o.id !== id));
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: res.message, life: 3000 });
         } else {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loading.set(false); }
@@ -107,9 +107,9 @@ export class OrderService {
         this.loadingSave.set(false);
         if (res.status) {
           this.order.set(res.data);
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: res.message, life: 3000 });
         } else {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loadingSave.set(false); }
@@ -123,9 +123,9 @@ export class OrderService {
         this.loadingSave.set(false);
         if (res.status) {
           this.order.set(res.data);
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: res.message, life: 3000 });
         } else {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loadingSave.set(false); }
@@ -141,7 +141,7 @@ export class OrderService {
         if (res.status) {
           this.order.set(res.data);
         } else {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loadingSave.set(false); }
@@ -156,10 +156,10 @@ export class OrderService {
       next: (res) => {
         this.loadingSave.set(false);
         if (res.status) {
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: res.message, life: 3000 });
           onSuccess?.(res.data);
         } else {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loadingSave.set(false); }
@@ -172,10 +172,10 @@ export class OrderService {
       next: (res) => {
         this.loadingSave.set(false);
         if (res.status) {
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: res.message, life: 3000 });
           onSuccess?.(res.data);
         } else {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loadingSave.set(false); }
@@ -192,10 +192,10 @@ export class OrderService {
         if (res.status) {
           this.order.set(res.data);
           this.orders.update(list => list.map(o => o.id === orderId ? res.data : o));
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: res.message, life: 3000 });
           onSuccess?.(res.data);
         } else {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loadingSave.set(false); }
@@ -210,10 +210,10 @@ export class OrderService {
         if (res.status) {
           this.journalEntry.set(res.data);
           this.orders.update(list => list.map(o => o.id === orderId ? { ...o, status: 'CHECKED_OUT' } : o));
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: res.message, life: 3000 });
           onSuccess?.(res.data);
         } else {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loadingSave.set(false); }
@@ -256,9 +256,9 @@ export class OrderService {
         this.loadingSave.set(false);
         if (res.status) {
           this.kitchenOrders.update(list => list.map(ko => ko.id === kitchenOrderId ? res.data : ko));
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: res.message, life: 3000 });
         } else {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loadingSave.set(false); }
@@ -272,9 +272,9 @@ export class OrderService {
         this.loadingSave.set(false);
         if (res.status) {
           this.kitchenOrders.update(list => list.map(ko => ko.id === kitchenOrderId ? res.data : ko));
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: res.message, life: 3000 });
         } else {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loadingSave.set(false); }
@@ -289,7 +289,7 @@ export class OrderService {
         if (res.status) {
           this.kitchenOrders.update(list => list.map(ko => ko.id === kitchenOrderId ? res.data : ko));
         } else {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loadingSave.set(false); }
@@ -304,7 +304,7 @@ export class OrderService {
         if (res.status) {
           this.kitchenOrders.update(list => list.map(ko => ko.id === kitchenOrderId ? res.data : ko));
         } else {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loadingSave.set(false); }
@@ -319,7 +319,7 @@ export class OrderService {
         if (res.status) {
           this.kitchenOrders.update(list => list.map(ko => ko.id === kitchenOrderId ? res.data : ko));
         } else {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loadingSave.set(false); }
@@ -334,7 +334,7 @@ export class OrderService {
         if (res.status) {
           this.kitchenOrders.update(list => list.map(ko => ko.id === kitchenOrderId ? res.data : ko));
         } else {
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loadingSave.set(false); }

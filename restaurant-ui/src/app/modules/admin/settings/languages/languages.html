@@ -33,10 +33,6 @@
         {{ translate.instant('label_name') }}
         <p-sortIcon field="name" />
       </th>
-      <th pSortableColumn="isDefault" style="width:4rem">
-        {{ translate.instant('label_is_default') }}
-        <p-sortIcon field="isDefault" />
-      </th>
       <th style="width: 6rem"></th>
     </tr>
   </ng-template>
@@ -44,10 +40,6 @@
     <tr>
       <td>{{ language.languageCode }}</td>
       <td>{{ language.name }} </td>
-      <td>
-        <p-tag [value]="language.isDefault ? translate.instant('label_yes') : translate.instant('label_no')"
-          [severity]="language.isDefault ? 'success' : 'info'"></p-tag>
-      </td>
       <td>
         <p-button icon="pi pi-pencil" class="m-inline-end-1" [rounded]="true" [outlined]="true" [showIfCanEdit]="menuItemId" (click)="editLanguage(language)" />
         <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" [showIfCanDelete]="menuItemId" (click)="deleteLanguage(language)" />
@@ -63,7 +55,6 @@
       <div class="mt-4 pt-3">
         <app-form-input [control]="$any(languageForm.get('name'))" label="label_name"> </app-form-input>
         <app-form-input [control]="$any(languageForm.get('languageCode'))" label="label_code"> </app-form-input>
-        <app-form-input [control]="$any(languageForm.get('isDefault'))" label="label_is_default" type="checkbox"> </app-form-input>
       </div>
     </form>
   </ng-template>

@@ -14,6 +14,4 @@ public class LanguageDto {
 
     @NotBlank(message = "Name is required")
     private String name;
-
-    private Boolean isDefault;
 }

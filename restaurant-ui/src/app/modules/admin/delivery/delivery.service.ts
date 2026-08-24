@@ -101,7 +101,7 @@ export class DeliveryService {
           this.messageService.add({
             severity: 'success',
             summary: this.translate.instant('label_successful'),
-            detail: this.translate.instant(res.message),
+            detail: res.message,
             life: 3000,
           });
           this.savedSuccess.set(true);
@@ -137,7 +137,7 @@ export class DeliveryService {
           this.messageService.add({
             severity: 'success',
             summary: this.translate.instant('label_successful'),
-            detail: this.translate.instant(res.message),
+            detail: res.message,
             life: 3000,
           });
           onSuccess?.();
@@ -172,7 +172,7 @@ export class DeliveryService {
           this.messageService.add({
             severity: 'success',
             summary: this.translate.instant('label_successful'),
-            detail: this.translate.instant(res.message),
+            detail: res.message,
             life: 3000,
           });
           onSuccess?.();
@@ -213,7 +213,7 @@ export class DeliveryService {
             this.messageService.add({
               severity: 'success',
               summary: this.translate.instant('label_successful'),
-              detail: this.translate.instant(res.message),
+              detail: res.message,
               life: 3000,
             });
             onSuccess?.();
@@ -250,7 +250,7 @@ export class DeliveryService {
             this.messageService.add({
               severity: 'success',
               summary: this.translate.instant('label_successful'),
-              detail: this.translate.instant(res.message),
+              detail: res.message,
               life: 3000,
             });
             onSuccess?.();

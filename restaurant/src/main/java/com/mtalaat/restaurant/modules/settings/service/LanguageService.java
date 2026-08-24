@@ -41,7 +41,6 @@ public class LanguageService {
                 .orElseThrow(() -> new ResourceNotFoundException("Language not found with code: " + code));
         entity.setName(dto.getName());
         entity.setLanguageCode(dto.getLanguageCode());
-        entity.setIsDefault(dto.getIsDefault() == null ? Boolean.FALSE : dto.getIsDefault());
         return languageMapper.toDto(languageRepository.save(entity));
     }
 

@@ -11,7 +11,6 @@ public class LanguageMapper {
         return LanguageDto.builder()
                 .languageCode(entity.getLanguageCode())
                 .name(entity.getName())
-                .isDefault(entity.getIsDefault())
                 .build();
     }
 
@@ -19,7 +18,6 @@ public class LanguageMapper {
         return Language.builder()
                 .languageCode(dto.getLanguageCode())
                 .name(dto.getName())
-                .isDefault(dto.getIsDefault() == null ? Boolean.FALSE : dto.getIsDefault())
                 .build();
     }
 }

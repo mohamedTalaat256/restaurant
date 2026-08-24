@@ -37,8 +37,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
       messageService.add({
         severity: 'error',
-        summary: messageKeyMap['label_error'] ,
-        detail: messageKeyMap[messageKey] || messageKey + ' (' + error.error?.message + ')',
+        summary: messageKeyMap['label_error'] + ': ' + (messageKeyMap[messageKey] || messageKey),
+        detail: error.error?.message || error.message || 'An unknown error occurred',
         life: 10000
       });
 

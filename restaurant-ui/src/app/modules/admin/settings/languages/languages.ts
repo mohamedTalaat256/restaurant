@@ -133,7 +133,6 @@ export class Languages implements OnInit {
     this.languageForm = this.fb.group({
       languageCode: [language.languageCode, Validators.required],
       name: [language.name, Validators.required],
-      isDefault: [language.isDefault],
     });
   }
 }

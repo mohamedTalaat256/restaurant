@@ -93,7 +93,13 @@ public class PurchaseService {
 
         if (purchase.getStatus() != PurchaseStatus.DRAFT) {
             throw new BadRequestException(
-                    "Purchase [" + purchaseId + "] cannot be approved from status: " + purchase.getStatus());
+                    languageTranslationService.get("label_purchase")
+                            +" ["
+                            + purchaseId
+                            + "]"
+                            + languageTranslationService.get("error_cannot_be_approved_from_status")
+                            +" "
+                            + languageTranslationService.get(String.valueOf(purchase.getStatus())));
         }
 
         // 1. Change status
@@ -155,8 +161,7 @@ public class PurchaseService {
         Purchase purchase = findPurchase(purchaseId);
 
         if (purchase.getStatus() != PurchaseStatus.APPROVED) {
-            throw new BadRequestException(
-                    "Only APPROVED purchases can be voided. Current status: " + purchase.getStatus());
+            throw new BadRequestException(languageTranslationService.get("error_only_approved_purchases_can_be_voided"));
         }
 
         // 1. Change status
@@ -170,9 +175,20 @@ public class PurchaseService {
             double reversedQty = item.getQuantity();
 
             if (currentQty < reversedQty) {
+
                 throw new BadRequestException(
-                        "Insufficient stock to reverse ingredient [" + ingredient.getName() + "]. " +
-                        "Current: " + currentQty + ", Required reversal: " + reversedQty);
+                        languageTranslationService.get("error_insufficient_stock_to_reverse_ingredient")
+                                + " ["
+                                + ingredient.getName()
+                                + "]. "
+                                + languageTranslationService.get("error_current_stock")
+                                + ": "
+                                + currentQty
+                                + ", "
+                                + languageTranslationService.get("error_required_reversal")
+                                + ": "
+                                + reversedQty
+                ); 
             }
 
             double newQty = currentQty - reversedQty;
@@ -222,7 +238,7 @@ public class PurchaseService {
         Purchase existing = findPurchase(purchaseId);
 
         if (existing.getStatus() == PurchaseStatus.VOIDED) {
-            throw new BadRequestException("A VOIDED purchase cannot be modified.");
+            throw new BadRequestException(languageTranslationService.get("error_voided_purchase_cannot_be_modified"));
         }
 
         if (existing.getStatus() == PurchaseStatus.APPROVED) {
@@ -271,7 +287,7 @@ public class PurchaseService {
     public void delete(Long id) {
         Purchase entity = findPurchase(id);
         if (entity.getStatus() == PurchaseStatus.APPROVED) {
-            throw new BadRequestException("An APPROVED purchase cannot be deleted. Void it first.");
+            throw new BadRequestException(languageTranslationService.get("error_approved_purchase_cannot_be_deleted"));
         }
         purchaseRepository.delete(entity);
     }
@@ -282,12 +298,12 @@ public class PurchaseService {
 
     private Purchase findPurchase(Long id) {
         return purchaseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Purchase not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(languageTranslationService.get("error_purchase_not_found") + id));
     }
 
     private Supplier findSupplier(Long id) {
         return supplierRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Supplier not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(languageTranslationService.get("error_supplier_not_found") + id));
     }
 
     /**
@@ -308,7 +324,7 @@ public class PurchaseService {
                 if (isSelf) return;
             }
             throw new BadRequestException(
-                    "Invoice number [" + invoiceNumber + "] already exists for this supplier.");
+                    languageTranslationService.get("error_duplicate_invoice_number") + " [" + invoiceNumber + "]");
         }
     }
 

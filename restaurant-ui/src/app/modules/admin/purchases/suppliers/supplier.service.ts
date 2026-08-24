@@ -50,11 +50,11 @@ export class SupplierService {
           this.loadingSave.set(false);
           this.supplierDialog.set(false);
           this.savedSuccess.set(true);
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: res.message, life: 3000 });
         } else {
           this.loadingSave.set(false);
           this.error.set(res.message);
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loadingSave.set(false); }
@@ -71,11 +71,11 @@ export class SupplierService {
           this.loadingSave.set(false);
           this.supplierDialog.set(false);
           this.savedSuccess.set(true);
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: res.message, life: 3000 });
         } else {
           this.loadingSave.set(false);
           this.error.set(res.message);
-          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: res.message, life: 3000 });
         }
       },
       error: () => { this.loadingSave.set(false); }
@@ -87,7 +87,7 @@ export class SupplierService {
       next: (res: ApiResponse<any>) => {
         if (res.status) {
           this.suppliers.update((items) => items.filter(item => item.id !== id));
-          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: res.message, life: 3000 });
         }
       },
       error: () => {}

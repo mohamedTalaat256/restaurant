@@ -78,4 +78,9 @@ public class ApplicationSettingService {
         return applicationSettingMapper.toDto(applicationSettingRepository.save(entity));
     }
 
+
+    public String GetCurrentLanguageCode() {
+        ApplicationSetting entity = applicationSettingRepository.findFirstByOrderByIdAsc();
+        return entity.getLanguage().getLanguageCode();
+    }
 }

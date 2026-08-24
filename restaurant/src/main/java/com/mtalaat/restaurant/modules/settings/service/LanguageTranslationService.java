@@ -40,7 +40,7 @@ public class LanguageTranslationService {
     }
 
     public List<LanguageTranslationDto> getAll() {
-        return languageTranslationRepository.findAll().stream().map(languageTranslationMapper::toDto).toList();
+        return languageTranslationRepository.findAllByLanguageCode(applicationSettingService.GetCurrentLanguageCode()).stream().map(languageTranslationMapper::toDto).toList();
     }
 
     public LanguageTranslationDto update(Long id, LanguageTranslationDto dto) {

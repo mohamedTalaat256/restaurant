@@ -50,7 +50,7 @@ export class ItemFoodVariantService {
           this.messageService.add({
             severity: 'success',
             summary: this.translate.instant('label_successful'),
-            detail: this.translate.instant(res.message),
+            detail: res.message,
             life: 3000
           });
         } else {
@@ -59,7 +59,7 @@ export class ItemFoodVariantService {
           this.messageService.add({
             severity: 'error',
             summary: this.translate.instant('label_failed'),
-            detail: this.translate.instant(res.message),
+            detail: res.message,
             life: 3000
           });
         }
@@ -86,7 +86,7 @@ export class ItemFoodVariantService {
           this.messageService.add({
             severity: 'success',
             summary: this.translate.instant('label_successful'),
-            detail: this.translate.instant(res.message),
+            detail: res.message,
             life: 3000
           });
         } else {
@@ -95,7 +95,7 @@ export class ItemFoodVariantService {
           this.messageService.add({
             severity: 'error',
             summary: this.translate.instant('label_failed'),
-            detail: this.translate.instant(res.message),
+            detail: res.message,
             life: 3000
           });
         }
@@ -114,7 +114,7 @@ export class ItemFoodVariantService {
           this.messageService.add({
             severity: 'success',
             summary: this.translate.instant('label_successful'),
-            detail: this.translate.instant(res.message),
+            detail: res.message,
             life: 3000
           });
         }

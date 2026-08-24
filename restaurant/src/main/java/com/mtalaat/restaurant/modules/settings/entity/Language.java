@@ -17,8 +17,4 @@ public class Language {
 
     @Column(name = "name", nullable = false)
     private String name;
-
-    @Builder.Default
-    @Column(name = "is_default", nullable = false)
-    private Boolean isDefault = false;
 }
