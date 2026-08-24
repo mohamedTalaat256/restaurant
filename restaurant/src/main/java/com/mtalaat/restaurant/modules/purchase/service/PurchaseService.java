@@ -1,17 +1,24 @@
 package com.mtalaat.restaurant.modules.purchase.service;
 
+import com.mtalaat.restaurant.exceptions.BadRequestException;
 import com.mtalaat.restaurant.exceptions.ResourceNotFoundException;
 import com.mtalaat.restaurant.modules.account.entity.Account;
 import com.mtalaat.restaurant.modules.account.service.AccountParentCodes;
 import com.mtalaat.restaurant.modules.account.service.AccountService;
 import com.mtalaat.restaurant.modules.account.service.FinancialPostingService;
 import com.mtalaat.restaurant.modules.purchase.dto.PurchaseDto;
+import com.mtalaat.restaurant.modules.purchase.entity.Ingredient;
 import com.mtalaat.restaurant.modules.purchase.entity.Purchase;
 import com.mtalaat.restaurant.modules.purchase.entity.PurchaseItem;
 import com.mtalaat.restaurant.modules.purchase.entity.Supplier;
+import com.mtalaat.restaurant.modules.purchase.entity.SupplierLedger;
+import com.mtalaat.restaurant.modules.purchase.enums.PurchaseStatus;
+import com.mtalaat.restaurant.modules.purchase.enums.SupplierLedgerTransactionType;
 import com.mtalaat.restaurant.modules.purchase.mapping.PurchaseItemMapper;
 import com.mtalaat.restaurant.modules.purchase.mapping.PurchaseMapper;
+import com.mtalaat.restaurant.modules.purchase.repository.IngredientRepository;
 import com.mtalaat.restaurant.modules.purchase.repository.PurchaseRepository;
+import com.mtalaat.restaurant.modules.purchase.repository.SupplierLedgerRepository;
 import com.mtalaat.restaurant.modules.purchase.repository.SupplierRepository;
 import com.mtalaat.restaurant.modules.settings.entity.PaymentMethod;
 import com.mtalaat.restaurant.modules.settings.service.LanguageTranslationService;
@@ -20,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -28,110 +36,339 @@ public class PurchaseService {
 
     private final PurchaseRepository purchaseRepository;
     private final SupplierRepository supplierRepository;
+    private final IngredientRepository ingredientRepository;
+    private final SupplierLedgerRepository supplierLedgerRepository;
     private final PurchaseMapper purchaseMapper;
     private final PurchaseItemMapper purchaseItemMapper;
     private final AccountParentCodes accountParentCodes;
     private final FinancialPostingService financialPostingService;
     private final AccountService accountService;
-
+    private final CashService cashService;
     private final LanguageTranslationService languageTranslationService;
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // CREATE (saves as DRAFT)
+    // ─────────────────────────────────────────────────────────────────────────
 
     @Transactional
     public PurchaseDto create(PurchaseDto dto) {
 
-        Supplier supplier = supplierRepository.findById(dto.getSupplierId())
-                .orElseThrow(() -> new ResourceNotFoundException("Supplier not found with id: " + dto.getSupplierId()));
+        Supplier supplier = findSupplier(dto.getSupplierId());
+        validateUniqueInvoice(supplier.getId(), dto.getInvoiceNumber(), null);
+
         Purchase entity = purchaseMapper.toEntity(dto, dto.getPaymentMethod(), supplier);
-
-        //make money operation
-        BigDecimal totalAmount = BigDecimal.valueOf(calculateTotalAmount(entity.getItems()));
-
-        Account cashSubAccount =  accountService.findAccountByCode(accountParentCodes.getCashAndBank());
-        Account inventorySubAccount = accountService.findAccountByCode(accountParentCodes.getInventory());
-        if ( dto.getPaymentMethod() == PaymentMethod.CASH) {
-
-            financialPostingService.postSupplierPurchase(
-                    inventorySubAccount.getId(),
-                    cashSubAccount.getId(),
-                    totalAmount,
-                    dto.getInvoiceNumber(),
-                    Boolean.TRUE
-            );
-        }else{
-            BigDecimal paidAmount = new BigDecimal(dto.getPaidAmount());
-
-            // 1. أثبت الفاتورة بالكامل (totalAmount = 50) على حساب المورد كحركة آجلة
-            // المخزن سيزيد بـ 50 (Asset -> Debit) والمورد سيزيد بـ 50 (Liability -> Credit)
-            financialPostingService.postSupplierPurchase(
-                    inventorySubAccount.getId(),
-                    supplier.getAccount().getId(),
-                    totalAmount, // القيمة الكاملة للفاتورة (50)
-                    dto.getInvoiceNumber(),
-                    Boolean.FALSE         // false لأنها تثبت في حساب المورد أولاً
-            );
-
-            // 2. إذا كان هناك مبلغ مدفوع (paidAmount = 30) قم بعمل قيد السداد فوراً
-            // المورد يقل بـ 30 (Debit) والخزنة تقل بـ 30 (Credit)
-            if (dto.getPaidAmount().compareTo(0D) > 0) {
-                financialPostingService.postSupplierPayment(
-                        supplier.getAccount().getId(),
-                        cashSubAccount.getId(), // ID الخزنة الرئيسية
-                        paidAmount,   // المبلغ المدفوع (30)
-                        dto.getInvoiceNumber()  // مرجع الفاتورة
-                );
-            }
-        }
+        entity.setStatus(PurchaseStatus.DRAFT);
 
         return purchaseMapper.toDto(purchaseRepository.save(entity));
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // READ
+    // ─────────────────────────────────────────────────────────────────────────
+
     public PurchaseDto getById(Long id) {
-        Purchase entity = purchaseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Purchase not found with id: " + id));
-        return purchaseMapper.toDto(entity);
+        return purchaseMapper.toDto(findPurchase(id));
     }
 
     public List<PurchaseDto> getAll() {
         return purchaseRepository.findAll().stream().map(purchaseMapper::toDto).toList();
     }
 
-    public PurchaseDto update(Long id, PurchaseDto dto) {
-        Purchase entity = purchaseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Purchase not found with id: " + id));
-        Supplier supplier = supplierRepository.findById(dto.getSupplierId())
-                .orElseThrow(() -> new ResourceNotFoundException("Supplier not found with id: " + dto.getSupplierId()));
+    // ─────────────────────────────────────────────────────────────────────────
+    // APPROVE
+    // ─────────────────────────────────────────────────────────────────────────
 
-        try{
+    /**
+     * Approves a DRAFT purchase:
+     * 1. Changes status to APPROVED.
+     * 2. Increases ingredient stock quantities.
+     * 3. Recalculates moving-average cost for each ingredient.
+     * 4. Records a SupplierLedger entry (credit = remaining balance owed).
+     * 5. Deducts paidAmount from the restaurant treasury via CashService.
+     */
+    @Transactional
+    public PurchaseDto approvePurchase(Long purchaseId) {
 
+        Purchase purchase = findPurchase(purchaseId);
 
-            List<PurchaseItem> newItems = dto.getPurchaseItems()
-                    .stream()
-                    .map(purchaseItemMapper::toEntity)
-                    .toList();
-
-            entity.getItems().clear();
-            entity.getItems().addAll(newItems);
-
-            entity.setInvoiceNumber(dto.getInvoiceNumber());
-            entity.setPaymentMethod(dto.getPaymentMethod());
-            entity.setSupplier(supplier);
-            entity.setPurchaseDate(dto.getPurchaseDate());
-            entity.setExpiryDate(dto.getExpiryDate());
-            entity.setTotalAmount(calculateTotalAmount(newItems));
-            entity.setPaidAmount(dto.getPaidAmount());
-            entity.setNote(dto.getNote());
-
-            return purchaseMapper.toDto(purchaseRepository.save(entity));
-        }catch(Exception e){
-          e.printStackTrace();
+        if (purchase.getStatus() != PurchaseStatus.DRAFT) {
+            throw new BadRequestException(
+                    "Purchase [" + purchaseId + "] cannot be approved from status: " + purchase.getStatus());
         }
-       return null;
+
+        // 1. Change status
+        purchase.setStatus(PurchaseStatus.APPROVED);
+
+        // 2 & 3. Update stock and moving-average cost
+        for (PurchaseItem item : purchase.getItems()) {
+            Ingredient ingredient = item.getIngredient();
+
+            double oldQty  = ingredient.getStockQuantity();
+            double addedQty = item.getQuantity();
+            double newTotalCost = (oldQty * ingredient.getAverageCost()) + (addedQty * item.getPrice());
+            double newQty  = oldQty + addedQty;
+
+            ingredient.setStockQuantity(newQty);
+            ingredient.setAverageCost(newQty > 0 ? newTotalCost / newQty : 0.0);
+            ingredientRepository.save(ingredient);
+        }
+
+        purchaseRepository.save(purchase);
+
+        // 4. Supplier ledger — credit = outstanding balance (totalAmount - paidAmount)
+        double outstanding = purchase.getTotalAmount() - purchase.getPaidAmount();
+        recordSupplierLedger(
+                purchase.getSupplier(),
+                purchase.getInvoiceNumber(),
+                SupplierLedgerTransactionType.PURCHASE,
+                0.0,
+                outstanding
+        );
+
+        // 5. Deduct cash paid
+        if (purchase.getPaidAmount() > 0) {
+            cashService.deductCash(
+                    BigDecimal.valueOf(purchase.getPaidAmount()),
+                    purchase.getInvoiceNumber()
+            );
+        }
+
+        // Legacy accounting entries (kept from original implementation)
+        postAccountingEntries(purchase);
+
+        return purchaseMapper.toDto(purchase);
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // VOID (internal helper — also exposed for direct use)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Voids an APPROVED purchase (Void & Replace method):
+     * 1. Changes status to VOIDED.
+     * 2. Reverses stock quantities (deducts what was added).
+     * 3. Reverses the SupplierLedger entry.
+     * 4. Returns cash that was paid back to treasury.
+     */
+    @Transactional
+    public PurchaseDto voidPurchase(Long purchaseId) {
+        Purchase purchase = findPurchase(purchaseId);
+
+        if (purchase.getStatus() != PurchaseStatus.APPROVED) {
+            throw new BadRequestException(
+                    "Only APPROVED purchases can be voided. Current status: " + purchase.getStatus());
+        }
+
+        // 1. Change status
+        purchase.setStatus(PurchaseStatus.VOIDED);
+
+        // 2. Reverse stock quantities
+        for (PurchaseItem item : purchase.getItems()) {
+            Ingredient ingredient = item.getIngredient();
+
+            double currentQty  = ingredient.getStockQuantity();
+            double reversedQty = item.getQuantity();
+
+            if (currentQty < reversedQty) {
+                throw new BadRequestException(
+                        "Insufficient stock to reverse ingredient [" + ingredient.getName() + "]. " +
+                        "Current: " + currentQty + ", Required reversal: " + reversedQty);
+            }
+
+            double newQty = currentQty - reversedQty;
+            // Reverse moving-average cost
+            double newTotalCost = (currentQty * ingredient.getAverageCost()) - (reversedQty * item.getPrice());
+            ingredient.setStockQuantity(newQty);
+            ingredient.setAverageCost(newQty > 0 ? newTotalCost / newQty : 0.0);
+            ingredientRepository.save(ingredient);
+        }
+
+        purchaseRepository.save(purchase);
+
+        // 3. Reverse supplier ledger — debit cancels the previous credit
+        double outstanding = purchase.getTotalAmount() - purchase.getPaidAmount();
+        recordSupplierLedger(
+                purchase.getSupplier(),
+                purchase.getInvoiceNumber(),
+                SupplierLedgerTransactionType.VOIDED,
+                outstanding,
+                0.0
+        );
+
+        // 4. Return cash to treasury
+        if (purchase.getPaidAmount() > 0) {
+            cashService.addCash(
+                    BigDecimal.valueOf(purchase.getPaidAmount()),
+                    purchase.getInvoiceNumber()
+            );
+        }
+
+        return purchaseMapper.toDto(purchase);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // UPDATE (Void & Replace)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Updates an invoice using the accounting-safe "Void & Replace" strategy:
+     * - If the old invoice was APPROVED → void it first (reverse all effects).
+     * - Create a brand-new invoice with the updated data and approve it.
+     * - If the old invoice was still DRAFT → simply overwrite its data.
+     */
+    @Transactional
+    public PurchaseDto updatePurchase(Long purchaseId, PurchaseDto updatedDto) {
+
+        Purchase existing = findPurchase(purchaseId);
+
+        if (existing.getStatus() == PurchaseStatus.VOIDED) {
+            throw new BadRequestException("A VOIDED purchase cannot be modified.");
+        }
+
+        if (existing.getStatus() == PurchaseStatus.APPROVED) {
+            // Step 1: void the old approved purchase
+            voidPurchase(purchaseId);
+
+            // Step 2: create a new purchase record with the updated data
+            Supplier supplier = findSupplier(updatedDto.getSupplierId());
+            validateUniqueInvoice(supplier.getId(), updatedDto.getInvoiceNumber(), null);
+
+            Purchase newPurchase = purchaseMapper.toEntity(updatedDto, updatedDto.getPaymentMethod(), supplier);
+            newPurchase.setStatus(PurchaseStatus.DRAFT);
+            Purchase saved = purchaseRepository.save(newPurchase);
+
+            // Step 3: immediately approve the new purchase
+            return approvePurchase(saved.getId());
+        }
+
+        // DRAFT → simple field update (no stock/ledger effects yet)
+        Supplier supplier = findSupplier(updatedDto.getSupplierId());
+        validateUniqueInvoice(supplier.getId(), updatedDto.getInvoiceNumber(), purchaseId);
+
+        List<PurchaseItem> newItems = updatedDto.getPurchaseItems()
+                .stream()
+                .map(purchaseItemMapper::toEntity)
+                .toList();
+
+        existing.getItems().clear();
+        existing.getItems().addAll(newItems);
+        existing.setInvoiceNumber(updatedDto.getInvoiceNumber());
+        existing.setPaymentMethod(updatedDto.getPaymentMethod());
+        existing.setSupplier(supplier);
+        existing.setPurchaseDate(updatedDto.getPurchaseDate());
+        existing.setTotalAmount(calculateTotalAmount(newItems));
+        existing.setPaidAmount(updatedDto.getPaidAmount());
+        existing.setNote(updatedDto.getNote());
+
+        return purchaseMapper.toDto(purchaseRepository.save(existing));
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // DELETE
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @Transactional
     public void delete(Long id) {
-        Purchase entity = purchaseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Purchase not found with id: " + id));
+        Purchase entity = findPurchase(id);
+        if (entity.getStatus() == PurchaseStatus.APPROVED) {
+            throw new BadRequestException("An APPROVED purchase cannot be deleted. Void it first.");
+        }
         purchaseRepository.delete(entity);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // PRIVATE HELPERS
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private Purchase findPurchase(Long id) {
+        return purchaseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Purchase not found with id: " + id));
+    }
+
+    private Supplier findSupplier(Long id) {
+        return supplierRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier not found with id: " + id));
+    }
+
+    /**
+     * Validates that no non-VOIDED purchase exists for the same supplier + invoice number.
+     * When updating a DRAFT (excludeId != null), the current record is excluded from the check.
+     */
+    private void validateUniqueInvoice(Long supplierId, String invoiceNumber, Long excludeId) {
+        boolean duplicate = purchaseRepository
+                .existsBySupplierIdAndInvoiceNumberAndStatusNot(supplierId, invoiceNumber, PurchaseStatus.VOIDED);
+
+        if (duplicate) {
+            // If updating, the match could be the record itself — fetch to confirm
+            if (excludeId != null) {
+                boolean isSelf = purchaseRepository
+                        .findBySupplierIdAndInvoiceNumber(supplierId, invoiceNumber)
+                        .map(p -> p.getId().equals(excludeId))
+                        .orElse(false);
+                if (isSelf) return;
+            }
+            throw new BadRequestException(
+                    "Invoice number [" + invoiceNumber + "] already exists for this supplier.");
+        }
+    }
+
+    private void recordSupplierLedger(Supplier supplier,
+                                      String referenceId,
+                                      SupplierLedgerTransactionType type,
+                                      double debit,
+                                      double credit) {
+
+        double previousBalance = supplierLedgerRepository
+                .findLatestBySupplier(supplier.getId())
+                .map(SupplierLedger::getRunningBalance)
+                .orElse(0.0);
+
+        double runningBalance = previousBalance + credit - debit;
+
+        SupplierLedger entry = SupplierLedger.builder()
+                .supplier(supplier)
+                .transactionDate(LocalDate.now())
+                .transactionType(type)
+                .referenceId(referenceId)
+                .debit(debit)
+                .credit(credit)
+                .runningBalance(runningBalance)
+                .build();
+
+        supplierLedgerRepository.save(entry);
+    }
+
+    private void postAccountingEntries(Purchase purchase) {
+        BigDecimal totalAmount = BigDecimal.valueOf(purchase.getTotalAmount());
+        Account cashSubAccount = accountService.findAccountByCode(accountParentCodes.getCashAndBank());
+        Account inventorySubAccount = accountService.findAccountByCode(accountParentCodes.getInventory());
+
+        if (purchase.getPaymentMethod() == PaymentMethod.CASH) {
+            financialPostingService.postSupplierPurchase(
+                    inventorySubAccount.getId(),
+                    cashSubAccount.getId(),
+                    totalAmount,
+                    purchase.getInvoiceNumber(),
+                    Boolean.TRUE
+            );
+        } else {
+            financialPostingService.postSupplierPurchase(
+                    inventorySubAccount.getId(),
+                    purchase.getSupplier().getAccount().getId(),
+                    totalAmount,
+                    purchase.getInvoiceNumber(),
+                    Boolean.FALSE
+            );
+
+            if (purchase.getPaidAmount() > 0) {
+                financialPostingService.postSupplierPayment(
+                        purchase.getSupplier().getAccount().getId(),
+                        cashSubAccount.getId(),
+                        BigDecimal.valueOf(purchase.getPaidAmount()),
+                        purchase.getInvoiceNumber()
+                );
+            }
+        }
     }
 
     private Double calculateTotalAmount(List<PurchaseItem> items) {
@@ -140,3 +377,4 @@ public class PurchaseService {
                 .sum();
     }
 }
+

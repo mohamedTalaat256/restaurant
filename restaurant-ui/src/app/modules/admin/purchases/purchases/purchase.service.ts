@@ -8,6 +8,7 @@ import { Purchase } from '../../../../core/model/purchase.model';
 import { FormMode } from '../../../../core/enum/formModeEnum';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { PaymentMethod } from '../../../../core/enum/paymentMethod.enum';
 
 @Injectable({ providedIn: 'root' })
 export class PurchaseService {
@@ -27,6 +28,7 @@ export class PurchaseService {
   purchaseForm!: FormGroup;
   readonly translate = inject(TranslateService);
   private itemsSubscription?: Subscription;
+  private paymentMethodSubscription?: Subscription;
 
 
 
@@ -117,17 +119,63 @@ export class PurchaseService {
     });
   }
 
+  approvePurchase(id: number) {
+    this.loadingSave.set(true);
+    this.http.patch<ApiResponse<Purchase>>(env.apiUrl + '/purchase/purchases/' + id + '/approve', {}).subscribe({
+      next: (res) => {
+        if (res.status) {
+          this.purchase.set(res.data);
+          this.purchases.update((items) => items.map(item => item.id === res.data.id ? res.data : item));
+          this.savedSuccess.set(true);
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+        } else {
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+        }
+        this.loadingSave.set(false);
+      },
+      error: () => { this.loadingSave.set(false); }
+    });
+  }
+
+  voidPurchase(id: number) {
+    this.loadingSave.set(true);
+    this.http.patch<ApiResponse<Purchase>>(env.apiUrl + '/purchase/purchases/' + id + '/void', {}).subscribe({
+      next: (res) => {
+        if (res.status) {
+          this.purchases.update((items) => items.map(item => item.id === res.data.id ? res.data : item));
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('label_successful'), detail: this.translate.instant(res.message), life: 3000 });
+        } else {
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('label_failed'), detail: this.translate.instant(res.message), life: 3000 });
+        }
+        this.loadingSave.set(false);
+      },
+      error: () => { this.loadingSave.set(false); }
+    });
+  }
+
   recalCulateTotalAmount(){
     const items = this.purchaseForm.get('purchaseItems') as FormArray;
     const total = items.value.reduce((sum:number, item:any) => sum + ((item.quantity || 0) * (item.price || 0)), 0);
     this.totalAmount.set(total);
+    this.syncPaidAmountIfCash();
+  }
+
+  private syncPaidAmountIfCash() {
+    const method = this.purchaseForm.get('paymentMethod')?.value;
+    if (method === PaymentMethod.CASH) {
+      this.purchaseForm.get('paidAmount')?.setValue(this.totalAmount(), { emitEvent: false });
+    }
   }
 
   private subscribeToPurchaseItems() {
     this.itemsSubscription?.unsubscribe();
+    this.paymentMethodSubscription?.unsubscribe();
     const items = this.purchaseForm.get('purchaseItems') as FormArray;
     this.itemsSubscription = items.valueChanges.subscribe(() => {
       this.recalCulateTotalAmount();
+    });
+    this.paymentMethodSubscription = this.purchaseForm.get('paymentMethod')?.valueChanges.subscribe(() => {
+      this.syncPaidAmountIfCash();
     });
     this.recalCulateTotalAmount();
   }
@@ -139,7 +187,6 @@ export class PurchaseService {
       paymentMethod: [null, Validators.required],
       supplierId: [null, Validators.required],
       purchaseDate: [null, Validators.required],
-      expiryDate: [null],
       paidAmount: [0, Validators.required],
       note: [''],
       purchaseItems: this.fb.array([]),
@@ -154,7 +201,6 @@ export class PurchaseService {
       paymentMethod: [purchase.paymentMethod, Validators.required],
       supplierId: [purchase.supplierId, Validators.required],
       purchaseDate: [purchase.purchaseDate ? new Date(purchase.purchaseDate) : null, Validators.required],
-      expiryDate: [purchase.expiryDate ? new Date(purchase.expiryDate) : null],
       paidAmount: [purchase.paidAmount, Validators.required],
       note: [purchase.note],
       purchaseItems: this.fb.array(
@@ -163,6 +209,8 @@ export class PurchaseService {
           ingredientId: [item.ingredientId || item.ingredient?.id, Validators.required],
           quantity: [item.quantity, Validators.required],
           price: [item.price, Validators.required],
+          productionDate: [item.productionDate ? new Date(item.productionDate) : null],
+          expiryDate: [item.expiryDate ? new Date(item.expiryDate) : null],
         }))
       ),
     });

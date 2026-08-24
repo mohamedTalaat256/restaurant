@@ -5,6 +5,7 @@ import com.mtalaat.restaurant.modules.purchase.dto.PurchaseItemDto;
 import com.mtalaat.restaurant.modules.purchase.entity.Purchase;
 import com.mtalaat.restaurant.modules.purchase.entity.PurchaseItem;
 import com.mtalaat.restaurant.modules.purchase.entity.Supplier;
+import com.mtalaat.restaurant.modules.purchase.enums.PurchaseStatus;
 import com.mtalaat.restaurant.modules.settings.entity.PaymentMethod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -32,7 +33,7 @@ public class PurchaseMapper {
                 .supplierId(entity.getSupplier() != null ? entity.getSupplier().getId() : null)
                 .supplierName(entity.getSupplier() != null ? entity.getSupplier().getName() : null)
                 .purchaseDate(entity.getPurchaseDate())
-                .expiryDate(entity.getExpiryDate())
+                .status(entity.getStatus())
                 .totalAmount(totalAmount)
                 .paidAmount(entity.getPaidAmount())
                 .note(entity.getNote())
@@ -49,7 +50,7 @@ public class PurchaseMapper {
         entity.setPaymentMethod(paymentMethod);
         entity.setSupplier(supplier);
         entity.setPurchaseDate(dto.getPurchaseDate());
-        entity.setExpiryDate(dto.getExpiryDate());
+        entity.setStatus(PurchaseStatus.DRAFT);
         entity.setTotalAmount(calculateTotalAmount(purchaseItems));
         entity.setPaidAmount(dto.getPaidAmount());
         entity.setNote(dto.getNote());

@@ -1,6 +1,7 @@
 import { Supplier } from './supplier.model';
 import { PurchaseItem } from './purchase-item.model';
 import { PaymentMethod } from '../enum/paymentMethod.enum';
+import { PurchaseStatus } from '../enum/purchaseStatus.enum';
 
 export interface Purchase {
   id: number;
@@ -9,7 +10,7 @@ export interface Purchase {
   supplier: Supplier;
   supplierId: number;
   purchaseDate: string;
-  expiryDate?: string;
+  status: PurchaseStatus;
   totalAmount: number;
   paidAmount: number;
   note?: string;

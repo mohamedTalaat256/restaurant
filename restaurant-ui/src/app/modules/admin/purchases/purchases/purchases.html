@@ -28,9 +28,10 @@
       <th pSortableColumn="invoiceNumber" style="width:5rem">{{ translate.instant('label_invoice_number') }}<p-sortIcon field="invoiceNumber" /></th>
       <th pSortableColumn="supplier.name" style="width:5rem">{{ translate.instant('label_supplier') }}<p-sortIcon field="supplier.name" /></th>
       <th pSortableColumn="purchaseDate" style="width:5rem">{{ translate.instant('label_purchase_date') }}<p-sortIcon field="purchaseDate" /></th>
+      <th pSortableColumn="status" style="width:4rem">{{ translate.instant('label_status') }}<p-sortIcon field="status" /></th>
       <th pSortableColumn="totalAmount" style="width:4rem">{{ translate.instant('label_total_amount') }}<p-sortIcon field="totalAmount" /></th>
       <th pSortableColumn="paidAmount" style="width:4rem">{{ translate.instant('label_paid_amount') }}<p-sortIcon field="paidAmount" /></th>
-      <th style="width: 6rem"></th>
+      <th style="width: 8rem"></th>
     </tr>
   </ng-template>
   <ng-template #body let-purchase>
@@ -39,11 +40,29 @@
       <td>{{ purchase.invoiceNumber }}</td>
       <td>{{ purchase.supplierName }}</td>
       <td>{{ purchase.purchaseDate }}</td>
+      <td>
+        @if (purchase.status === PurchaseStatus.DRAFT) {
+          <p-tag severity="info" [value]="translate.instant('label_draft')" />
+        } @else if (purchase.status === PurchaseStatus.APPROVED) {
+          <p-tag severity="success" [value]="translate.instant('label_approved')" />
+        } @else if (purchase.status === PurchaseStatus.VOIDED) {
+          <p-tag severity="danger" [value]="translate.instant('label_voided')" />
+        }
+      </td>
       <td>{{ purchase.totalAmount }}</td>
       <td>{{ purchase.paidAmount }}</td>
       <td>
-        <p-button icon="pi pi-pencil" class="m-inline-end-1" [rounded]="true" [outlined]="true" [showIfCanEdit]="menuItemId" (click)="editPurchase(purchase)" />
-        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" [showIfCanDelete]="menuItemId" (click)="deletePurchase(purchase)" />
+        @if (purchase.status === PurchaseStatus.APPROVED) {
+          <p-button icon="pi pi-ban" severity="secondary" [rounded]="true" [outlined]="true"
+            [pTooltip]="translate.instant('label_void')" tooltipPosition="top"
+            class="m-inline-end-1" (click)="voidPurchase(purchase)" />
+        }
+        @if (purchase.status !== PurchaseStatus.VOIDED) {
+          <p-button icon="pi pi-pencil" class="m-inline-end-1" [rounded]="true" [outlined]="true" [showIfCanEdit]="menuItemId" (click)="editPurchase(purchase)" />
+        }
+        @if (purchase.status === PurchaseStatus.DRAFT) {
+          <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" [showIfCanDelete]="menuItemId" (click)="deletePurchase(purchase)" />
+        }
       </td>
     </tr>
   </ng-template>

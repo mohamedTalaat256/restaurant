@@ -1,6 +1,7 @@
 package com.mtalaat.restaurant.modules.purchase.entity;
 
 import com.mtalaat.restaurant.entity.BaseEntity;
+import com.mtalaat.restaurant.modules.purchase.enums.PurchaseStatus;
 import com.mtalaat.restaurant.modules.settings.entity.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,7 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "purchases")
+@Table(
+    name = "purchases",
+    uniqueConstraints = @UniqueConstraint(
+        name = "uk_supplier_invoice",
+        columnNames = {"supplier_id", "invoice_number"}
+    )
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,8 +36,9 @@ public class Purchase extends BaseEntity {
     @Column(name = "purchase_date", nullable = false)
     private LocalDate purchaseDate;
 
-    @Column(name = "expiry_date")
-    private LocalDate expiryDate;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private PurchaseStatus status = PurchaseStatus.DRAFT;
 
     @Column(name = "total_amount", nullable = false)
     private Double totalAmount;

@@ -20,6 +20,7 @@ import { ShowIfCanCreateDirective } from '../../../../core/directives/showIfCanC
 import { ShowIfCanEditDirective } from '../../../../core/directives/showIfCanEdit';
 import { ShowIfCanDeleteDirective } from '../../../../core/directives/showIfCanDelete';
 import { Router } from '@angular/router';
+import { PurchaseStatus } from '../../../../core/enum/purchaseStatus.enum';
 
 @Component({
   selector: 'app-purchases',
@@ -45,6 +46,7 @@ export class Purchases implements OnInit {
   private router = inject(Router);
 
   menuItemId: number = env.menuItems.find(item => item.name === 'purchases')?.id || 0;
+  readonly PurchaseStatus = PurchaseStatus;
 
   getTotalAmount(): number {
     return this.purchaseService.purchases().reduce((sum, p) => sum + (p.totalAmount || 0), 0);
@@ -79,6 +81,17 @@ export class Purchases implements OnInit {
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         this.purchaseService.deletePurchase(purchase.id);
+      }
+    });
+  }
+
+  voidPurchase(purchase: Purchase) {
+    this.confirmationService.confirm({
+      message: this.translate.instant('confirm_void_purchase'),
+      header: this.translate.instant('label_confrim'),
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.purchaseService.voidPurchase(purchase.id);
       }
     });
   }

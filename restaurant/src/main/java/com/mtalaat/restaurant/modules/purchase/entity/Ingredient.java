@@ -32,4 +32,8 @@ public class Ingredient {
     @Builder.Default
     @Column(name = "status", nullable = false)
     private Boolean status = true;
+
+    @Builder.Default
+    @Column(name = "average_cost", nullable = false)
+    private Double averageCost = 0.0;
 }

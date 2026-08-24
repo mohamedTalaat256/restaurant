@@ -51,10 +51,28 @@ public class PurchaseController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse> update(@PathVariable Long id, @Valid @RequestBody PurchaseDto dto) {
         permissionChecker.checkEdit(menuId);
-        PurchaseDto updated = purchaseService.update(id, dto);
+        PurchaseDto updated = purchaseService.updatePurchase(id, dto);
         HttpStatus status = HttpStatus.OK;
         return ResponseEntity.status(status)
                 .body(ApiResponse.success("msg_purchase_updated", updated, status.value()));
+    }
+
+    @PatchMapping("/{id}/approve")
+    public ResponseEntity<ApiResponse> approve(@PathVariable Long id) {
+        permissionChecker.checkEdit(menuId);
+        PurchaseDto approved = purchaseService.approvePurchase(id);
+        HttpStatus status = HttpStatus.OK;
+        return ResponseEntity.status(status)
+                .body(ApiResponse.success("msg_purchase_approved", approved, status.value()));
+    }
+
+    @PatchMapping("/{id}/void")
+    public ResponseEntity<ApiResponse> voidInvoice(@PathVariable Long id) {
+        permissionChecker.checkEdit(menuId);
+        PurchaseDto voided = purchaseService.voidPurchase(id);
+        HttpStatus status = HttpStatus.OK;
+        return ResponseEntity.status(status)
+                .body(ApiResponse.success("msg_purchase_voided", voided, status.value()));
     }
 
     @DeleteMapping("/{id}")

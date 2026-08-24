@@ -1,5 +1,6 @@
 package com.mtalaat.restaurant.modules.purchase.dto;
 
+import com.mtalaat.restaurant.modules.purchase.enums.PurchaseStatus;
 import com.mtalaat.restaurant.modules.settings.entity.PaymentMethod;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -32,7 +33,7 @@ public class PurchaseDto {
     @NotNull(message = "Purchase date is required")
     private LocalDate purchaseDate;
 
-    private LocalDate expiryDate;
+    private PurchaseStatus status;
 
     private Double totalAmount;
 

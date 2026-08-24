@@ -15,17 +15,20 @@ import { IngredientService } from '../ingredients/ingredient.service';
 import { DatePickerModule } from 'primeng/datepicker';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { PaymentMethod } from '../../../../core/enum/paymentMethod.enum';
+import { PurchaseStatus } from '../../../../core/enum/purchaseStatus.enum';
 
 @Component({
   selector: 'app-edit-purchase',
   imports: [CommonModule, ButtonModule,
     InputTextModule, TextareaModule, SelectModule,
     ProgressBarModule, DatePickerModule,
-    ReactiveFormsModule, FormInput, Toast],
+    ReactiveFormsModule, FormInput, Toast, ConfirmDialogModule],
   templateUrl: './edit-purchase.html',
   styleUrls: ['./edit-purchase.scss'],
-  providers: [MessageService],
+  providers: [MessageService, ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditPurchase implements OnInit {
@@ -38,8 +41,12 @@ export class EditPurchase implements OnInit {
   readonly translate = inject(TranslateService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private confirmationService = inject(ConfirmationService);
 
   isEditMode = false;
+  readonly PurchaseStatus = PurchaseStatus;
+
+  isVoided = computed(() => this.purchaseService.purchase()?.status === PurchaseStatus.VOIDED);
 
   constructor() {
     effect(() => {
@@ -87,6 +94,8 @@ export class EditPurchase implements OnInit {
       ingredientId: [null, Validators.required],
       quantity: [1, Validators.required],
       price: [null, Validators.required],
+      productionDate: [null],
+      expiryDate: [null],
     }));
   }
 
@@ -111,6 +120,18 @@ export class EditPurchase implements OnInit {
 
   goBack() {
     this.router.navigate(['/admin/purchases']);
+  }
+
+  approvePurchase() {
+    this.confirmationService.confirm({
+      message: this.translate.instant('confirm_approve_purchase'),
+      header: this.translate.instant('label_confrim'),
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        const id = this.purchaseService.purchase()?.id;
+        if (id) this.purchaseService.approvePurchase(id);
+      }
+    });
   }
 
 }

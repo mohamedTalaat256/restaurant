@@ -3,6 +3,8 @@ package com.mtalaat.restaurant.modules.purchase.dto;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -10,7 +12,6 @@ import lombok.*;
 public class PurchaseItemDto {
 
     private Long id;
-
 
     @NotNull(message = "Ingredient is required")
     private Long ingredientId;
@@ -22,4 +23,8 @@ public class PurchaseItemDto {
 
     @NotNull(message = "Price is required")
     private Double price;
+
+    private LocalDate productionDate;
+
+    private LocalDate expiryDate;
 }

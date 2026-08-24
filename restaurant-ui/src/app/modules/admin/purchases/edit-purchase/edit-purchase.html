@@ -1,4 +1,5 @@
 <p-toast></p-toast>
+<p-confirmdialog [style]="{ width: '450px' }" />
 
 @if(purchaseService.loading()) {
 <div class="loading-container">
@@ -23,10 +24,12 @@
       </div>
     </div>
     <div class="header-actions">
-      <p-button [label]="translate.instant('label_cancel')" icon="pi pi-arrow-left" severity="secondary"
-        [outlined]="true" (onClick)="goBack()" class="m-inline-end-1" />
-      <p-button [label]="translate.instant('label_save')" icon="pi pi-check" (onClick)="savePurchase()"
-        [loading]="purchaseService.loadingSave()" />
+      <p-button [label]="translate.instant('label_cancel')" icon="pi pi-arrow-left" severity="danger"
+        [outlined]="true" (onClick)="goBack()" />
+      @if (isEditMode && purchaseService.purchase()?.status === PurchaseStatus.DRAFT) {
+      <p-button [label]="translate.instant('label_approve')" icon="pi pi-check-circle" severity="success"
+        class="m-inline-start-1" (onClick)="approvePurchase()" [loading]="purchaseService.loadingSave()" />
+      }
     </div>
   </div>
 
@@ -42,8 +45,6 @@
       label="label_supplier" [options]="supplierOptions()" type="select" [filter]="true"></app-form-input>
     <app-form-input class="col-3" [control]="$any(purchaseService.purchaseForm.get('purchaseDate'))"
       label="label_purchase_date" type="date"></app-form-input>
-    <app-form-input class="col-3" [control]="$any(purchaseService.purchaseForm.get('expiryDate'))"
-      label="label_expiry_date" type="date"></app-form-input>
   </div>
 
   </div>
@@ -65,7 +66,7 @@
           <table class="purchase-table">
             <thead>
               <tr>
-                <th>
+                <th width="220px">
                   <i class="pi pi-tag"></i>
                   {{translate.instant('label_item')}}
                 </th>
@@ -76,6 +77,14 @@
                 <th>
                   <i class="pi pi-dollar"></i>
                   {{translate.instant('label_price')}}
+                </th>
+                <th>
+                  <i class="pi pi-calendar"></i>
+                  {{translate.instant('label_production_date')}}
+                </th>
+                <th>
+                  <i class="pi pi-calendar-times"></i>
+                  {{translate.instant('label_expiry_date')}}
                 </th>
                 <th class="action-col"></th>
               </tr>
@@ -95,15 +104,25 @@
                   <app-form-input [hideLabel]="true" [control]="$any(item.get('price'))" label="label_price"
                     type="number"></app-form-input>
                 </td>
+                <td>
+                  <app-form-input [hideLabel]="true" [control]="$any(item.get('productionDate'))" label="label_production_date"
+                    type="date"></app-form-input>
+                </td>
+                <td>
+                  <app-form-input [hideLabel]="true" [control]="$any(item.get('expiryDate'))" label="label_expiry_date"
+                    type="date"></app-form-input>
+                </td>
                 <td class="action-col">
+                  @if (!isVoided()) {
                   <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [text]="true"
                     (click)="removePurchaseItem(i)" />
+                  }
                 </td>
               </tr>
               }
               @empty {
               <tr class="empty-row">
-                <td colspan="4">
+                <td colspan="6">
                   <div class="empty-state">
                     <i class="pi pi-inbox"></i>
                     <p>{{ translate.instant('label_add_item') }}</p>
@@ -114,7 +133,7 @@
             </tbody>
             <tfoot>
               <tr class="total-row">
-                <td colspan="2" class="total-label">{{ translate.instant('label_total') || 'Total' }}</td>
+                <td colspan="4" class="total-label">{{ translate.instant('label_total') || 'Total' }}</td>
                 <td class="total-value">{{ totalAmount() | number:'1.2-2' }}</td>
                 <td></td>
               </tr>
@@ -156,6 +175,11 @@
 
           <app-form-input [control]="$any(purchaseService.purchaseForm.get('note'))" label="label_note"
             type="textarea"></app-form-input>
+
+          @if (!isVoided()) {
+          <p-button class="w-full mt-2" styleClass="w-full" [label]="translate.instant('label_save')" icon="pi pi-check"
+            (onClick)="savePurchase()" [loading]="purchaseService.loadingSave()" />
+          }
         </div>
       </div>
 

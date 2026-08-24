@@ -49,7 +49,7 @@
 
       <p-tabpanel value="flat">
         <div class="mt-4">
-          <p-table [value]="accountsService.accountsFlat()" [paginator]="true" [rows]="10" responsiveLayout="scroll">
+          <p-table [value]="accountsService.accountsFlat()" [paginator]="true" [rowsPerPageOptions]="[10, 20, 50]" [rows]="10" responsiveLayout="scroll">
             <ng-template pTemplate="header">
               <tr>
                 <th>{{ translate.instant('label_account_code') }}</th>

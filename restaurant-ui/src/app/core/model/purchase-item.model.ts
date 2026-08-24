@@ -6,4 +6,6 @@ export interface PurchaseItem {
   ingredient?: Ingredient;
   quantity: number;
   price: number;
+  productionDate?: string;
+  expiryDate?: string;
 }

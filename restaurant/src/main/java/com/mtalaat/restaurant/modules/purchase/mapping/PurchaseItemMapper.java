@@ -20,6 +20,8 @@ public class PurchaseItemMapper {
                 .ingredientName(entity.getIngredient() != null ? entity.getIngredient().getName() : null)
                 .quantity(entity.getQuantity())
                 .price(entity.getPrice())
+                .productionDate(entity.getProductionDate())
+                .expiryDate(entity.getExpiryDate())
                 .build();
     }
 
@@ -31,6 +33,8 @@ public class PurchaseItemMapper {
         entity.setIngredient(ingredient);
         entity.setQuantity(dto.getQuantity());
         entity.setPrice(dto.getPrice());
+        entity.setProductionDate(dto.getProductionDate());
+        entity.setExpiryDate(dto.getExpiryDate());
         return entity;
     }
 }

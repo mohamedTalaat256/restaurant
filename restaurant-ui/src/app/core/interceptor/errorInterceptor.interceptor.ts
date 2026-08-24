@@ -37,8 +37,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
       messageService.add({
         severity: 'error',
-        summary: messageKeyMap['label_error'],
-        detail: messageKeyMap[messageKey] || messageKey,
+        summary: messageKeyMap['label_error'] ,
+        detail: messageKeyMap[messageKey] || messageKey + ' (' + error.error?.message + ')',
         life: 10000
       });
 
@@ -62,4 +62,5 @@ export const messageKeyMap: { [key: string]: string } = {
   "msg_forbidden": "Forbidden access",
   "msg_not_found": "Resource not found",
   "msg_cannot_connect": "Cannot connect to server",
+  "msg_bad_request": "Bad request"
 };
