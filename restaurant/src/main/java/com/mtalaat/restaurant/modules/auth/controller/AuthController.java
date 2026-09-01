@@ -29,4 +29,12 @@ public class AuthController {
         return ResponseEntity.status(status)
                 .body(ApiResponse.success("msg_login_success", responseDto, status.value()));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse> logout(HttpServletRequest request) {
+        authService.logout(request.getRemoteAddr());
+        HttpStatus status = HttpStatus.OK;
+        return ResponseEntity.status(status)
+                .body(ApiResponse.success("msg_logout_success", null, status.value()));
+    }
 }

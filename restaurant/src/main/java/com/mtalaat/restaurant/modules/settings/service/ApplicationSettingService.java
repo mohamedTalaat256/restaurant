@@ -31,6 +31,10 @@ public class ApplicationSettingService {
         return applicationSettingMapper.toDto(entity);
     }
 
+    public ApplicationSettingDto getApplicationSettingsPublic(){
+        return applicationSettingMapper.toDtoPublic(applicationSettingRepository.findFirstByOrderByIdAsc());
+    }
+
     public ApplicationSettingDto update(ApplicationSettingDto dto, MultipartFile iconFile, MultipartFile logoFile) {
         ApplicationSetting entity = applicationSettingRepository.findFirstByOrderByIdAsc();
 

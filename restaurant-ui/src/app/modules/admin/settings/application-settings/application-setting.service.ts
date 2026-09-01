@@ -3,26 +3,24 @@ import { HttpClient } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
 import { TranslateService } from '../../../../core/service/translate.service';
 import { ApiResponse } from '../../../../core/model/api-response.model';
-import { ApplicationSetting } from '../../../../core/model/application-setting.model';
+import { ApplicationSetting, DEFAULT_APPLICATION_SETTING } from '../../../../core/model/application-setting.model';
 import { env } from '../../../../../environment/env';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { delay } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ApplicationSettingService {
 
   settingForm!: FormGroup;
 
-  setting = signal<ApplicationSetting | null>(null);
+  readonly setting = signal<ApplicationSetting>(DEFAULT_APPLICATION_SETTING);
+  readonly settingPublic = signal<ApplicationSetting>(DEFAULT_APPLICATION_SETTING);
   loading = signal(false);
   loadingSave = signal(false);
   savedSuccess = signal(false);
 
   iconPreview = signal<string | ArrayBuffer | null>('/images/person.jpg');
   logoPreview = signal<string | ArrayBuffer | null>('/images/person.jpg');
-
-  appLogo = signal<string | null>('/images/person.png');
-  appIcon = signal<string | null>('/images/fav.ico');
-  appDirection = signal<string>('LTR');
   imagesUrl = env.baseUrl;
 
   error = signal<string | null>(null);
@@ -40,6 +38,24 @@ export class ApplicationSettingService {
         this.setting.set(res.data);
         this.setForm(res.data);
         this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+      }
+    });
+  }
+
+  loadSettingPublic() {
+    this.loading.set(true);
+    this.error.set(null);
+
+    this.http.get<ApiResponse<ApplicationSetting>>(env.apiUrl + '/settings/application-settings/public').subscribe({
+      next: (res) => {
+        this.settingPublic.set(res.data);
+        this.loading.set(false);
+        localStorage.setItem('applicationSettings', JSON.stringify(res.data));
+        this.setPageAttributes();
+
       },
       error: () => {
         this.loading.set(false);
@@ -145,11 +161,6 @@ export class ApplicationSettingService {
   }
 
   setForm(setting: ApplicationSetting) {
-    this.appIcon.set(setting.icon ? this.imagesUrl + setting.icon : '/images/fav.ico');
-    this.appLogo.set(setting.logo ? this.imagesUrl + setting.logo : '/images/logo.png');
-    this.appDirection.set(setting.applicationDirection || 'LTR');
-    this.translate.setLocale(setting.languageCode || 'en');
-
     this.settingForm = this.fb.group({
       id: [setting.id],
       applicationTitle: [setting.applicationTitle, Validators.required],
@@ -182,6 +193,24 @@ export class ApplicationSettingService {
     }
 
     localStorage.setItem('applicationSettings', JSON.stringify(setting));
+  }
+
+  setPageAttributes(): void {
+    let link: HTMLLinkElement | null =
+      document.querySelector("link[rel*='icon']");
+
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+
+    link.type = 'image/x-icon';
+    link.href = this.settingPublic().icon ? this.imagesUrl + this.settingPublic().icon : '/images/fav.ico';
+
+    document.documentElement.dir = this.settingPublic().applicationDirection.toLowerCase() === 'rtl' ? 'rtl' : 'ltr';
+
+    this.translate.setLocale(this.settingPublic().languageCode || 'en');
   }
 
   loadSettingFromLocalStorage() {

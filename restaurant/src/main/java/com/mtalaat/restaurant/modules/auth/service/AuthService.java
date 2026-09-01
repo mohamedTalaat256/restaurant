@@ -63,4 +63,14 @@ public class AuthService {
             throw new UnauthorizedException("msg_invalid_email_or_password");
         }
     }
+
+    public AuthResponseDto logout(String ipAddress) {
+        //logout user
+        return AuthResponseDto.builder()
+                .accessToken(null)
+                .tokenType(null)
+                .user(null)
+                .sideMenu(null)
+                .build();
+    }
 }

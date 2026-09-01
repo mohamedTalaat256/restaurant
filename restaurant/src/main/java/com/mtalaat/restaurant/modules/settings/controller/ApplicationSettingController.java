@@ -34,6 +34,14 @@ public class ApplicationSettingController {
                 .body(ApiResponse.success("msg_application_setting_fetched", setting, status.value()));
     }
 
+    @GetMapping("/public")
+    public ResponseEntity<ApiResponse> getApplicationSettingsPublic() {
+        ApplicationSettingDto setting = applicationSettingService.getApplicationSettingsPublic();
+        HttpStatus status = HttpStatus.OK;
+        return ResponseEntity.status(status)
+                .body(ApiResponse.success("msg_application_setting_fetched", setting, status.value()));
+    }
+
 
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse> update(

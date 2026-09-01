@@ -187,8 +187,8 @@ export class JournalEntries implements OnInit {
 
   transactionTypes = computed(() => Object.values(FinancialTransactionType).map(type => ({ label: this.translate.instant('enum_' + type), value: type })));
 
-  sourceAccountOptions = computed(() => this.accountsService.accountsFlat().map(a => a.allowTransaction ? { label: a.code + ' - ' + a.name, value: a.id } : null).filter(a => a !== null));
-  destinationAccountOptions = computed(() => this.accountsService.accountsFlat().map(a => a.allowTransaction ? { label: a.code + ' - ' + a.name, value: a.id } : null).filter(a => a !== null));
+  sourceAccountOptions = computed(() => this.accountsService.accountsFlat().map(a => a.allowTransaction ? { label: a.code + ' - ' + this.translate.instant(a.name), value: a.id } : null).filter(a => a !== null));
+  destinationAccountOptions = computed(() => this.accountsService.accountsFlat().map(a => a.allowTransaction ? { label: a.code + ' - ' + this.translate.instant(a.name), value: a.id } : null).filter(a => a !== null));
   costCenterOptions = computed(() => this.costCenterService.activeCostCenters().map(c => ({ label: c.name, value: c.id })));
 
   constructor(private fb: FormBuilder, private messageService: MessageService) { }

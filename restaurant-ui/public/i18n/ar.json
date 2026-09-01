@@ -674,5 +674,22 @@
   "marketingAndAdvertising": "التسويق والإعلان",
   "kitchenAndDiningSupplies": "مستلزمات المطبخ وصالة الطعام",
   "equity": "حقوق الملكية",
-  "retainedEarnings": "الأرباح المحتجزة"
+  "retainedEarnings": "الأرباح المحتجزة",
+  "label_transaction_type":"نوع المعاملة",
+  "label_source_account": "حساب المصدر",
+  "label_destination_account": "حساب الوجهة",
+  "enum_SUPPLIER_PAYMENT": "دفع المورد",
+  "enum_CUSTOMER_COLLECTION": "تحصيل العميل",
+  "enum_OPERATIONAL_EXPENSE": "المصروفات التشغيلية",
+  "enum_EMPLOYEE_ADVANCE": "سلفة الموظف",
+  "enum_SALARY_PAYMENT": "دفع الرواتب",
+  "enum_CAPITAL_INJECTION": "حقن رأس المال",
+  "enum_INTERNAL_TRANSFER": "تحويل داخلي",
+  "label_financial_document_details": "تفاصيل المستند المالي",
+  "label_transaction_date": "تاريخ المعاملة",
+  "label_select_transaction_type": "اختر نوع المعاملة",
+  "label_select_source_account": "اختر حساب المصدر",
+  "label_select_destination_account": "اختر حساب الوجهة",
+  "label_confirm_logout_message": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
+  "label_confirm_logout": "تأكيد تسجيل الخروج"
 }

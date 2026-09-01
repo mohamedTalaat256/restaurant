@@ -38,6 +38,26 @@ public class ApplicationSettingMapper {
                 .build();
     }
 
+    public ApplicationSettingDto toDtoPublic(ApplicationSetting entity) {
+        return ApplicationSettingDto.builder()
+                .id(entity.getId())
+                .applicationTitle(entity.getApplicationTitle())
+                .storeName(entity.getStoreName())
+                .address(entity.getAddress())
+                .phone(entity.getPhone())
+                .icon(entity.getIcon())
+                .logo(entity.getLogo())
+                .openingTime(entity.getOpeningTime())
+                .closingTime(entity.getClosingTime())
+                .taxNumber(entity.getTaxNumber())
+                .languageCode(entity.getLanguage() != null ? entity.getLanguage().getLanguageCode() : null)
+                .languageName(entity.getLanguage() != null ? entity.getLanguage().getName() : null)
+                .applicationDirection(entity.getApplicationDirection())
+                .poweredByText(entity.getPoweredByText())
+                .footerText(entity.getFooterText())
+                .build();
+    }
+
     public ApplicationSetting toEntity(ApplicationSettingDto dto, Currency currency, Language language) {
         return ApplicationSetting.builder()
                 .applicationTitle(dto.getApplicationTitle())

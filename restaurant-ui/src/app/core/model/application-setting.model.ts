@@ -27,3 +27,31 @@ export interface ApplicationSetting {
   poweredByText: string;
   footerText: string;
 }
+
+
+export const DEFAULT_APPLICATION_SETTING: ApplicationSetting = {
+  id: 0,
+  applicationTitle: '',
+  storeName: '',
+  address: '',
+  phone: '',
+  icon: '',
+  logo: '',
+  openingTime: '',
+  closingTime: '',
+  discountType: 'PERCENTAGE',
+  discountPercentage: 0,
+  serviceChargeType: 'PERCENTAGE',
+  taxPercentage: 0,
+  taxNumber: '',
+  currency: { id: 0, code: '', symbol: '', name: '', exchangeRateToUSD: 1 },
+  currencyId: 0,
+  currencySymbol: '',
+  language: { languageCode: '', name: '' },
+  languageCode: '',
+  dateFormat: '',
+  timezone: '',
+  applicationDirection: 'LTR',
+  poweredByText: '',
+  footerText: ''
+};

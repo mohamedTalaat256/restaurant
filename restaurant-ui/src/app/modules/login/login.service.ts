@@ -56,5 +56,27 @@ export class LoginService {
     );
   }
 
+  //
+  logout() {
+    this.http.post<ApiResponse<any>>(`${env.apiUrl}/auth/logout`, {}).subscribe({
+      next: (response: ApiResponse<any>) => {
+        if (response.status) {
+          this.messageService.add({ severity: 'success', summary: this.translate.instant('msg_logout_success'), detail: this.translate.instant(response.message) });
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          this.router.navigate(['/login']);
+        } else {
+          this.messageService.add({ severity: 'error', summary: this.translate.instant('msg_logout_failed'), detail: this.translate.instant(response.message) });
+        }
+      },
+      error: (error: ApiResponse<any>) => {
+        this.messageService.add({ severity: 'error', summary: this.translate.instant('msg_logout_failed'), detail: this.translate.instant(error.message) });
+      }
+    }
+    );
+
+
+  }
+
 
 }

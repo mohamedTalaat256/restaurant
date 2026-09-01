@@ -1,16 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import Aura from '@primeuix/themes/aura';
 import Lara from '@primeuix/themes/lara';
 import Nora from '@primeuix/themes/nora';
 import { LayoutService } from '../../../core/service/layout.service';
 import { StyleClassModule } from 'primeng/styleclass';
-import { MenuItem } from 'primeng/api';
+import { ConfirmationService, MenuItem } from 'primeng/api';
 import { AppConfigurator } from "./app.configurator";
-import { Button } from "primeng/button";
 import { ApplicationSetting } from '../../../core/model/application-setting.model';
 import { env } from '../../../../environment/env';
+import { LoginService } from '../../login/login.service';
+import { TranslateService } from '../../../core/service/translate.service';
+import { ConfirmDialog } from "primeng/confirmdialog";
 
 const presets = {
   Aura,
@@ -18,30 +20,10 @@ const presets = {
   Nora
 } as const;
 
-declare type KeyOfType<T> = keyof T extends infer U ? U : never;
-
-declare type SurfacesType = {
-  name?: string;
-  palette?: {
-    0?: string;
-    50?: string;
-    100?: string;
-    200?: string;
-    300?: string;
-    400?: string;
-    500?: string;
-    600?: string;
-    700?: string;
-    800?: string;
-    900?: string;
-    950?: string;
-  };
-};
-
-
 @Component({
   selector: 'app-admin-tool-bar',
-  imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator],
+  imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, ConfirmDialog],
+  providers: [ConfirmationService],
   template: `
      <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
@@ -92,20 +74,6 @@ declare type SurfacesType = {
                     </button>
 
 
-
-
-                    <!--   @if(authService.authenticated()){
-                        @if(authService.authUser()){
-                      <a class="p-ripple px-0 pt-2 text-surface-900 dark:text-surface-0 font-medium text-xl">
-                            {{ authService.authUser()!['preferred_username'] }}
-                        </a>
-
-                        }
-                      }@else {
-                        <p-button [label]="'auth.loginOAuth2' | translate" severity="contrast" styleClass="w-full" (click)="login()"></p-button>
-                      } -->
-
-
                     <button type="button" class="layout-topbar-action" (click)="logout()">
                         <i class="pi pi-sign-out"></i>
                         <span>Logout</span>
@@ -114,6 +82,8 @@ declare type SurfacesType = {
             </div>
         </div>
     </div>
+
+    <p-confirmdialog [style]="{ width: '450px' }" />
   `,
   styles: `
     .layout-topbar-logo-image{
@@ -127,20 +97,27 @@ declare type SurfacesType = {
 export class AdminToolBar {
   items!: MenuItem[];
 
-
   layoutService = inject(LayoutService);
+  readonly loginService = inject(LoginService);
+  readonly translate = inject(TranslateService);
+  private confirmationService = inject(ConfirmationService);
   applicationSettings: ApplicationSetting | null = null;
   imageUrl = env.baseUrl;
 
-  constructor(private router: Router) {
+  constructor() {
     this.applicationSettings = JSON.parse(localStorage.getItem('applicationSettings') || '{}');
-
-    effect(() => {
-
-    });
   }
 
   logout() {
+
+     this.confirmationService.confirm({
+      message: this.translate.instant('label_confirm_logout_message'),
+      header: this.translate.instant('label_confirm_logout'),
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.loginService.logout();
+      }
+    });
 
   }
   login() {

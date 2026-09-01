@@ -30,10 +30,15 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origin}")
     private String allowedOrigin;
 
+    @Value("${app.cors.public-endpoints}")
+    private String publicEndpoints;
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomUserDetailsService userDetailsService;
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
     private final RestAccessDeniedHandler restAccessDeniedHandler;
+
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -46,8 +51,7 @@ public class SecurityConfig {
                         .accessDeniedHandler(restAccessDeniedHandler)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/files/**").permitAll()
+                        .requestMatchers(publicEndpoints.split(",")).permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.PUT, "/api/**").hasAnyRole("ADMIN", "MANAGER")

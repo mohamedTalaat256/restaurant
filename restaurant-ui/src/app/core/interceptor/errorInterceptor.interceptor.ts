@@ -1,10 +1,12 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { MessageService } from 'primeng/api';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const messageService = inject(MessageService);
+  const router = inject(Router);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
@@ -17,6 +19,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         messageKey = 'msg_bad_request';
       } else if (error.status === 401) {
         messageKey = 'msg_unauthorized';
+        localStorage.removeItem('token');
+        router.navigate(['/login']);
       } else if (error.status === 403) {
         messageKey = 'msg_forbidden';
       } else if (error.status === 404) {
