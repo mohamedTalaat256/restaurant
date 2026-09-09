@@ -26,7 +26,7 @@ export const appConfig: ApplicationConfig = {
     providePrimeNG({ theme: { preset: Aura, options: { darkModeSelector: '.app-dark' } } }),
     importProvidersFrom(ToastModule),
     MessageService,
-    provideAppInitializer(() => inject(TranslateService).setLocale('en')),
+    provideAppInitializer(() => inject(TranslateService).setLocale()),
 
   ]
 };

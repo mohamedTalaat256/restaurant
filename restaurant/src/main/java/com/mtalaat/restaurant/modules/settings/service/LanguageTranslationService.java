@@ -11,7 +11,9 @@ import com.mtalaat.restaurant.modules.settings.repository.LanguageTranslationRep
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,20 @@ public class LanguageTranslationService {
     private final LanguageRepository languageRepository;
     private final LanguageTranslationMapper languageTranslationMapper;
     private final ApplicationSettingService applicationSettingService;
+
+
+    public Map<String, Object> i18nJson(){
+        String languageCode = applicationSettingService.getApplicationSettings().getLanguageCode();
+        List<LanguageTranslation> translations = languageTranslationRepository.findAllByLanguageCode(languageCode);
+
+        Map<String, Object> data = new HashMap<>();
+
+        data.put("local", applicationSettingService.getApplicationSettings().getLanguageCode());
+        data.put("i18n",translations.stream()
+                .collect(java.util.stream.Collectors.toMap(LanguageTranslation::getKey, LanguageTranslation::getValue)));
+
+        return data;
+    }
 
     public LanguageTranslationDto add(LanguageTranslationDto dto) {
         return create(dto);

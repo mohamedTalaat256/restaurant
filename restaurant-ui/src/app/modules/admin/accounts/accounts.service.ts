@@ -136,5 +136,5 @@ export class AccountsService {
         ? this.mapToPrimeNgTree(acc.children)
         : []
     }));
-}
+  }
 }

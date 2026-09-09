@@ -60,7 +60,7 @@ export class Orders implements OnInit {
   statusOptions = [
     { label: this.translate.instant('label_all'), value: null },
     ...(['NEW', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'COMPLETED', 'CHECKED_OUT', 'CANCELLED', 'MERGED', 'SPLIT'] as OrderStatus[])
-      .map(s => ({ label: s, value: s })),
+      .map(s => ({ label: this.translate.instant(s), value: s })),
   ];
 
   ngOnInit() {

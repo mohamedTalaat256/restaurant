@@ -9,8 +9,8 @@
   <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
     <p-button icon="pi pi-arrow-left" [text]="true" (click)="goBack()" />
     <h4 class="m-0"># {{ order.orderNumber }}</h4>
-    <p-tag [value]="order.status" [severity]="getStatusSeverity(order.status)" />
-    <p-tag [value]="order.orderType" [severity]="order.orderType === 'QUICK_ORDER' ? 'warn' : 'info'" />
+    <p-tag [value]="translate.instant(order.status)" [severity]="getStatusSeverity(order.status)" />
+    <p-tag [value]="translate.instant(order.orderType)" [severity]="order.orderType === 'QUICK_ORDER' ? 'warn' : 'info'" />
     <div class="ms-auto d-flex gap-2 flex-wrap">
       <p-button [label]="translate.instant('label_tracking')" icon="pi pi-map" severity="secondary" (click)="openTracking()" />
       <p-button [label]="translate.instant('label_split')" icon="pi pi-share-alt" severity="warn"

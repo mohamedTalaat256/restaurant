@@ -48,7 +48,7 @@
                   <small class="text-muted">x{{ item.quantity }}</small>
                 </div>
                 <div class="kitchen-item-actions">
-                  <p-tag [value]="item.status" [severity]="itemStatusSeverity(item.status)" />
+                  <p-tag [value]="translate.instant(item.status)" [severity]="itemStatusSeverity(item.status)" />
                   @if (canItemReady(item.status)) {
                     <p-button icon="pi pi-check" size="small" severity="success" [text]="true"
                       [pTooltip]="translate.instant('label_item_ready')" (click)="markItemReady(ko, item.id)" />

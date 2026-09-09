@@ -70,10 +70,10 @@
       </td>
       <td>{{ order.orderNumber }}</td>
       <td>
-        <p-tag [value]="order.orderType" [severity]="order.orderType === 'QUICK_ORDER' ? 'warn' : 'info'" />
+        <p-tag [value]="translate.instant(order.orderType)" [severity]="order.orderType === 'QUICK_ORDER' ? 'warn' : 'info'" />
       </td>
       <td>
-        <p-tag [value]="order.status" [severity]="getStatusSeverity(order.status)" />
+        <p-tag [value]="translate.instant(order.status)" [severity]="getStatusSeverity(order.status)" />
       </td>
       <td>{{ order.tableName ?? '-' }}</td>
       <td>{{ order.waiterName ?? '-' }}</td>

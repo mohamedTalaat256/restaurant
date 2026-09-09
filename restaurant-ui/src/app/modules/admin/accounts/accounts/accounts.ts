@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Table, TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -31,7 +31,7 @@ import { ApplicationSettingService } from '../../settings/application-settings/a
     ProgressBarModule,
     ReactiveFormsModule, Toast,
   Tabs, TabList, Tab, TabPanels, TabPanel, // نظام التابات الجديد
-    Tree, Tag
+    Tree, Tag,FormsModule
   ],
   templateUrl: './accounts.html',
   styleUrls: ['./accounts.scss'],
@@ -54,6 +54,8 @@ export class Accounts implements OnInit {
   menuItemId: number = env.menuItems.find(item => item.name === 'accounts')?.id || 0;
 
   currencySymbol = this.settingsService.setting()?.currencySymbol || 'EGP';
+
+  searchTerm: string = '';
 
   ngOnInit(): void {
     this.accountsService.loadAccountsTree();

@@ -16,7 +16,8 @@ public class AccountParentCodes {
     private String customers; // Holds value "1300"
     private String liabilities;
     private String suppliers;
-    private String revenue;
+    private String revenue;  //4000
+    private String restaurantSalesRevenue;  //4100
     private String cogs;
     private String opex;
     private String equity;

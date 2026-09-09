@@ -49,15 +49,26 @@
 
       <p-tabpanel value="flat">
         <div class="mt-4">
-          <p-table [value]="accountsService.accountsFlat()" [paginator]="true" [rowsPerPageOptions]="[10, 20, 50]" [rows]="10" responsiveLayout="scroll">
+          <p-table #dt [value]="accountsService.accountsFlat()" [paginator]="true" [rowsPerPageOptions]="[20, 50, 100]"
+          [rows]="20" [rowHover]="true" [globalFilterFields]="['name']" responsiveLayout="scroll">
+
+          <ng-template #caption>
+            <div class="flex items-center justify-between">
+
+              <p-iconfield>
+                <p-inputicon styleClass="pi pi-search" />
+                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" [placeholder]="translate.instant('label_search')" />
+              </p-iconfield>
+            </div>
+          </ng-template>
             <ng-template pTemplate="header">
               <tr>
                 <th>{{ translate.instant('label_account_code') }}</th>
-                <th>{{ translate.instant('label_account_name') }}</th>
+                <th field="name" >{{ translate.instant('label_account_name') }}</th>
                 <th>{{ translate.instant('label_account_type') }}</th>
                 <th>{{ translate.instant('label_account_nature') }}</th>
-                <th>{{ translate.instant('label_account_balance') }}</th>
-                <th>{{ translate.instant('label_date') }}</th>
+                <th pSortableColumn="balance">{{ translate.instant('label_account_balance') }}<p-sortIcon field="balance"></p-sortIcon></th>
+                <th pSortableColumn="updatedAt">{{ translate.instant('label_date') }}<p-sortIcon field="updatedAt"></p-sortIcon></th>
                 <th>{{ translate.instant('label_account_status') }}</th>
               </tr>
             </ng-template>
@@ -72,7 +83,9 @@
                   </p-tag>
                 </td>
                 <td class="font-bold text-lg">{{ account.balance + ' ' + currencySymbol }}</td>
-                <td class="font-bold text-lg">{{ account.updatedAt | date:'short' }}</td>
+                <td class="font-bold text-lg" style="direction: ltr;">
+                  <div class="w-100 d-flex justify-content-start">{{ account.updatedAt | date: 'hh:mm a dd/MM/yyyy' }}</div>
+                </td>
                 <td>
                   <i class="pi" [ngClass]="account.status ? 'pi-check-circle text-green-500' : 'pi-times-circle text-red-500'"></i>
                 </td>

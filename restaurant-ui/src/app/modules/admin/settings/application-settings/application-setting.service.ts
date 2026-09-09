@@ -6,7 +6,6 @@ import { ApiResponse } from '../../../../core/model/api-response.model';
 import { ApplicationSetting, DEFAULT_APPLICATION_SETTING } from '../../../../core/model/application-setting.model';
 import { env } from '../../../../../environment/env';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { delay } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ApplicationSettingService {
@@ -76,6 +75,8 @@ export class ApplicationSettingService {
           this.loadingSave.set(false);
           this.savedSuccess.set(true);
           this.setForm(res.data);
+
+          this.setPageAttributes();
 
           this.messageService.add({
             severity: 'success',
@@ -209,8 +210,7 @@ export class ApplicationSettingService {
     link.href = this.settingPublic().icon ? this.imagesUrl + this.settingPublic().icon : '/images/fav.ico';
 
     document.documentElement.dir = this.settingPublic().applicationDirection.toLowerCase() === 'rtl' ? 'rtl' : 'ltr';
-
-    this.translate.setLocale(this.settingPublic().languageCode || 'en');
+    this.translate.setLocale();
   }
 
   loadSettingFromLocalStorage() {

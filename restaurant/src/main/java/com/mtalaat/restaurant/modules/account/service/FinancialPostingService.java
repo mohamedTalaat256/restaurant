@@ -195,7 +195,7 @@ public class FinancialPostingService {
                         translate.get("error_accounting_missing_code") + " " + debitCode));
 
         // 2. Determine Credit Account Code (Defaulting to Food Sales Revenue)
-        String creditCode = parentCodes.getRevenue(); // Root code, or use a specific child sub-account if preferred
+        String creditCode = parentCodes.getRestaurantSalesRevenue(); // Root code, or use a specific child sub-account if preferred
 
         Account salesAccount = accountRepository.findByCode(creditCode)
                 .orElseThrow(() -> new RuntimeException(

@@ -2,6 +2,7 @@ import { Injectable, signal, effect, inject } from '@angular/core';
 import { MessageService } from 'primeng/api';
 import { PrimeNG } from 'primeng/config';
 import { arDatePickerConfig, enDatePickerConfig } from '../config/date-picker.configuration';
+import { env } from '../../../environment/env';
 
 interface Message {
   severity: 'success' | 'error' | 'info' | 'warning';
@@ -44,12 +45,12 @@ export class TranslateService {
 
   });
 
-  async setLocale(locale: string): Promise<void> {
-    const res = await fetch(`/i18n/${locale}.json`);
+  async setLocale(): Promise<void> {
+    const res = await fetch(`${env.apiUrl}/settings/language-translations/translation/i18n-json`);
     if (!res.ok) return;
     const data = await res.json();
-    this._locale.set(locale);
-    this.messages.set(data);
+    this._locale.set(data.data.local);
+    this.messages.set(data.data.i18n);
     this.primengConfig.setTranslation(this._locale() === 'ar' ? arDatePickerConfig: enDatePickerConfig);
   }
 

@@ -22,6 +22,14 @@ public class LanguageTranslationController {
     @Value("${app.menu.language-translation-id}")
     private Long menuId;
 
+
+    @GetMapping("/translation/i18n-json")
+    public ResponseEntity<ApiResponse> i18nJson() {
+        HttpStatus status = HttpStatus.OK;
+        return ResponseEntity.status(status)
+                .body(ApiResponse.success("msg_all_languages", languageTranslationService.i18nJson(), status.value()));
+    }
+
     @PostMapping("/add")
     public ResponseEntity<ApiResponse> add(@Valid @RequestBody LanguageTranslationDto dto) {
         permissionChecker.checkCreate(menuId);
