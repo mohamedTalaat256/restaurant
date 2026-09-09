@@ -36,7 +36,7 @@ public class ApplicationSettingController {
 
     @GetMapping("/public")
     public ResponseEntity<ApiResponse> getApplicationSettingsPublic() {
-        ApplicationSettingDto setting = applicationSettingService.getApplicationSettingsPublic();
+        ApplicationSettingDto setting = applicationSettingService.getApplicationSettings();
         HttpStatus status = HttpStatus.OK;
         return ResponseEntity.status(status)
                 .body(ApiResponse.success("msg_application_setting_fetched", setting, status.value()));

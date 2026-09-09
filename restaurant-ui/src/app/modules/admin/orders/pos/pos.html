@@ -172,11 +172,16 @@
         </div>
 
         <div class="row w-100 mt-3">
+          @if(posService.posForm.value.customerType !== CustomerType.TAKEAWAY_CUSTOMER) {
           <app-form-input class="col-md-6" [control]="$any(posService.posForm.get('paymentMethodId'))" label="label_payment_method" type="select"
             placeholder="label_select_payment_method"
               [options]="posService.paymentMethodOptions()">
             </app-form-input>
-            <app-form-input class="col-md-6" [control]="$any(posService.posForm.get('paidAmount'))" label="label_paid_amount" type="number" placeholder="0">
+          }
+            <app-form-input [class.col-md-12]="posService.posForm.value.customerType === CustomerType.TAKEAWAY_CUSTOMER"
+            [class.col-md-6]="posService.posForm.value.customerType !== CustomerType.TAKEAWAY_CUSTOMER"
+            [control]="$any(posService.posForm.get('paidAmount'))"
+            label="label_paid_amount" type="number" placeholder="0">
               </app-form-input>
         </div>
 

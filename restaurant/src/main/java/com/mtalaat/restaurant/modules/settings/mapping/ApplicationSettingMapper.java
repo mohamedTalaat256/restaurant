@@ -49,6 +49,8 @@ public class ApplicationSettingMapper {
                 .logo(entity.getLogo())
                 .openingTime(entity.getOpeningTime())
                 .closingTime(entity.getClosingTime())
+                .currencyName(entity.getCurrency().getName())
+                .currencySymbol(entity.getCurrency().getSymbol())
                 .taxNumber(entity.getTaxNumber())
                 .languageCode(entity.getLanguage() != null ? entity.getLanguage().getLanguageCode() : null)
                 .languageName(entity.getLanguage() != null ? entity.getLanguage().getName() : null)

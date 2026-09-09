@@ -9,6 +9,7 @@ import { MessageService } from 'primeng/api';
 import { FormArray, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormInput } from "../../../../shared/components/form-input/form-input";
 import { CustomerType } from '../../../../core/enum/customerType.enum';
+import { PaymentMethod } from '../../../../core/enum/paymentMethod.enum';
 import { Toolbar } from "primeng/toolbar";
 import { PosService } from './pos.service';
 import { CashRegisterDialog } from '../cash-registers/cash-register-dialog';
@@ -40,6 +41,7 @@ export class Pos implements OnInit {
   readonly orderService = inject(OrderService);
   readonly router = inject(Router);
   CustomerType = CustomerType;
+  PaymentMethod = PaymentMethod;
 
   // Auto-open cash register dialog if no open register exists
   private registerCheckEffect = effect(() => {
