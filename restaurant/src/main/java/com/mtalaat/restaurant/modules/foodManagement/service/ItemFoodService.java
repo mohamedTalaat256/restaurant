@@ -95,6 +95,10 @@ public class ItemFoodService {
         return itemFoodMapper.toDto(itemFoodRepository.save(entity));
     }
 
+    public Long getProductsCount() {
+        return itemFoodRepository.count();
+    }
+
     public void delete(Long id) {
         ItemFood entity = itemFoodRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ItemFood not found with id: " + id));

@@ -9,6 +9,8 @@ import com.mtalaat.restaurant.modules.foodManagement.entity.ItemFoodVariant;
 import com.mtalaat.restaurant.modules.foodManagement.repository.ItemFoodAddOnsRepository;
 import com.mtalaat.restaurant.modules.foodManagement.repository.ItemFoodRepository;
 import com.mtalaat.restaurant.modules.foodManagement.repository.ItemFoodVariantRepository;
+import com.mtalaat.restaurant.modules.foodManagement.mapping.ItemFoodMapper;
+import com.mtalaat.restaurant.modules.foodManagement.dto.ItemFoodDto;
 import com.mtalaat.restaurant.modules.order.dto.*;
 import com.mtalaat.restaurant.modules.order.entity.*;
 import com.mtalaat.restaurant.modules.order.enums.*;
@@ -26,6 +28,7 @@ import com.mtalaat.restaurant.modules.settings.repository.CustomerRepository;
 import com.mtalaat.restaurant.modules.settings.repository.TableRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +53,7 @@ public class OrderService {
     private final CustomerRepository customerRepository;
     private final TableRepository tableRepository;
     private final OrderMapper orderMapper;
+    private final ItemFoodMapper itemFoodMapper;
 
     // ─────────────────────────────────────────────
     // CREATE
@@ -404,6 +408,25 @@ public class OrderService {
                 .build();
     }
 
+    public Long getOrdersCount(){
+        return orderRepository.count();
+    }
+
+    public Long getOrdersCountLast24Hours(){
+        LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
+        return orderRepository.countByCreatedAtAfter(twentyFourHoursAgo);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ItemFoodDto> getTopSellingItems(int limit) {
+        // PageRequest.of(0, limit) applies the LIMIT clause directly in SQL
+        List<ItemFood> topItems = orderRepository.findTopSellingItems(PageRequest.of(0, limit));
+
+        return topItems.stream()
+                .map(itemFoodMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
     // ─────────────────────────────────────────────
     // PRIVATE HELPERS
     // ─────────────────────────────────────────────
@@ -612,6 +635,7 @@ public class OrderService {
         String datePart = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         return "ORD-" + datePart + "-" + String.format("%04d", id);
     }
+
 
 }
 

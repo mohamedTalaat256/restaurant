@@ -83,6 +83,10 @@ public class CustomerService {
         customerRepository.delete(entity);
     }
 
+    public Long getCustomersCount() {
+        return customerRepository.count();
+    }
+
 
 
 }
