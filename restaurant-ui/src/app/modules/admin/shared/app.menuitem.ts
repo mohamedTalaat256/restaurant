@@ -49,7 +49,7 @@ import { TranslateService } from '../../../core/service/translate.service';
             </a>
         }
         @if (hasChildren() && isVisible() && (root() || isActive())) {
-            <ul [animate.enter]="initialized() ? 'p-submenu-enter' : null" [animate.leave]="'p-submenu-leave'" [class.layout-root-submenulist]="root()">
+            <ul [ngClass]="{'layout-submenu-list': !root()}" [animate.enter]="initialized() ? 'p-submenu-enter' : null" [animate.leave]="'p-submenu-leave'" [class.layout-root-submenulist]="root()">
                 @for (child of item().items; track child?.label) {
                     <li app-menuitem [item]="child" [parentPath]="fullPath()" [root]="false" [class]="child['badgeClass']"></li>
                 }
@@ -62,6 +62,12 @@ import { TranslateService } from '../../../core/service/translate.service';
     },
     styles: [
         `
+        .layout-submenu-list{
+
+        }
+        .layout-submenu-list a{
+
+        }
             .p-submenu-enter {
                 animation: p-animate-submenu-expand 450ms cubic-bezier(0.86, 0, 0.07, 1) forwards;
             }

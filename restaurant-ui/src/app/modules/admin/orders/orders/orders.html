@@ -26,7 +26,7 @@
   #dt
   [value]="orderService.orders()"
   [loading]="orderService.loading()"
-  [rows]="15"
+  [rows]="size()"
   [paginator]="true"
   [globalFilterFields]="['orderNumber', 'tableName', 'waiterName', 'status']"
   [tableStyle]="{ 'min-width': '70rem' }"
@@ -34,8 +34,14 @@
   [rowHover]="true"
   dataKey="id"
   [showCurrentPageReport]="true"
-  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} orders"
+  [currentPageReportTemplate]="
+    translate.instant('label_showing') + ' {first} ' +
+    translate.instant('label_to') + ' {last} ' +
+    translate.instant('label_of') + ' {totalRecords} ' +
+    translate.instant('label_orders')
+  "
   [rowsPerPageOptions]="[15, 30, 50]"
+  (onPage)="onPageChange($event)"
 >
   <ng-template #caption>
     <div class="flex items-center justify-between">
@@ -59,7 +65,7 @@
       <th pSortableColumn="waiterName">{{ translate.instant('label_waiter') }} <p-sortIcon field="waiterName" /></th>
       <th pSortableColumn="totalAmount">{{ translate.instant('label_total') }} <p-sortIcon field="totalAmount" /></th>
       <th pSortableColumn="createdAt">{{ translate.instant('label_created_at') }} <p-sortIcon field="createdAt" /></th>
-      <th style="width: 10rem"></th>
+      <th style="width: 18rem"></th>
     </tr>
   </ng-template>
 
@@ -80,15 +86,15 @@
       <td>{{ order.totalAmount }}</td>
       <td>{{ order.createdAt | date: 'short' }}</td>
       <td>
-        <p-button icon="pi pi-eye" [rounded]="true" [text]="true" severity="info" size="small"
+        <p-button icon="pi pi-eye" [rounded]="true" severity="info"
           [pTooltip]="translate.instant('label_view')" (click)="viewOrder(order)" class="m-inline-end-1" />
-        <p-button icon="pi pi-check" [rounded]="true" [text]="true" severity="success" size="small"
+        <p-button icon="pi pi-check" [rounded]="true" severity="success"
           [pTooltip]="translate.instant('label_complete')" [disabled]="!canComplete(order.status)"
           (click)="completeOrder(order)" class="m-inline-end-1" />
-        <p-button icon="pi pi-credit-card" [rounded]="true" [text]="true" severity="warn" size="small"
+        <p-button icon="pi pi-credit-card" [rounded]="true" severity="warn"
           [pTooltip]="translate.instant('label_checkout')" [disabled]="!canCheckout(order.status)"
           (click)="openCheckout(order)" class="m-inline-end-1" />
-        <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" size="small"
+        <p-button icon="pi pi-trash" [rounded]="true" severity="danger"
           [pTooltip]="translate.instant('label_delete')" [disabled]="!canDelete(order.status)"
           (click)="deleteOrder(order)" />
       </td>
@@ -96,7 +102,7 @@
   </ng-template>
 </p-table>
 
-<p-confirmdialog [style]="{ width: '450px' }" />
+<p-confirmdialog [style]="{ width: '450px' }" [acceptLabel]="translate.instant('label_yes')" [rejectLabel]="translate.instant('label_no')"/>
 
 <app-checkout-dialog
   [visible]="showCheckoutDialog()"

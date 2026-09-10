@@ -17,6 +17,7 @@ import {
 } from '../../../../core/model/order.model';
 import { JournalEntry } from '../../../../core/model/journal-entry.model';
 import { env } from '../../../../../environment/env';
+import { Page } from '../../../../core/model/page.model';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
@@ -39,14 +40,16 @@ export class OrderService {
 
   // ── Orders ─────────────────────────────────────────────
 
-  loadOrders(status?: OrderStatus) {
+  loadOrders(status?: OrderStatus, page: number = 0, size: number = 10) {
     this.loading.set(true);
     let params = new HttpParams();
     if (status) params = params.set('orderStatus', status);
+    params = params.set('page', page);
+    params = params.set('size', size);
 
-    this.http.get<ApiResponse<Order[]>>(this.baseUrl, { params }).subscribe({
+    this.http.get<ApiResponse<Page<Order>>>(this.baseUrl, { params }).subscribe({
       next: (res) => {
-        this.orders.set(res.data ?? []);
+        this.orders.set(res.data.content ?? []);
         this.loading.set(false);
       },
       error: () => { this.loading.set(false); }

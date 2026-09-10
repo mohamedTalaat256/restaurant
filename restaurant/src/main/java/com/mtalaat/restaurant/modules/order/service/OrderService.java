@@ -25,6 +25,8 @@ import com.mtalaat.restaurant.modules.settings.entity.RestaurantTable;
 import com.mtalaat.restaurant.modules.settings.repository.CustomerRepository;
 import com.mtalaat.restaurant.modules.settings.repository.TableRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,13 +82,13 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<OrderDto> getAll() {
-        return orderRepository.findAll().stream().map(orderMapper::toDto).toList();
+    public Page<OrderDto> getAll(Pageable pageable) {
+        return orderRepository.findAll(pageable).map(orderMapper::toDto);
     }
 
     @Transactional(readOnly = true)
-    public List<OrderDto> getByStatus(OrderStatus status) {
-        return orderRepository.findByStatus(status).stream().map(orderMapper::toDto).toList();
+    public Page<OrderDto> getByStatus( Pageable pageable, OrderStatus status) {
+        return orderRepository.findByStatus(pageable, status).map(orderMapper::toDto);
     }
 
     // ─────────────────────────────────────────────

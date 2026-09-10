@@ -10,6 +10,8 @@ import com.mtalaat.restaurant.payload.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -56,14 +58,18 @@ public class OrderController {
 
     @GetMapping
     public ResponseEntity<ApiResponse> getAll(
-            @RequestParam(required = false) OrderStatus orderStatus) {
+            @RequestParam(required = false) OrderStatus orderStatus,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         permissionChecker.checkRead(menuId);
-        List<OrderDto> orders = orderStatus != null
-                ? orderService.getByStatus(orderStatus)
-                : orderService.getAll();
+
+        Pageable pageable = Pageable.ofSize(size).withPage(page);
+        Page<OrderDto> ordersPage = orderStatus != null
+                ? orderService.getByStatus(pageable, orderStatus)
+                : orderService.getAll(pageable);
         HttpStatus status = HttpStatus.OK;
         return ResponseEntity.status(status)
-                .body(ApiResponse.success("msg_orders_fetched", orders, status.value()));
+                .body(ApiResponse.success("msg_orders_fetched", ordersPage, status.value()));
     }
 
     // ─────────────────────────────────────────────

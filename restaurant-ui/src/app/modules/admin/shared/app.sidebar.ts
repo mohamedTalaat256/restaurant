@@ -101,6 +101,8 @@ export class AppSidebar implements OnInit, OnDestroy {
             path: '/admin/orders',
             items: [
               { label: 'label_pos', routerLink: ['/admin/pos'] },
+              { label: 'label_orders', routerLink: ['/admin/orders'] },
+              { label: 'label_kitchen_status', routerLink: ['/admin/kitchen-dashboard'] },
               { label: 'label_cash_counters', routerLink: ['/admin/cash-counters'] },
               { label: 'label_cash_registers', routerLink: ['/admin/cash-registers'] }
             ]

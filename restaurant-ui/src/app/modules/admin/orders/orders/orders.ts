@@ -53,6 +53,8 @@ export class Orders implements OnInit {
 
   selectedOrders: Order[] = [];
   selectedStatus: OrderStatus | null = null;
+  page = signal(0);
+  size = signal(10);
   showCheckoutDialog = signal(false);
   checkoutOrderId = signal<number | null>(null);
   checkoutTotal = signal<number>(0);
@@ -71,10 +73,17 @@ export class Orders implements OnInit {
   }
 
   loadOrders() {
-    this.orderService.loadOrders(this.selectedStatus ?? undefined);
+    this.orderService.loadOrders(this.selectedStatus ?? undefined, this.page(), this.size());
   }
 
   onStatusChange() {
+    this.page.set(0);
+    this.loadOrders();
+  }
+
+  onPageChange(event: any) {
+    this.page.set(Math.floor(event.first / event.rows));
+    this.size.set(event.rows);
     this.loadOrders();
   }
 
