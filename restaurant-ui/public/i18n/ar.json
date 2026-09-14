@@ -541,6 +541,8 @@
 
   "label_order_number": "رقم الطلب",
   "label_order_type": "نوع الطلب",
+  "label_pos_invoice": "فاتورة نقطة البيع",
+  "label_print_pos": "طباعة نقطة البيع",
   "label_order_info": "معلومات الطلب",
   "label_orders": "الطلبات",
   "label_created_at": "تاريخ الإنشاء",

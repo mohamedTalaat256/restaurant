@@ -557,6 +557,8 @@
 
   "label_order_number": "Order #",
   "label_order_type": "Order Type",
+  "label_pos_invoice": "POS Invoice",
+  "label_print_pos": "Print POS",
   "label_order_info": "Order Info",
   "label_orders": "Orders",
   "label_created_at": "Created At",

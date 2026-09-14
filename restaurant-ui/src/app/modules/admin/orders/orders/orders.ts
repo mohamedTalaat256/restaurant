@@ -18,6 +18,7 @@ import { OrderService } from './order.service';
 import { Order, OrderStatus } from '../../../../core/model/order.model';
 import { TranslateService } from '../../../../core/service/translate.service';
 import { CheckoutDialogComponent } from '../checkout-dialog/checkout-dialog';
+import { PosPrintDialogComponent } from '../pos-print-dialog/pos-print-dialog';
 
 const STATUS_SEVERITY: Record<OrderStatus, string> = {
   NEW: 'info',
@@ -37,6 +38,7 @@ const STATUS_SEVERITY: Record<OrderStatus, string> = {
     CommonModule, TableModule, ButtonModule, ToolbarModule, InputTextModule,
     TagModule, InputIconModule, IconFieldModule, ConfirmDialogModule,
     Toast, SelectModule, FormsModule, TooltipModule, CheckoutDialogComponent,
+    PosPrintDialogComponent,
   ],
   templateUrl: './orders.html',
   styleUrls: ['./orders.scss'],
@@ -58,6 +60,8 @@ export class Orders implements OnInit {
   showCheckoutDialog = signal(false);
   checkoutOrderId = signal<number | null>(null);
   checkoutTotal = signal<number>(0);
+  showPosPrintDialog = signal(false);
+  printOrderId = signal<number | null>(null);
 
   statusOptions = [
     { label: this.translate.instant('label_all'), value: null },
@@ -108,6 +112,11 @@ export class Orders implements OnInit {
     this.checkoutOrderId.set(order.id);
     this.checkoutTotal.set(order.totalAmount);
     this.showCheckoutDialog.set(true);
+  }
+
+  openPosPrint(order: Order) {
+    this.printOrderId.set(order.id);
+    this.showPosPrintDialog.set(true);
   }
 
   deleteOrder(order: Order) {

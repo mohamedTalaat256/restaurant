@@ -65,7 +65,7 @@
       <th pSortableColumn="waiterName">{{ translate.instant('label_waiter') }} <p-sortIcon field="waiterName" /></th>
       <th pSortableColumn="totalAmount">{{ translate.instant('label_total') }} <p-sortIcon field="totalAmount" /></th>
       <th pSortableColumn="createdAt">{{ translate.instant('label_created_at') }} <p-sortIcon field="createdAt" /></th>
-      <th style="width: 18rem"></th>
+      <th style="width: 22rem"></th>
     </tr>
   </ng-template>
 
@@ -88,6 +88,8 @@
       <td>
         <p-button icon="pi pi-eye" [rounded]="true" severity="info"
           [pTooltip]="translate.instant('label_view')" (click)="viewOrder(order)" class="m-inline-end-1" />
+        <p-button icon="pi pi-print" [rounded]="true" severity="secondary"
+          [pTooltip]="translate.instant('label_print_pos')" (click)="openPosPrint(order)" class="m-inline-end-1" />
         <p-button icon="pi pi-check" [rounded]="true" severity="success"
           [pTooltip]="translate.instant('label_complete')" [disabled]="!canComplete(order.status)"
           (click)="completeOrder(order)" class="m-inline-end-1" />
@@ -111,3 +113,9 @@
   (visibleChange)="showCheckoutDialog.set($any($event))"
   (checkoutDone)="loadOrders()"
 />
+
+<app-pos-print-dialog
+  [visible]="showPosPrintDialog()"
+  [orderId]="printOrderId()"
+  (visibleChange)="showPosPrintDialog.set($any($event))"
+></app-pos-print-dialog>
