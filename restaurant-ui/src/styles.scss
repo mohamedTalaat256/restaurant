@@ -86,3 +86,13 @@ body {
 .m-inline-end-2{
   margin-inline-end: 2rem !important;
 }
+
+html[dir="rtl"] {
+  .p-datepicker-header {
+    flex-direction: row-reverse !important;
+  }
+
+  .p-datepicker {
+    direction: rtl;
+  }
+}

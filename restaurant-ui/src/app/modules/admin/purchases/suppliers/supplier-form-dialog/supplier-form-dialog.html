@@ -1,0 +1,21 @@
+<p-dialog [visible]="visible" [style]="{ width: '650px' }" [header]="translate.instant('label_supplier_details')" [modal]="true" (onHide)="hideDialog()">
+  <ng-template #content>
+    <form [formGroup]="supplierForm" class="pb-3">
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <app-form-input [control]="$any(supplierForm.get('name'))" label="label_name"></app-form-input>
+          <app-form-input [control]="$any(supplierForm.get('email'))" label="label_email" type="email"></app-form-input>
+          <app-form-input [control]="$any(supplierForm.get('phone'))" label="label_phone"></app-form-input>
+        </div>
+        <div class="col-md-6">
+          <app-form-input [control]="$any(supplierForm.get('address'))" label="label_address" type="textarea"></app-form-input>
+          <app-form-input [control]="$any(supplierForm.get('status'))" label="label_status" type="checkbox"></app-form-input>
+        </div>
+      </div>
+    </form>
+  </ng-template>
+  <ng-template #footer>
+    <p-button [label]="translate.instant('label_cancel')" icon="pi pi-times" text (click)="hideDialog()" />
+    <p-button [label]="translate.instant('label_save')" icon="pi pi-check" (click)="saveSupplier()" [loading]="supplierService.loadingSave()" />
+  </ng-template>
+</p-dialog>

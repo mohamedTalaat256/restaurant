@@ -2,184 +2,186 @@
 <p-confirmdialog [style]="{ width: '450px' }" />
 
 @if(purchaseService.loading()) {
-<div class="loading-container">
-  <div class="loading-spinner">
+<div class="d-flex flex-column justify-content-center align-items-center vh-100 gap-3 text-primary">
+  <div class="d-flex flex-column align-items-center gap-3">
     <i class="pi pi-spin pi-spinner"></i>
-    <span>{{ translate.instant('label_loading') || 'Loading...' }}</span>
+    <span class="fw-medium">{{ translate.instant('label_loading') || 'Loading...' }}</span>
   </div>
 </div>
 } @else {
-<form [formGroup]="purchaseService.purchaseForm" class="purchase-page">
+<form [formGroup]="purchaseService.purchaseForm" class="container-fluid px-0">
 
   <!-- Header -->
-  <div class="page-header">
-    <div class="header-left">
-      <div class="header-icon">
-        <i class="pi pi-file-edit"></i>
-      </div>
-      <div>
-        <h4 class="header-title">{{ translate.instant(isEditMode ? 'label_edit_purchase' : 'label_add_purchase') }}</h4>
-        <p class="header-subtitle">{{ translate.instant(isEditMode ? 'label_edit_purchase' : 'label_add_purchase') }}
-        </p>
-      </div>
-    </div>
-    <div class="header-actions">
-      <p-button [label]="translate.instant('label_cancel')" icon="pi pi-arrow-left" severity="danger"
-        [outlined]="true" (onClick)="goBack()" />
-      @if (isEditMode && purchaseService.purchase()?.status === PurchaseStatus.DRAFT) {
-      <p-button [label]="translate.instant('label_approve')" icon="pi pi-check-circle" severity="success"
-        class="m-inline-start-1" (onClick)="approvePurchase()" [loading]="purchaseService.loadingSave()" />
-      }
-    </div>
-  </div>
 
-  <div class="card">
-    <div class="d-flex align-items-center gap-2 mb-3 pb-3 border-bottom">
-      <i class="pi pi-receipt section-icon"></i>
-      <h6 class="section-title">{{ translate.instant('label_invoice_number') }}</h6>
-    </div>
-    <div class="row">
-    <app-form-input class="col-3" [control]="$any(purchaseService.purchaseForm.get('invoiceNumber'))"
-      label="label_invoice_number"></app-form-input>
-    <app-form-input class="col-3" [control]="$any(purchaseService.purchaseForm.get('supplierId'))"
-      label="label_supplier" [options]="supplierOptions()" type="select" [filter]="true"></app-form-input>
-    <app-form-input class="col-3" [control]="$any(purchaseService.purchaseForm.get('purchaseDate'))"
-      label="label_purchase_date" type="date"></app-form-input>
-  </div>
+  <div class="card mb-4">
+    <div class="card-body">
 
-  </div>
-
-  <div class="row">
-    <div class="col-9">
-      <div class="card">
-        <div class="d-flex align-items-center gap-2 mb-3 pb-3 border-bottom">
-          <div class="flex items-center gap-2">
-            <i class="pi pi-box section-icon"></i>
-            <h6 class="section-title">{{ translate.instant('label_purchase_items') }}</h6>
-            <span class="item-count-badge">{{ purchaseItems.length }}</span>
-          </div>
-          <p-button icon="pi pi-plus" [label]="translate.instant('label_add_item')" severity="success" size="small"
-            [rounded]="true" (onClick)="addPurchaseItem()" />
+      <div class=" d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <h4 class="mb-1">{{ translate.instant(isEditMode ? 'label_edit_purchase' : 'label_add_purchase') }}</h4>
         </div>
-
-        <div class="items-table-wrapper">
-          <table class="purchase-table">
-            <thead>
-              <tr>
-                <th width="220px">
-                  <i class="pi pi-tag"></i>
-                  {{translate.instant('label_item')}}
-                </th>
-                <th>
-                  <i class="pi pi-sort-numeric-up"></i>
-                  {{translate.instant('label_qti')}}
-                </th>
-                <th>
-                  <i class="pi pi-dollar"></i>
-                  {{translate.instant('label_price')}}
-                </th>
-                <th>
-                  <i class="pi pi-calendar"></i>
-                  {{translate.instant('label_production_date')}}
-                </th>
-                <th>
-                  <i class="pi pi-calendar-times"></i>
-                  {{translate.instant('label_expiry_date')}}
-                </th>
-                <th class="action-col"></th>
-              </tr>
-            </thead>
-            <tbody formArrayName="purchaseItems">
-              @for (item of purchaseItems.controls; track $index; let i = $index) {
-              <tr [formGroupName]="i" class="item-row">
-                <td>
-                  <app-form-input [hideLabel]="true" [control]="$any(item.get('ingredientId'))" label="label_ingredient"
-                    [options]="ingredientOptions()" type="select" [filter]="true"></app-form-input>
-                </td>
-                <td>
-                  <app-form-input [hideLabel]="true" [control]="$any(item.get('quantity'))" label="label_quantity"
-                    type="number"></app-form-input>
-                </td>
-                <td>
-                  <app-form-input [hideLabel]="true" [control]="$any(item.get('price'))" label="label_price"
-                    type="number"></app-form-input>
-                </td>
-                <td>
-                  <app-form-input [hideLabel]="true" [control]="$any(item.get('productionDate'))" label="label_production_date"
-                    type="date"></app-form-input>
-                </td>
-                <td>
-                  <app-form-input [hideLabel]="true" [control]="$any(item.get('expiryDate'))" label="label_expiry_date"
-                    type="date"></app-form-input>
-                </td>
-                <td class="action-col">
-                  @if (!isVoided()) {
-                  <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [text]="true"
-                    (click)="removePurchaseItem(i)" />
-                  }
-                </td>
-              </tr>
-              }
-              @empty {
-              <tr class="empty-row">
-                <td colspan="6">
-                  <div class="empty-state">
-                    <i class="pi pi-inbox"></i>
-                    <p>{{ translate.instant('label_add_item') }}</p>
-                  </div>
-                </td>
-              </tr>
-              }
-            </tbody>
-            <tfoot>
-              <tr class="total-row">
-                <td colspan="4" class="total-label">{{ translate.instant('label_total') || 'Total' }}</td>
-                <td class="total-value">{{ totalAmount() | number:'1.2-2' }}</td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div class="col-3">
-      <div class="card">
-        <div class="d-flex align-items-center gap-2 mb-3 pb-3">
-          <i class="pi pi-wallet section-icon"></i>
-          <h6 class="section-title">{{ translate.instant('label_payment_method') }}</h6>
-        </div>
-        <div class="payment-fields">
-          <app-form-input [control]="$any(purchaseService.purchaseForm.get('paymentMethod'))"
-            label="label_payment_method" [options]="paymentMethodOptions()" type="select"></app-form-input>
-          <app-form-input [control]="$any(purchaseService.purchaseForm.get('paidAmount'))" label="label_paid_amount"
-            type="number"></app-form-input>
-
-          <div class="balance-indicator">
-            <div class="balance-row">
-              <span class="balance-label">{{ translate.instant('label_total') || 'Total' }}</span>
-              <span class="balance-value">{{ totalAmount() | number:'1.2-2' }}</span>
-            </div>
-            <div class="balance-row">
-              <span class="balance-label">{{ translate.instant('label_paid_amount') }}</span>
-              <span class="balance-value paid">{{ purchaseService.purchaseForm.get('paidAmount')?.value | number:'1.2-2'
-                }}</span>
-            </div>
-            <div class="balance-divider"></div>
-            <div class="balance-row">
-              <span class="balance-label remaining-label">{{ translate.instant('label_remaining') || 'Remaining'
-                }}</span>
-              <span class="balance-value remaining">{{ (totalAmount() -
-                (purchaseService.purchaseForm.get('paidAmount')?.value || 0)) | number:'1.2-2' }}</span>
-            </div>
-          </div>
-
-          <app-form-input [control]="$any(purchaseService.purchaseForm.get('note'))" label="label_note"
-            type="textarea"></app-form-input>
-
-          @if (!isVoided()) {
-          <p-button class="w-full mt-2" styleClass="w-full" [label]="translate.instant('label_save')" icon="pi pi-check"
-            (onClick)="savePurchase()" [loading]="purchaseService.loadingSave()" />
+        <div class="d-flex flex-wrap gap-2">
+          <p-button [label]="translate.instant('label_cancel')" icon="pi pi-arrow-left" severity="danger"
+            [outlined]="true" (onClick)="goBack()" />
+          @if (isEditMode && purchaseService.purchase()?.status === PurchaseStatus.DRAFT) {
+          <p-button [label]="translate.instant('label_approve')" icon="pi pi-check-circle" severity="success"
+            (onClick)="approvePurchase()" [loading]="purchaseService.loadingSave()" />
           }
+        </div>
+      </div>
+
+      <div class="row g-3 mt-5">
+        <app-form-input class="col-12 col-md-4" [control]="$any(purchaseService.purchaseForm.get('invoiceNumber'))"
+          label="label_invoice_number"></app-form-input>
+
+        <div class="col-12 col-md-4">
+          <div class="w-100 d-flex gap-2">
+          <p-button class="mt-4" icon="pi pi-plus" severity="secondary" size="small" (onClick)="openSupplierDialog()" />
+
+          <app-form-input [control]="$any(purchaseService.purchaseForm.get('supplierId'))" class="flex-1"
+            label="label_supplier" [options]="supplierOptions()" type="select" [filter]="true"></app-form-input>
+          </div>
+
+
+        </div>
+
+        <app-form-input class="col-12 col-md-4" [control]="$any(purchaseService.purchaseForm.get('purchaseDate'))"
+          label="label_purchase_date" type="date"></app-form-input>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-9">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 pb-3 border-bottom">
+            <div class="d-flex align-items-center gap-2">
+              <i class="pi pi-box text-primary"></i>
+              <h6 class="mb-0">{{ translate.instant('label_purchase_items') }}</h6>
+              <span class="badge text-bg-primary rounded-pill">{{ purchaseItems.length }}</span>
+            </div>
+            <p-button icon="pi pi-plus" [label]="translate.instant('label_add_item')" severity="success" size="small"
+              [rounded]="true" (onClick)="addPurchaseItem()" />
+          </div>
+
+          <div class="table-responsive">
+            <table class="table purchase-table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th width="220px">
+                    {{translate.instant('label_item')}}
+                  </th>
+                  <th>
+                    {{translate.instant('label_qti')}}
+                  </th>
+                  <th>
+                    {{translate.instant('label_price')}}
+                  </th>
+                  <th>
+                    {{translate.instant('label_production_date')}}
+                  </th>
+                  <th>
+                    {{translate.instant('label_expiry_date')}}
+                  </th>
+                  <th class="text-center" style="width: 60px"></th>
+                </tr>
+              </thead>
+              <tbody formArrayName="purchaseItems">
+                @for (item of purchaseItems.controls; track $index; let i = $index) {
+                <tr [formGroupName]="i" class="item-row">
+                  <td>
+                    <app-form-input [hideLabel]="true" [control]="$any(item.get('ingredientId'))"
+                      label="label_ingredient" [options]="ingredientOptions()" type="select"
+                      [filter]="true"></app-form-input>
+                  </td>
+                  <td>
+                    <app-form-input [hideLabel]="true" [control]="$any(item.get('quantity'))" label="label_quantity"
+                      type="number"></app-form-input>
+                  </td>
+                  <td>
+                    <app-form-input [hideLabel]="true" [control]="$any(item.get('price'))" label="label_price"
+                      type="number"></app-form-input>
+                  </td>
+                  <td>
+                    <app-form-input [hideLabel]="true" [control]="$any(item.get('productionDate'))"
+                      label="label_production_date" type="date"></app-form-input>
+                  </td>
+                  <td>
+                    <app-form-input [hideLabel]="true" [control]="$any(item.get('expiryDate'))"
+                      label="label_expiry_date" type="date"></app-form-input>
+                  </td>
+                  <td class="text-center p-0">
+                    @if (!isVoided()) {
+                    <p-button icon="pi pi-trash" severity="danger" size="small" [rounded]="true" [text]="true" (click)="removePurchaseItem(i)" />
+                    }
+                  </td>
+                </tr>
+                }
+                @empty {
+                <tr>
+                  <td colspan="6" class="text-center py-5 text-secondary">
+                    <div class="d-flex flex-column align-items-center gap-2">
+                      <i class="pi pi-inbox"></i>
+                      <p class="mb-0">{{ translate.instant('label_add_item') }}</p>
+                    </div>
+                  </td>
+                </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr class="fw-bold">
+                  <td colspan="4" class="text-end">{{ translate.instant('label_total') || 'Total' }}</td>
+                  <td>{{ totalAmount() | number:'1.2-2' }}</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-3">
+      <div class="card sticky-top" style="top: 1rem">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-2 mb-3 pb-3">
+            <i class="pi pi-wallet text-primary"></i>
+            <h6 class="mb-0">{{ translate.instant('label_payment_method') }}</h6>
+          </div>
+          <div class="d-flex flex-column gap-2">
+            <app-form-input [control]="$any(purchaseService.purchaseForm.get('paymentMethod'))"
+              label="label_payment_method" [options]="paymentMethodOptions()" type="select"></app-form-input>
+            <app-form-input [control]="$any(purchaseService.purchaseForm.get('paidAmount'))" label="label_paid_amount"
+              type="number"></app-form-input>
+
+            <div class="border rounded p-3 my-2 bg-light">
+              <div class="d-flex justify-content-between align-items-center py-1">
+                <span class="text-muted small">{{ translate.instant('label_total') || 'Total' }}</span>
+                <span class="fw-semibold">{{ totalAmount() | number:'1.2-2' }}</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center py-1">
+                <span class="text-muted small">{{ translate.instant('label_paid_amount') }}</span>
+                <span class="fw-semibold text-success">{{ purchaseService.purchaseForm.get('paidAmount')?.value |
+                  number:'1.2-2'
+                  }}</span>
+              </div>
+              <hr class="my-2">
+              <div class="d-flex justify-content-between align-items-center py-1">
+                <span class="fw-semibold">{{ translate.instant('label_remaining') || 'Remaining'
+                  }}</span>
+                <span class="fw-bold text-danger">{{ (totalAmount() -
+                  (purchaseService.purchaseForm.get('paidAmount')?.value || 0)) | number:'1.2-2' }}</span>
+              </div>
+            </div>
+
+            <app-form-input [control]="$any(purchaseService.purchaseForm.get('note'))" label="label_note"
+              type="textarea"></app-form-input>
+
+            @if (!isVoided()) {
+            <p-button class="w-full mt-2" styleClass="w-full" [label]="translate.instant('label_save')"
+              icon="pi pi-check" (onClick)="savePurchase()" [loading]="purchaseService.loadingSave()" />
+            }
+          </div>
         </div>
       </div>
 
@@ -189,4 +191,6 @@
 
 
 </form>
+
+<app-supplier-form-dialog [visible]="supplierDialogVisible" (visibleChange)="onSupplierDialogVisibleChange($event)" (saved)="onSupplierSaved()"></app-supplier-form-dialog>
 }

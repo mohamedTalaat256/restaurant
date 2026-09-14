@@ -186,7 +186,7 @@ export class PurchaseService {
       invoiceNumber: ['', Validators.required],
       paymentMethod: [null, Validators.required],
       supplierId: [null, Validators.required],
-      purchaseDate: [null, Validators.required],
+      purchaseDate: [new Date(), Validators.required],
       paidAmount: [0, Validators.required],
       note: [''],
       purchaseItems: this.fb.array([]),

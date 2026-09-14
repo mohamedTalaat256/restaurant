@@ -19,13 +19,14 @@ import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { PaymentMethod } from '../../../../core/enum/paymentMethod.enum';
 import { PurchaseStatus } from '../../../../core/enum/purchaseStatus.enum';
+import { SupplierFormDialog } from '../suppliers/supplier-form-dialog/supplier-form-dialog';
 
 @Component({
   selector: 'app-edit-purchase',
   imports: [CommonModule, ButtonModule,
     InputTextModule, TextareaModule, SelectModule,
     ProgressBarModule, DatePickerModule,
-    ReactiveFormsModule, FormInput, Toast, ConfirmDialogModule],
+    ReactiveFormsModule, FormInput, Toast, ConfirmDialogModule, SupplierFormDialog],
   templateUrl: './edit-purchase.html',
   styleUrls: ['./edit-purchase.scss'],
   providers: [MessageService, ConfirmationService],
@@ -44,6 +45,7 @@ export class EditPurchase implements OnInit {
   private confirmationService = inject(ConfirmationService);
 
   isEditMode = false;
+  supplierDialogVisible = false;
   readonly PurchaseStatus = PurchaseStatus;
 
   isVoided = computed(() => this.purchaseService.purchase()?.status === PurchaseStatus.VOIDED);
@@ -132,6 +134,18 @@ export class EditPurchase implements OnInit {
         if (id) this.purchaseService.approvePurchase(id);
       }
     });
+  }
+
+  openSupplierDialog() {
+    this.supplierDialogVisible = true;
+  }
+
+  onSupplierDialogVisibleChange(visible: boolean) {
+    this.supplierDialogVisible = visible;
+  }
+
+  onSupplierSaved() {
+    this.supplierService.loadSuppliers();
   }
 
 }
