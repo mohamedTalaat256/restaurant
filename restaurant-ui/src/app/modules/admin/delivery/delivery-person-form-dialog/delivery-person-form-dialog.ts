@@ -1,12 +1,12 @@
-import { ChangeDetectionStrategy, Component, effect, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, EventEmitter, inject, Input, OnChanges, Output, signal, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { MessageModule } from 'primeng/message';
-import { DeliveryPersonService } from '../delivery-person.service';
-import { FormInput } from '../../../../../shared/components/form-input/form-input';
-import { DeliveryDetails, DELIVERY_VEHICLE_TYPE_OPTIONS } from '../../../../../core/model/delivery-details.model';
-import { TranslateService } from '../../../../../core/service/translate.service';
+import { DeliveryPersonService } from '../delivery-persons/delivery-person.service';
+import { FormInput } from '../../../../shared/components/form-input/form-input';
+import { DeliveryDetails, DELIVERY_VEHICLE_TYPE_OPTIONS } from '../../../../core/model/delivery-details.model';
+import { TranslateService } from '../../../../core/service/translate.service';
 
 @Component({
   selector: 'app-delivery-person-form-dialog',
@@ -23,7 +23,7 @@ export class DeliveryPersonFormDialog implements OnChanges {
   deliveryForm!: FormGroup;
   isEditMode = false;
 
-  readonly vehicleTypeOptions = DELIVERY_VEHICLE_TYPE_OPTIONS;
+  readonly vehicleTypeOptions = computed(() => DELIVERY_VEHICLE_TYPE_OPTIONS.map(opt => ({ label: this.translate.instant(opt.label), value: opt.value })));
 
   deliveryService = inject(DeliveryPersonService);
   readonly translate = inject(TranslateService);

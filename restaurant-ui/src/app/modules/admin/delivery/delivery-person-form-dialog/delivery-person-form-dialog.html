@@ -12,7 +12,7 @@
         <div class="col-md-6">
           <app-form-input [control]="$any(deliveryForm.get('phone'))" label="label_phone"></app-form-input>
           <app-form-input [control]="$any(deliveryForm.get('vehicleType'))" label="label_vehicle_type" type="select"
-            [options]="vehicleTypeOptions" placeholder="label_select_vehicle_type"></app-form-input>
+            [options]="vehicleTypeOptions()" placeholder="label_select_vehicle_type"></app-form-input>
           <app-form-input [control]="$any(deliveryForm.get('vehicleNumber'))" label="label_vehicle_number"></app-form-input>
           <app-form-input [control]="$any(deliveryForm.get('status'))" label="label_status" type="checkbox"></app-form-input>
         </div>

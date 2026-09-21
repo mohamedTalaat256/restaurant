@@ -21,7 +21,7 @@ import { env } from '../../../../../environment/env';
 import { ShowIfCanCreateDirective } from '../../../../core/directives/showIfCanCreate';
 import { ShowIfCanEditDirective } from '../../../../core/directives/showIfCanEdit';
 import { ShowIfCanDeleteDirective } from '../../../../core/directives/showIfCanDelete';
-import { DeliveryPersonFormDialog } from './delivery-person-form-dialog/delivery-person-form-dialog';
+import { DeliveryPersonFormDialog } from '../delivery-person-form-dialog/delivery-person-form-dialog';
 
 @Component({
   selector: 'app-delivery-persons',
