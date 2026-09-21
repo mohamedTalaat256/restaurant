@@ -63,6 +63,7 @@
       <th pSortableColumn="status">{{ translate.instant('label_status') }} <p-sortIcon field="status" /></th>
       <th pSortableColumn="tableName">{{ translate.instant('label_table') }} <p-sortIcon field="tableName" /></th>
       <th pSortableColumn="waiterName">{{ translate.instant('label_waiter') }} <p-sortIcon field="waiterName" /></th>
+      <th pSortableColumn="deliveryPersonName">{{ translate.instant('label_delivery_person') }} <p-sortIcon field="deliveryPersonName" /></th>
       <th pSortableColumn="totalAmount">{{ translate.instant('label_total') }} <p-sortIcon field="totalAmount" /></th>
       <th pSortableColumn="createdAt">{{ translate.instant('label_created_at') }} <p-sortIcon field="createdAt" /></th>
       <th style="width: 22rem"></th>
@@ -76,13 +77,14 @@
       </td>
       <td>{{ order.orderNumber }}</td>
       <td>
-        <p-tag [value]="translate.instant(order.orderType)" [severity]="order.orderType === 'QUICK_ORDER' ? 'warn' : 'info'" />
+        <p-tag [value]="translate.instant(order.orderType)" [severity]="getOrderTypeSeverity(order.orderType)" />
       </td>
       <td>
         <p-tag [value]="translate.instant(order.status)" [severity]="getStatusSeverity(order.status)" />
       </td>
       <td>{{ order.tableName ?? '-' }}</td>
       <td>{{ order.waiterName ?? '-' }}</td>
+      <td>{{ order.deliveryPersonName ?? '-' }}</td>
       <td>{{ order.totalAmount }}</td>
       <td>{{ order.createdAt | date: 'short' }}</td>
       <td>

@@ -1,4 +1,4 @@
-export type OrderType = 'QUICK_ORDER' | 'PLACE_ORDER' | 'DELIVERY';
+export type OrderType = 'QUICK_ORDER' | 'PLACE_ORDER' | 'DELIVERY_ORDER';
 
 export type OrderStatus =
   | 'NEW'
@@ -71,6 +71,9 @@ export interface Order {
   customerType: string;
   customerId?: number;
   customerName?: string;
+  customerPhone?: string;
+  customerEmail?: string;
+  customerAddress?: string;
   thirdPartyCustomerId?: number;
   thirdPartyCustomerName?: string;
   tableId?: number;
@@ -81,6 +84,11 @@ export interface Order {
   totalAmount: number;
   notes?: string;
   parentOrderId?: number;
+  deliveryAddress?: string;
+  deliveryCost?: number;
+  deliveryPersonId?: number;
+  deliveryPersonName?: string;
+  deliveredAt?: string;
   orderItems: OrderItem[];
   kitchenOrders: KitchenOrder[];
   createdAt: string;
@@ -122,6 +130,9 @@ export interface CreateOrderRequest {
   waiterId?: number;
   cashRegisterId?: number;
   notes?: string;
+  deliveryAddress?: string;
+  deliveryCost?: number;
+  deliveryPersonId?: number;
   orderItems: {
     itemFoodId: number;
     price: number;

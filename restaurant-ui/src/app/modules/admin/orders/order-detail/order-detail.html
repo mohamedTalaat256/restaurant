@@ -43,6 +43,43 @@
             <span class="text-muted">{{ translate.instant('label_created_at') }}</span>
             <span>{{ order.createdAt | date: 'short' }}</span>
           </div>
+          @if (order.orderType === 'DELIVERY_ORDER') {
+            <p-divider />
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">{{ translate.instant('label_customer') }}</span>
+              <span>{{ order.customerName ?? '-' }}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">{{ translate.instant('label_customer_phone') }}</span>
+              <span>{{ order.customerPhone ?? '-' }}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">{{ translate.instant('label_customer_email') }}</span>
+              <span>{{ order.customerEmail ?? '-' }}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">{{ translate.instant('label_customer_address') }}</span>
+              <span>{{ order.customerAddress ?? '-' }}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">{{ translate.instant('label_delivery_person') }}</span>
+              <span>{{ order.deliveryPersonName ?? '-' }}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">{{ translate.instant('label_delivery_address') }}</span>
+              <span>{{ order.deliveryAddress ?? '-' }}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">{{ translate.instant('label_delivery_cost') }}</span>
+              <span>{{ order.deliveryCost ?? 0 }}</span>
+            </div>
+            @if (order.deliveredAt) {
+              <div class="d-flex justify-content-between">
+                <span class="text-muted">{{ translate.instant('label_delivered_at') }}</span>
+                <span>{{ order.deliveredAt | date: 'short' }}</span>
+              </div>
+            }
+          }
           <p-divider />
           <div class="d-flex justify-content-between">
             <span class="f-w-bold">{{ translate.instant('label_total') }}</span>

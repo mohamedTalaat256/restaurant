@@ -18,6 +18,8 @@ import com.mtalaat.restaurant.modules.account.dto.JournalEntryDTO;
 import com.mtalaat.restaurant.modules.account.entity.JournalEntry;
 import com.mtalaat.restaurant.modules.account.mapper.JournalMapper;
 import com.mtalaat.restaurant.modules.account.service.FinancialPostingService;
+import com.mtalaat.restaurant.modules.delivery.entity.DeliveryDetails;
+import com.mtalaat.restaurant.modules.delivery.repository.DeliveryDetailsRepository;
 import com.mtalaat.restaurant.modules.order.mapping.OrderMapper;
 import com.mtalaat.restaurant.modules.order.repository.KitchenOrderRepository;
 import com.mtalaat.restaurant.modules.order.repository.OrderRepository;
@@ -52,8 +54,11 @@ public class OrderService {
     private final ItemFoodAddOnsRepository itemFoodAddOnsRepository;
     private final CustomerRepository customerRepository;
     private final TableRepository tableRepository;
+    private final DeliveryDetailsRepository deliveryDetailsRepository;
     private final OrderMapper orderMapper;
     private final ItemFoodMapper itemFoodMapper;
+
+    private static final String ONLINE_CUSTOMER_TYPE = "ONLINE_CUSTOMER";
 
     // ─────────────────────────────────────────────
     // CREATE
@@ -330,6 +335,9 @@ public class OrderService {
         }
         order.setStatus(OrderStatus.COMPLETED);
         order.setCompletedAt(LocalDateTime.now());
+        if (OrderType.DELIVERY_ORDER.equals(order.getOrderType())) {
+            order.setDeliveredAt(LocalDateTime.now());
+        }
         return orderMapper.toDto(orderRepository.save(order));
     }
 
@@ -466,6 +474,8 @@ public class OrderService {
             cashRegister.setId(dto.getCashRegisterId());
         }
 
+        User deliveryPerson = resolveDeliveryPerson(dto, customer);
+
         Order order = Order.builder()
                 .orderNumber("TEMP")
                 .orderType(dto.getOrderType())
@@ -478,6 +488,9 @@ public class OrderService {
                 .cashRegister(cashRegister)
                 .totalAmount(0.0)
                 .notes(dto.getNotes())
+                .deliveryAddress(resolveDeliveryAddress(dto, customer))
+                .deliveryCost(dto.getDeliveryCost() != null ? dto.getDeliveryCost() : 0.0)
+                .deliveryPerson(deliveryPerson)
                 .build();
 
         List<OrderItem> items = dto.getOrderItems().stream()
@@ -487,6 +500,66 @@ public class OrderService {
         order.setOrderItems(items);
         recalculateTotal(order);
         return order;
+    }
+
+    /**
+     * Resolves the delivery person to assign to the order.
+     * <p>
+     * For DELIVERY orders placed by an ONLINE_CUSTOMER a delivery person is
+     * mandatory. For any other order type the assignment is optional and only
+     * applied when a delivery person id is supplied.
+     */
+    private User resolveDeliveryPerson(CreateOrderRequestDto dto, Customer customer) {
+        boolean requiresDeliveryPerson = OrderType.DELIVERY_ORDER.equals(dto.getOrderType())
+                && ONLINE_CUSTOMER_TYPE.equalsIgnoreCase(resolveCustomerType(dto, customer));
+
+        if (requiresDeliveryPerson && dto.getDeliveryPersonId() == null) {
+            throw new BadRequestException(
+                    "Delivery person is required for DELIVERY orders placed by an ONLINE_CUSTOMER");
+        }
+
+        if (dto.getDeliveryPersonId() == null) {
+            return null;
+        }
+
+        DeliveryDetails deliveryDetails = deliveryDetailsRepository.findByUserId(dto.getDeliveryPersonId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Delivery person not found: " + dto.getDeliveryPersonId()));
+
+        if (Boolean.FALSE.equals(deliveryDetails.getStatus())) {
+            throw new BadRequestException("The selected delivery person is not active");
+        }
+
+        return deliveryDetails.getUser();
+    }
+
+    private String resolveCustomerType(CreateOrderRequestDto dto, Customer customer) {
+        if (dto.getCustomerType() != null && !dto.getCustomerType().isBlank()) {
+            return dto.getCustomerType();
+        }
+        if (customer != null && customer.getCustomerType() != null) {
+            return customer.getCustomerType().getType();
+        }
+        return null;
+    }
+
+    /**
+     * Resolves the delivery address for the order. When an explicit address is
+     * supplied on the request it is used as-is; otherwise, for DELIVERY orders
+     * it falls back to the customer's favorite delivery address and then their
+     * default address.
+     */
+    private String resolveDeliveryAddress(CreateOrderRequestDto dto, Customer customer) {
+        if (dto.getDeliveryAddress() != null && !dto.getDeliveryAddress().isBlank()) {
+            return dto.getDeliveryAddress();
+        }
+        if (OrderType.DELIVERY_ORDER.equals(dto.getOrderType()) && customer != null) {
+            if (customer.getFavoriteDeliveryAddress() != null && !customer.getFavoriteDeliveryAddress().isBlank()) {
+                return customer.getFavoriteDeliveryAddress();
+            }
+            return customer.getAddress();
+        }
+        return dto.getDeliveryAddress();
     }
 
     private OrderItem buildOrderItem(OrderItemRequestDto dto, Order order) {

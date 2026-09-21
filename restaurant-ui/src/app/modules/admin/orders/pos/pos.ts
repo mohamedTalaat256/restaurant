@@ -73,6 +73,10 @@ export class Pos implements OnInit {
     return this.posService.posForm.get('orderItems') as FormArray;
   }
 
+  get selectedCustomer() {
+    return this.posService.getCustomerById(this.posService.posForm.get('customerId')?.value);
+  }
+
   get invoiceTotal(): number {
     let total = 0;
     for (const control of this.orderItems.controls) {
@@ -81,6 +85,15 @@ export class Pos implements OnInit {
       total += price * quantity;
     }
     return total;
+  }
+
+  get deliveryCost(): number {
+    if (this.posService.posForm.value.customerType !== CustomerType.ONLINE_CUSTOMER) return 0;
+    return this.posService.posForm.get('deliveryCost')?.value ?? 0;
+  }
+
+  get grandTotal(): number {
+    return this.invoiceTotal + (this.invoiceTotal * this.taxPercentage / 100) + this.deliveryCost;
   }
 
   // Dialog methods
@@ -341,6 +354,67 @@ export class Pos implements OnInit {
       this.posService.initializeForm();
       this.router.navigate(['/admin/orders', order.id]);
     });
+  }
+
+  deliveryOrder() {
+    const form = this.posService.posForm;
+
+    form.controls['tableId'].removeValidators([Validators.required]);
+    form.controls['waiterId'].removeValidators([Validators.required]);
+    form.controls['tableId'].updateValueAndValidity();
+    form.controls['waiterId'].updateValueAndValidity();
+
+
+
+    // Delivery person is required for DELIVERY orders placed by an ONLINE_CUSTOMER
+    const deliveryPersonControl = form.controls['deliveryPersonId'];
+    if (form.value.customerType === CustomerType.ONLINE_CUSTOMER) {
+      deliveryPersonControl.setValidators([Validators.required]);
+    } else {
+      deliveryPersonControl.removeValidators([Validators.required]);
+    }
+    deliveryPersonControl.updateValueAndValidity();
+
+    console.log(this.posService.posForm);
+    if (form.invalid || this.orderItems.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: this.translate.instant('label_warning'),
+        detail: this.translate.instant('msg_fill_required_fields')
+      });
+      return;
+    }
+
+    const formValue = form.value;
+    this.orderService.createOrder({
+      orderType: 'DELIVERY_ORDER',
+      customerType: formValue.customerType,
+      customerId: formValue.customerId ?? undefined,
+      thirdPartyCustomerId: formValue.thirdPartyCustomerId ?? undefined,
+      tableId: formValue.tableId ?? undefined,
+      waiterId: formValue.waiterId ?? undefined,
+      cashRegisterId: this.cashRegisterService.currentOpenRegister()?.id,
+      deliveryAddress: formValue.deliveryAddress ?? undefined,
+      deliveryCost: formValue.deliveryCost ?? undefined,
+      deliveryPersonId: formValue.deliveryPersonId ?? undefined,
+      orderItems: formValue.orderItems.map((item: any) => ({
+        itemFoodId: item.itemFoodId,
+        price: item.price,
+        quantity: item.quantity,
+        variantId: item.variantId ?? undefined,
+        variantName: item.variantName ?? undefined,
+        addOnIds: item.addOnIds ?? [],
+        addOnsPrice: item.addOnsPrice ?? 0,
+      }))
+    }, (order) => {
+      this.clearCart();
+      this.posService.initializeForm();
+      this.router.navigate(['/admin/orders', order.id]);
+    });
+  }
+
+  isDeliveryCustomer(): boolean {
+    return this.posService.posForm.value.customerType === CustomerType.ONLINE_CUSTOMER;
   }
 
   openOnGoingOrders(){

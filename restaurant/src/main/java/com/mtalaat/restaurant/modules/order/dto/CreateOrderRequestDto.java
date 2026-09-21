@@ -37,6 +37,24 @@ public class CreateOrderRequestDto {
 
     private String notes;
 
+    // ─── Delivery-specific fields ───────────────────────────────
+
+    /**
+     * Destination address for DELIVERY orders.
+     */
+    private String deliveryAddress;
+
+    /**
+     * Delivery fee charged for this order.
+     */
+    private Double deliveryCost;
+
+    /**
+     * Id of the delivery person (user with DELIVERY role) to assign.
+     * Required for DELIVERY orders placed by an ONLINE_CUSTOMER.
+     */
+    private Long deliveryPersonId;
+
     @NotEmpty(message = "Order must have at least one item")
     @Valid
     private List<OrderItemRequestDto> orderItems;

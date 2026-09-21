@@ -80,6 +80,7 @@
 
           }
 
+           @if(posService.posForm.value.customerType !== CustomerType.ONLINE_CUSTOMER) {
            <app-form-input class="col-md-6" [control]="$any(posService.posForm.get('waiterId'))" label="label_waiter"
            placeholder="label_select_waiter"
             type="select" [options]="posService.waiterOptions()" [filter]="true">
@@ -89,12 +90,57 @@
           placeholder="label_select_table"
             [options]="posService.tableOptions()">
           </app-form-input>
+          }
 
           @if(posService.posForm.value.customerType === CustomerType.THIRD_PARTY_CUSTOMER) {
           <app-form-input class="col-md-6" [control]="$any(posService.posForm.get('thirdPartyCustomerId'))"
             label="label_third_party_customer" placeholder="label_select_third_party_customer" [options]="posService.thirdPartyCustomerOptions()"
             type="select" [filter]="true">
           </app-form-input>
+          }
+
+          @if(posService.posForm.value.customerType === CustomerType.ONLINE_CUSTOMER) {
+          <div class="col-12">
+            <h6 class="m-0 mt-2 mb-2">{{ translate.instant('label_delivery') }}</h6>
+          </div>
+          <app-form-input class="col-md-6" [control]="$any(posService.posForm.get('customerId'))" label="label_customer"
+            placeholder="label_select_customer" [options]="posService.customerOptions()"
+            type="select" [filter]="true">
+          </app-form-input>
+          <app-form-input class="col-md-6" [control]="$any(posService.posForm.get('deliveryPersonId'))"
+            label="label_delivery_person" placeholder="label_select_delivery_person"
+            [options]="posService.deliveryPersonOptions()" type="select" [filter]="true">
+          </app-form-input>
+          <app-form-input class="col-md-6" [control]="$any(posService.posForm.get('deliveryCost'))"
+            label="label_delivery_cost" type="number" placeholder="0">
+          </app-form-input>
+          <app-form-input class="col-12" [control]="$any(posService.posForm.get('deliveryAddress'))"
+            label="label_delivery_address" placeholder="label_delivery_address">
+          </app-form-input>
+
+          @if(selectedCustomer) {
+          <div class="col-12 mt-2">
+            <h6 class="m-0 mb-2">{{ translate.instant('label_customer_info') }}</h6>
+            <div class="d-flex flex-column gap-1">
+              <div class="d-flex justify-content-between">
+                <span class="text-muted">{{ translate.instant('label_customer') }}</span>
+                <span>{{ selectedCustomer.name || '-' }}</span>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span class="text-muted">{{ translate.instant('label_customer_phone') }}</span>
+                <span>{{ selectedCustomer.phone || '-' }}</span>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span class="text-muted">{{ translate.instant('label_customer_email') }}</span>
+                <span>{{ selectedCustomer.email || '-' }}</span>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span class="text-muted">{{ translate.instant('label_customer_address') }}</span>
+                <span>{{ selectedCustomer.address || '-' }}</span>
+              </div>
+            </div>
+          </div>
+          }
           }
 
 
@@ -164,9 +210,16 @@
             <span class="f-w-bold">{{ (invoiceTotal * taxPercentage / 100) +' ' + currencySymbol }}</span>
           </div>
 
+          @if(deliveryCost > 0) {
+          <div class="d-flex justify-content-between align-items-center p-3">
+            <span class="f-w-bold">{{ translate.instant('label_delivery_cost') }}</span>
+            <span class="f-w-bold">{{ deliveryCost +' ' + currencySymbol }}</span>
+          </div>
+          }
+
           <div class="d-flex justify-content-between align-items-center p-3">
             <span class="f-w-bold">{{ translate.instant('label_total') }}</span>
-            <span class="invoice-total-amount">{{ (invoiceTotal + (invoiceTotal * taxPercentage / 100)) +' ' + currencySymbol }}</span>
+            <span class="invoice-total-amount">{{ grandTotal +' ' + currencySymbol }}</span>
           </div>
 
         </div>
@@ -187,11 +240,20 @@
 
 
         <div class="d-flex justify-content-between mt-3">
-          <p-button [label]="translate.instant('label_place_order')" icon="pi pi-check" severity="info"
-            (click)="placeOrder()" />
+           @if(!isDeliveryCustomer()){
+            <p-button [label]="translate.instant('label_place_order')" icon="pi pi-check" severity="info"
+              (click)="placeOrder()" />
+           }
 
+          @if(!isDeliveryCustomer()){
           <p-button [label]="translate.instant('label_quick_order')" icon="pi pi-check" severity="primary"
             class="ml-2" (click)="quickOrder()" />
+          }
+
+          @if(isDeliveryCustomer()) {
+          <p-button [label]="translate.instant('label_delivery_order')" icon="pi pi-truck" severity="help"
+            class="ml-2" (click)="deliveryOrder()" />
+          }
             </div>
 
       </div>

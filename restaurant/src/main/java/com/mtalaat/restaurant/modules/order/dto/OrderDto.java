@@ -22,6 +22,9 @@ public class OrderDto {
     private String customerType;
     private Long customerId;
     private String customerName;
+    private String customerPhone;
+    private String customerEmail;
+    private String customerAddress;
     private Long thirdPartyCustomerId;
     private String thirdPartyCustomerName;
     private Long tableId;
@@ -32,6 +35,11 @@ public class OrderDto {
     private Double totalAmount;
     private String notes;
     private Long parentOrderId;
+    private String deliveryAddress;
+    private Double deliveryCost;
+    private Long deliveryPersonId;
+    private String deliveryPersonName;
+    private LocalDateTime deliveredAt;
     private List<OrderItemDto> orderItems;
     private List<KitchenOrderDto> kitchenOrders;
     private LocalDateTime createdAt;

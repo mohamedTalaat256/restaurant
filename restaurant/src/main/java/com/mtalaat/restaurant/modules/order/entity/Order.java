@@ -70,6 +70,34 @@ public class Order {
     @Column(name = "notes")
     private String notes;
 
+    // ─── Delivery-specific fields ───────────────────────────────
+
+    /**
+     * Destination address for DELIVERY orders.
+     */
+    @Column(name = "delivery_address")
+    private String deliveryAddress;
+
+    /**
+     * Delivery fee charged for this order.
+     */
+    @Column(name = "delivery_cost")
+    private Double deliveryCost;
+
+    /**
+     * The delivery person (system user with the DELIVERY role) assigned to
+     * deliver this order.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "delivery_person_id")
+    private User deliveryPerson;
+
+    /**
+     * Timestamp at which the order was delivered to the customer.
+     */
+    @Column(name = "delivered_at")
+    private LocalDateTime deliveredAt;
+
     /**
      * For split orders: references the original order from which this was split.
      */

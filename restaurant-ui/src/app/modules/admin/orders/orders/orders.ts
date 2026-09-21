@@ -155,6 +155,12 @@ export class Orders implements OnInit {
     return STATUS_SEVERITY[status] ?? 'info';
   }
 
+  getOrderTypeSeverity(orderType: string): any {
+    if (orderType === 'QUICK_ORDER') return 'warn';
+    if (orderType === 'DELIVERY_ORDER') return 'help';
+    return 'info';
+  }
+
   canComplete(status: OrderStatus): boolean {
     return ['NEW', 'CONFIRMED', 'IN_PROGRESS', 'READY'].includes(status);
   }

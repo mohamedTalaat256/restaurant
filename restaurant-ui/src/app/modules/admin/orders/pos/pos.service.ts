@@ -10,6 +10,7 @@ import { FormArray, FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { CustomerType } from "../../../../core/enum/customerType.enum";
 import { CashRegisterService } from "../cash-registers/cash-register.service";
 import { PaymentMethod } from "../../../../core/enum/paymentMethod.enum";
+import { DeliveryPersonService } from "../../delivery/delivery-persons/delivery-person.service";
 
 
 @Injectable({
@@ -27,6 +28,7 @@ export class PosService {
   readonly tableService = inject(TableService);
   readonly userService = inject(UserService);
   readonly cashRegisterService = inject(CashRegisterService);
+  readonly deliveryPersonService = inject(DeliveryPersonService);
   readonly  fb = inject(FormBuilder);
 
   customerTypesOptions = computed(() => this.customerService.customerTypes().map(ct => ({ label: ct.description, value: ct.type })));
@@ -34,6 +36,7 @@ export class PosService {
   thirdPartyCustomerOptions = computed(() => this.thirdPartyCustomerService.thirdPartyCustomers().map(c => ({ label: c.name, value: c.id })));
   tableOptions = computed(() => this.tableService.tables().map(t => ({ label: t.name + ' ' + t.capacity + ' ' + this.translate.instant('label_seats'), value: t.id })));
   waiterOptions = computed(() => this.userService.users().map(u => ({ label: u.firstname + ' ' + u.lastname, value: u.id })));
+  deliveryPersonOptions = computed(() => this.deliveryPersonService.deliveries().map(d => ({ label: d.firstname + ' ' + d.lastname, value: d.userId })));
   paymentMethodOptions = computed(() => Object.values(PaymentMethod).map(m => ({ label: this.translate.instant(m), value: m })));
   currentOpenRegister = this.cashRegisterService.currentOpenRegister;
 
@@ -45,6 +48,7 @@ export class PosService {
     this.thirdPartyCustomerService.loadThirdPartyCustomers();
     this.tableService.loadTables();
     this.userService.loadUsers();
+    this.deliveryPersonService.loadDeliveries(true);
     this.cashRegisterService.getMyOpenCashRegister();
     this.initializeForm();
   }
@@ -58,6 +62,9 @@ export class PosService {
       thirdPartyCustomerId: [null],
       tableId: [null],
       waiterId: [null, Validators.required],
+      deliveryAddress: [null],
+      deliveryCost: [0],
+      deliveryPersonId: [null],
       paidAmount: [0, [Validators.required, Validators.min(0)]],
       paymentMethodId: [PaymentMethod.CASH, Validators.required],
       orderItems: this.fb.array([])
@@ -94,13 +101,42 @@ export class PosService {
         this.posForm.get('paidAmount')?.setValue(invoiceTotal, { emitEvent: false });
       }
     });
+
+    // Update paidAmount when delivery cost changes if payment method is CASH
+    this.posForm.get('deliveryCost')?.valueChanges.subscribe(() => {
+      const paymentMethodId = this.posForm.get('paymentMethodId')?.value;
+      if (paymentMethodId === PaymentMethod.CASH) {
+        const invoiceTotal = this.calculateInvoiceTotal();
+        this.posForm.get('paidAmount')?.setValue(invoiceTotal, { emitEvent: false });
+      }
+    });
+
+    // Prefill delivery address from the selected customer's saved address
+    this.posForm.get('customerId')?.valueChanges.subscribe((customerId) => {
+      const customer = this.getCustomerById(customerId);
+      if (customer) {
+        const savedAddress = customer.favoriteDeliveryAddress || customer.address;
+        if (savedAddress) {
+          this.posForm.get('deliveryAddress')?.setValue(savedAddress, { emitEvent: false });
+        }
+      }
+    });
+  }
+
+  getCustomerById(customerId: number | null | undefined) {
+    if (!customerId) return null;
+    return this.customerService.customers().find(c => c.id === customerId) ?? null;
   }
 
   private calculateInvoiceTotal(): number {
     const orderItems = this.posForm.get('orderItems') as FormArray;
-    return orderItems.value.reduce((total: number, item: any) => {
+    const itemsTotal = orderItems.value.reduce((total: number, item: any) => {
       return total + (item.quantity * item.price);
     }, 0);
+    const deliveryCost = this.posForm.get('customerType')?.value === CustomerType.ONLINE_CUSTOMER
+      ? (this.posForm.get('deliveryCost')?.value ?? 0)
+      : 0;
+    return itemsTotal + deliveryCost;
   }
 
 
