@@ -1,0 +1,73 @@
+<p-toast></p-toast>
+<p-toolbar class="mb-6">
+  <ng-template #start>
+    <p-button [showIfCanCreate]="menuItemId" [label]="translate.instant('label_add_delivery_person')" icon="pi pi-plus" severity="secondary" class="m-inline-end-1" (onClick)="openNew()" />
+  </ng-template>
+  <ng-template #end>
+    <p-selectButton [options]="statusFilterOptions" [(ngModel)]="statusFilter" optionValue="value"
+      (onChange)="onStatusFilterChange()" [allowEmpty]="false">
+      <ng-template let-item #item>
+        <span>{{ translate.instant(item.label) }}</span>
+      </ng-template>
+    </p-selectButton>
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt [value]="deliveryService.deliveries()" [loading]="deliveryService.loading()" [rows]="10" [paginator]="true"
+  [globalFilterFields]="['firstname', 'lastname', 'email', 'phone', 'vehicleNumber']"
+  [tableStyle]="{ 'min-width': '60rem' }" [(selection)]="selectedDeliveries" [rowHover]="true" dataKey="id"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} delivery persons" [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[10, 20, 30]">
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <h5 class="m-0">{{ translate.instant('label_manage_delivery_persons') }}</h5>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" [placeholder]="translate.instant('label_search')" />
+      </p-iconfield>
+    </div>
+  </ng-template>
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="id" style="width: 4rem">{{ translate.instant('label_id') }}<p-sortIcon field="id" /></th>
+      <th pSortableColumn="firstname" style="width:12rem">{{ translate.instant('label_name') }}<p-sortIcon field="firstname" /></th>
+      <th pSortableColumn="email" style="width:10rem">{{ translate.instant('label_email') }}<p-sortIcon field="email" /></th>
+      <th pSortableColumn="phone" style="width:8rem">{{ translate.instant('label_phone') }}<p-sortIcon field="phone" /></th>
+      <th pSortableColumn="vehicleType" style="width:8rem">{{ translate.instant('label_vehicle_type') }}<p-sortIcon field="vehicleType" /></th>
+      <th pSortableColumn="vehicleNumber" style="width:8rem">{{ translate.instant('label_vehicle_number') }}<p-sortIcon field="vehicleNumber" /></th>
+      <th pSortableColumn="status" style="width:6rem">{{ translate.instant('label_status') }}<p-sortIcon field="status" /></th>
+      <th style="width: 6rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-delivery>
+    <tr>
+      <td>{{ delivery.id }}</td>
+      <td>{{ delivery.firstname }} {{ delivery.lastname }}</td>
+      <td>{{ delivery.email }}</td>
+      <td>{{ delivery.phone }}</td>
+      <td>
+        @if (delivery.vehicleType) {
+          <p-tag [value]="vehicleLabel(delivery.vehicleType)" severity="info"></p-tag>
+        }
+      </td>
+      <td>{{ delivery.vehicleNumber }}</td>
+      <td>
+        <p-toggleswitch [ngModel]="delivery.status" (onChange)="toggleStatus(delivery, $event.checked)"
+          [showIfCanEdit]="menuItemId" />
+      </td>
+      <td>
+        <p-button icon="pi pi-pencil" class="m-inline-end-1" [rounded]="true" [outlined]="true" [showIfCanEdit]="menuItemId" (click)="editDelivery(delivery)" />
+        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" [showIfCanDelete]="menuItemId" (click)="deleteDelivery(delivery)" />
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="8" class="text-center p-4">{{ translate.instant('label_no_delivery_persons') }}</td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<app-delivery-person-form-dialog [visible]="deliveryDialogVisible" [delivery]="editingDelivery" (visibleChange)="onDialogVisibleChange($event)" (saved)="onDeliverySaved()"></app-delivery-person-form-dialog>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

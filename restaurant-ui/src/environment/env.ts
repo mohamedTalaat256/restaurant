@@ -120,6 +120,10 @@ export const env = {
     {
       id: 34,
       name: 'kitchen_dashboard'
+    },
+    {
+      id: 25,
+      name: 'deliveries'
     }
 
   ]

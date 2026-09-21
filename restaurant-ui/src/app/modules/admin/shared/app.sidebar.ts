@@ -112,8 +112,7 @@ export class AppSidebar implements OnInit, OnDestroy {
             icon: 'pi pi-fw pi-truck text-green-500',
             path: '/admin/deliveries',
             items: [
-              { label: 'label_deliveries', routerLink: ['/admin/deliveries'] },
-              { label: 'label_drivers', routerLink: ['/admin/drivers'] },
+              { label: 'label_delivery_persons', routerLink: ['/admin/deliveries'] },
             ]
           }
 

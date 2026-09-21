@@ -1,20 +1,24 @@
 package com.mtalaat.restaurant.modules.delivery.controller;
 
-import com.mtalaat.restaurant.modules.auth.entity.User;
 import com.mtalaat.restaurant.modules.auth.security.PermissionChecker;
-import com.mtalaat.restaurant.modules.delivery.dto.request.AssignDriverRequest;
-import com.mtalaat.restaurant.modules.delivery.dto.request.CancelDeliveryRequest;
-import com.mtalaat.restaurant.modules.delivery.dto.request.CreateDeliveryRequest;
-import com.mtalaat.restaurant.modules.delivery.dto.request.ReassignDriverRequest;
+import com.mtalaat.restaurant.modules.delivery.dto.DeliveryDetailsDto;
 import com.mtalaat.restaurant.modules.delivery.service.DeliveryService;
 import com.mtalaat.restaurant.payload.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/deliveries")
@@ -24,15 +28,20 @@ public class DeliveryController {
     private final DeliveryService deliveryService;
     private final PermissionChecker permissionChecker;
 
+    @Value("${app.menu.delivery-id}")
+    private Long menuId;
+
     // ─────────────────────────────────────────────
     // CREATE
     // ─────────────────────────────────────────────
 
     @PostMapping
-    public ResponseEntity<ApiResponse> createDelivery(@Valid @RequestBody CreateDeliveryRequest request) {
-        var result = deliveryService.createDelivery(request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("msg_delivery_created", result, HttpStatus.CREATED.value()));
+    public ResponseEntity<ApiResponse> create(@Valid @RequestBody DeliveryDetailsDto dto) {
+        permissionChecker.checkCreate(menuId);
+        DeliveryDetailsDto created = deliveryService.create(dto);
+        HttpStatus status = HttpStatus.CREATED;
+        return ResponseEntity.status(status)
+                .body(ApiResponse.success("msg_delivery_created", created, status.value()));
     }
 
     // ─────────────────────────────────────────────
@@ -40,84 +49,59 @@ public class DeliveryController {
     // ─────────────────────────────────────────────
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse> getDeliveryById(@PathVariable Long id) {
-        var result = deliveryService.getDeliveryById(id);
-        return ResponseEntity.ok(ApiResponse.success("msg_delivery_fetched", result, HttpStatus.OK.value()));
-    }
-
-    @GetMapping("/order/{orderId}")
-    public ResponseEntity<ApiResponse> getDeliveryByOrder(@PathVariable Long orderId) {
-        var result = deliveryService.getDeliveryByOrderId(orderId);
-        return ResponseEntity.ok(ApiResponse.success("msg_delivery_fetched", result, HttpStatus.OK.value()));
+    public ResponseEntity<ApiResponse> getById(@PathVariable Long id) {
+        permissionChecker.checkRead(menuId);
+        DeliveryDetailsDto delivery = deliveryService.getById(id);
+        HttpStatus status = HttpStatus.OK;
+        return ResponseEntity.status(status)
+                .body(ApiResponse.success("msg_delivery_fetched", delivery, status.value()));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse> getAllDeliveries() {
-        List<?> results = deliveryService.getAllDeliveries();
-        return ResponseEntity.ok(ApiResponse.success("msg_deliveries_fetched", results, HttpStatus.OK.value()));
+    public ResponseEntity<ApiResponse> getAll(@RequestParam(required = false) Boolean status) {
+        permissionChecker.checkRead(menuId);
+        var deliveries = status != null
+                ? deliveryService.getByStatus(status)
+                : deliveryService.getAll();
+        HttpStatus httpStatus = HttpStatus.OK;
+        return ResponseEntity.status(httpStatus)
+                .body(ApiResponse.success("msg_deliveries_fetched", deliveries, httpStatus.value()));
     }
 
     // ─────────────────────────────────────────────
-    // ASSIGNMENT
+    // UPDATE
     // ─────────────────────────────────────────────
 
-    @PostMapping("/{id}/assign")
-    public ResponseEntity<ApiResponse> assignDriver(
-            @PathVariable Long id,
-            @Valid @RequestBody AssignDriverRequest request) {
-        User currentUser = permissionChecker.getCurrentUser();
-        var result = deliveryService.assignDriver(id, request, currentUser);
-        return ResponseEntity.ok(ApiResponse.success("msg_driver_assigned", result, HttpStatus.OK.value()));
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse> update(@PathVariable Long id,
+                                              @Valid @RequestBody DeliveryDetailsDto dto) {
+        permissionChecker.checkEdit(menuId);
+        DeliveryDetailsDto updated = deliveryService.update(id, dto);
+        HttpStatus status = HttpStatus.OK;
+        return ResponseEntity.status(status)
+                .body(ApiResponse.success("msg_delivery_updated", updated, status.value()));
     }
 
-    @PostMapping("/{id}/reassign")
-    public ResponseEntity<ApiResponse> reassignDriver(
-            @PathVariable Long id,
-            @Valid @RequestBody ReassignDriverRequest request) {
-        User currentUser = permissionChecker.getCurrentUser();
-        var result = deliveryService.reassignDriver(id, request, currentUser);
-        return ResponseEntity.ok(ApiResponse.success("msg_driver_reassigned", result, HttpStatus.OK.value()));
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<ApiResponse> updateStatus(@PathVariable Long id,
+                                                    @RequestParam Boolean status) {
+        permissionChecker.checkEdit(menuId);
+        DeliveryDetailsDto updated = deliveryService.updateStatus(id, status);
+        HttpStatus httpStatus = HttpStatus.OK;
+        return ResponseEntity.status(httpStatus)
+                .body(ApiResponse.success("msg_delivery_status_updated", updated, httpStatus.value()));
     }
 
     // ─────────────────────────────────────────────
-    // STATE TRANSITIONS
+    // DELETE
     // ─────────────────────────────────────────────
 
-    @PatchMapping("/{id}/accept")
-    public ResponseEntity<ApiResponse> acceptDelivery(@PathVariable Long id) {
-        var result = deliveryService.acceptDelivery(id);
-        return ResponseEntity.ok(ApiResponse.success("msg_delivery_accepted", result, HttpStatus.OK.value()));
-    }
-
-    @PatchMapping("/{id}/arrived")
-    public ResponseEntity<ApiResponse> arrivedAtRestaurant(@PathVariable Long id) {
-        var result = deliveryService.arrivedAtRestaurant(id);
-        return ResponseEntity.ok(ApiResponse.success("msg_delivery_arrived", result, HttpStatus.OK.value()));
-    }
-
-    @PatchMapping("/{id}/pickup")
-    public ResponseEntity<ApiResponse> pickupOrder(@PathVariable Long id) {
-        var result = deliveryService.pickupOrder(id);
-        return ResponseEntity.ok(ApiResponse.success("msg_delivery_picked_up", result, HttpStatus.OK.value()));
-    }
-
-    @PatchMapping("/{id}/start")
-    public ResponseEntity<ApiResponse> startDelivery(@PathVariable Long id) {
-        var result = deliveryService.startDelivery(id);
-        return ResponseEntity.ok(ApiResponse.success("msg_delivery_started", result, HttpStatus.OK.value()));
-    }
-
-    @PatchMapping("/{id}/complete")
-    public ResponseEntity<ApiResponse> completeDelivery(@PathVariable Long id) {
-        var result = deliveryService.completeDelivery(id);
-        return ResponseEntity.ok(ApiResponse.success("msg_delivery_completed", result, HttpStatus.OK.value()));
-    }
-
-    @PatchMapping("/{id}/cancel")
-    public ResponseEntity<ApiResponse> cancelDelivery(
-            @PathVariable Long id,
-            @RequestBody(required = false) CancelDeliveryRequest request) {
-        var result = deliveryService.cancelDelivery(id, request != null ? request : new CancelDeliveryRequest(null));
-        return ResponseEntity.ok(ApiResponse.success("msg_delivery_cancelled", result, HttpStatus.OK.value()));
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse> delete(@PathVariable Long id) {
+        permissionChecker.checkDelete(menuId);
+        deliveryService.delete(id);
+        HttpStatus status = HttpStatus.OK;
+        return ResponseEntity.status(status)
+                .body(ApiResponse.success("msg_delivery_deleted", null, status.value()));
     }
 }

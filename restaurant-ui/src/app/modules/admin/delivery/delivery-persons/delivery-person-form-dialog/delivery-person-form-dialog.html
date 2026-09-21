@@ -1,0 +1,27 @@
+<p-dialog [visible]="visible" [style]="{ width: '650px' }" [header]="translate.instant('label_delivery_person_details')" [modal]="true" (onHide)="hideDialog()">
+  <ng-template #content>
+    <form [formGroup]="deliveryForm" class="pb-3">
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <app-form-input [control]="$any(deliveryForm.get('firstname'))" label="label_firstname"></app-form-input>
+          <app-form-input [control]="$any(deliveryForm.get('lastname'))" label="label_lastname"></app-form-input>
+          <app-form-input [control]="$any(deliveryForm.get('email'))" label="label_email" type="email"></app-form-input>
+          <app-form-input [control]="$any(deliveryForm.get('password'))" label="label_password" type="password"
+            [placeholder]="isEditMode ? 'label_password_keep_current' : ''"></app-form-input>
+        </div>
+        <div class="col-md-6">
+          <app-form-input [control]="$any(deliveryForm.get('phone'))" label="label_phone"></app-form-input>
+          <app-form-input [control]="$any(deliveryForm.get('vehicleType'))" label="label_vehicle_type" type="select"
+            [options]="vehicleTypeOptions" placeholder="label_select_vehicle_type"></app-form-input>
+          <app-form-input [control]="$any(deliveryForm.get('vehicleNumber'))" label="label_vehicle_number"></app-form-input>
+          <app-form-input [control]="$any(deliveryForm.get('status'))" label="label_status" type="checkbox"></app-form-input>
+        </div>
+      </div>
+      <p-message severity="info" styleClass="w-100">{{ translate.instant('msg_delivery_syncs_user_account') }}</p-message>
+    </form>
+  </ng-template>
+  <ng-template #footer>
+    <p-button [label]="translate.instant('label_cancel')" icon="pi pi-times" text (click)="hideDialog()" />
+    <p-button [label]="translate.instant('label_save')" icon="pi pi-check" (click)="saveDelivery()" [loading]="deliveryService.loadingSave()" />
+  </ng-template>
+</p-dialog>

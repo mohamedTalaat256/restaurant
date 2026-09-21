@@ -1,12 +1,10 @@
 package com.mtalaat.restaurant.modules.delivery.enums;
 
-/**
- * Type of vehicle the driver uses for deliveries.
- */
 public enum VehicleType {
-    BICYCLE,
     MOTORCYCLE,
+    BICYCLE,
     CAR,
     VAN,
-    TRUCK
+    SCOOTER,
+    ON_FOOT
 }
