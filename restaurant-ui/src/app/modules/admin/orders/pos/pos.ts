@@ -5,6 +5,7 @@ import { TranslateService } from '../../../../core/service/translate.service';
 import { env } from '../../../../../environment/env';
 import { Checkbox } from "primeng/checkbox";
 import { DialogModule } from 'primeng/dialog';
+import { SelectButtonModule } from 'primeng/selectbutton';
 import { MessageService } from 'primeng/api';
 import { FormArray, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormInput } from "../../../../shared/components/form-input/form-input";
@@ -24,7 +25,7 @@ const CART_STORAGE_KEY = 'pos_cart_items';
 
 @Component({
   selector: 'app-pos',
-  imports: [Toast, FormsModule, ReactiveFormsModule, Button, FormInput, Checkbox, DialogModule, Toolbar, CashRegisterDialog,
+  imports: [Toast, FormsModule, ReactiveFormsModule, Button, FormInput, Checkbox, DialogModule, Toolbar, CashRegisterDialog, SelectButtonModule,
     ShowIfCanCreateDirective, ShowIfCanEditDirective, ShowIfCanDeleteDirective
   ],
   templateUrl: './pos.html',
