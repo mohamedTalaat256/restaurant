@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import Aura from '@primeuix/themes/aura';
 import Lara from '@primeuix/themes/lara';
 import Nora from '@primeuix/themes/nora';
@@ -13,6 +13,11 @@ import { env } from '../../../../environment/env';
 import { LoginService } from '../../login/login.service';
 import { TranslateService } from '../../../core/service/translate.service';
 import { ConfirmDialog } from "primeng/confirmdialog";
+import { Button } from 'primeng/button';
+import { ShowIfCanDeleteDirective } from '../../../core/directives/showIfCanDelete';
+import { ShowIfCanEditDirective } from '../../../core/directives/showIfCanEdit';
+import { ShowIfCanCreateDirective } from '../../../core/directives/showIfCanCreate';
+import { CustomerType } from '../../../core/enum/customerType.enum';
 
 const presets = {
   Aura,
@@ -22,7 +27,7 @@ const presets = {
 
 @Component({
   selector: 'app-admin-tool-bar',
-  imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, ConfirmDialog],
+  imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, ConfirmDialog, Button, ShowIfCanCreateDirective, ShowIfCanEditDirective, ShowIfCanDeleteDirective],
   providers: [ConfirmationService],
   template: `
      <div class="layout-topbar">
@@ -35,6 +40,13 @@ const presets = {
                 <span>{{ applicationSettings?.applicationTitle}}</span>
             </a>
         </div>
+         <div  >
+            <p-button [showIfCanCreate]="ordersMenuItemId" [label]="translate.instant('label_delivery_orders')" severity="info" class="m-inline-end-1" icon="pi-truck" (onClick)="openOnGoingOrders()" />
+            <p-button [showIfCanCreate]="ordersMenuItemId" [label]="translate.instant('label_on_going_orders')" severity="info" class="m-inline-end-1" (onClick)="openOnGoingOrders()" />
+            <p-button [showIfCanCreate]="kitchenDashboardMenuItemId" [label]="translate.instant('label_kitchen_status')" severity="success" class="m-inline-end-1" (onClick)="openKitchenStatus()" />
+            <p-button [showIfCanCreate]="ordersMenuItemId" [label]="translate.instant('label_today_orders')" severity="warn" class="m-inline-end-1" (onClick)="openTodayOrders()" />
+          </div>
+
 
         <div class="layout-topbar-actions">
             <div class="layout-config-menu">
@@ -100,9 +112,13 @@ export class AdminToolBar {
   layoutService = inject(LayoutService);
   readonly loginService = inject(LoginService);
   readonly translate = inject(TranslateService);
+    readonly router = inject(Router);
   private confirmationService = inject(ConfirmationService);
   applicationSettings: ApplicationSetting | null = null;
   imageUrl = env.baseUrl;
+
+  ordersMenuItemId: number = env.menuItems.find(item => item.name === 'orders')?.id || 0;
+  kitchenDashboardMenuItemId: number = env.menuItems.find(item => item.name === 'kitchen_dashboard')?.id || 0;
 
   constructor() {
     this.applicationSettings = JSON.parse(localStorage.getItem('applicationSettings') || '{}');
@@ -132,4 +148,16 @@ export class AdminToolBar {
       darkTheme: !state.darkTheme
     }));
   }
+
+    openOnGoingOrders(){
+      this.router.navigate(['/admin/orders']);
+    }
+
+    openKitchenStatus(){
+      this.router.navigate(['/admin/kitchen-dashboard']);
+    }
+
+    openTodayOrders(){
+      this.router.navigate(['/admin/orders'], { queryParams: { status: 'NEW' } });
+    }
 }
